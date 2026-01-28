@@ -1,0 +1,14 @@
+services:
+  qbittorrent:
+    container_name: qbittorrent
+    image: linuxserver/qbittorrent:20.04.1
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=${WEBUI_PORT}
+    volumes:
+      - /mnt/docker/qbittorrent/config:/config
+      - /mnt/docker/qbittorrent/downloads:/downloads
+    ports:
+      - "8080:8080"

@@ -1,0 +1,10 @@
+services:
+  wallos:
+    image: bellamy/wallos:latest
+    environment:
+      TZ: ${WALLOS_TZ}
+    volumes:
+      - './db:/var/www/html/db'
+      - './logos:/var/www/html/images/uploads/logos'
+
+

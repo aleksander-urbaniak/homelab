@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-runner
+  namespace: gitlab-runner
+  labels:
+    app: gitlab-runner
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gitlab-runner
+  template:
+    metadata:
+      labels:
+        app: gitlab-runner
+    spec:
+      serviceAccountName: gitlab-runner-sa
+
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 192.0.2.10
+          - 192.0.2.11
+
+      containers:
+      - name: gitlab-runner
+        image: gitlab/gitlab-runner:alpine
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash", "-c"]
+        args:
+          - cp /config-template/config.toml /etc/gitlab-runner/config.toml && /usr/bin/gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
+
+        env:
+        - name: KUBERNETES_SERVICE_ACCOUNT_OVERWRITE
+          value: "gitlab-runner-sa"
+
+        ports:
+        - containerPort: 8093
+          name: metrics
+
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config-template
+        - name: runner-data
+          mountPath: /home/gitlab-runner
+        - name: etc-gitlab-runner
+          mountPath: /etc/gitlab-runner
+
+        livenessProbe:
+          exec:
+            command: ["/usr/bin/pgrep", "gitlab-runner"]
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          periodSeconds: 10
+
+      volumes:
+      - name: config-volume
+        configMap:
+          name: gitlab-runner-config
+      - name: runner-data
+        persistentVolumeClaim:
+          claimName: gitlab-runner-pvc
+      - name: etc-gitlab-runner
+        emptyDir: {}

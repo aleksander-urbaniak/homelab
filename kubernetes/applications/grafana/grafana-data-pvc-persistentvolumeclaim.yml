@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data-pvc
+  namespace: grafana
+spec:
+  storageClassName: longhorn
+  accessModes: ["ReadWriteMany"]
+  resources:
+    requests:
+      storage: 5Gi

@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pastefy-app
+  namespace: pastefy
+  labels:
+    app: pastefy-app
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pastefy-app
+  template:
+    metadata:
+      labels:
+        app: pastefy-app
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z pastefy-db 3306; do
+                echo "Waiting for mariaDB...";
+                sleep 3;
+              done
+      containers:
+        - name: pastefy-app
+          image: interaapps/pastefy:7.1.5
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: HTTP_SERVER_PORT
+              value: "80"
+            - name: HTTP_SERVER_CORS
+              value: "*"
+            - name: DATABASE_DRIVER
+              value: "mysql"
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_DATABASE
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_USER
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_PASSWORD
+            - name: DATABASE_HOST
+              value: "pastefy-db"
+            - name: DATABASE_PORT
+              value: "3306"
+            - name: SERVER_NAME
+              value: "http://pastefy.example.com"
+          readinessProbe:
+            httpGet:
+              path: "/healthz"
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: "/healthz"
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+

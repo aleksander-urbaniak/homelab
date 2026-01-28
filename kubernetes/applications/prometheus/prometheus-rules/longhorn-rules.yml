@@ -1,0 +1,80 @@
+groups:
+  - name: longhorn.node.rules
+    rules:
+      - alert: LonghornNodeNotReady
+        expr: longhorn_node_status{condition="ready"} == 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Longhorn node not ready ({{ $labels.node }})"
+          description: "Longhorn reports node not ready for >5m."
+
+      - alert: LonghornDiskHighUsage
+        expr: (longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes) > 0.85
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Longhorn disk >85% used on {{ $labels.node }}/{{ $labels.disk }}"
+          description: "Disk usage ratio has been high for >10m."
+
+  - name: longhorn.volume.rules
+    rules:
+      - alert: LonghornVolumeReadOnly
+        expr: longhorn_volume_file_system_read_only == 1
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "Volume mounted read-only ({{ $labels.volume }})"
+          description: "Longhorn reports filesystem is read-only."
+
+      - alert: LonghornVolumeSpaceHigh
+        expr: (longhorn_volume_actual_size_bytes / longhorn_volume_capacity_bytes) > 0.9
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Volume >90% full ({{ $labels.volume }})"
+          description: "Actual used space vs capacity >90% for >10m."
+
+      - alert: LonghornVolumeReplicaCountLow
+        expr: sum by (volume) (longhorn_engine_replica_mode{mode="RW"}) < 2
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Insufficient RW replicas for {{ $labels.volume }}"
+          description: "Number of RW replicas dropped below desired (e.g., 2)."
+
+      - alert: LonghornEngineStateError
+        expr: longhorn_engine_state{state="error"} == 1
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "Engine error on {{ $labels.volume }}"
+          description: "Longhorn engine state is error."
+
+      - alert: LonghornRebuildStuck
+        expr: (longhorn_engine_rebuild_progress < 100) and on(volume) (max_over_time(longhorn_engine_rebuild_progress[45m]) < 100)
+        for: 15m
+        labels: {severity: warning}
+        annotations:
+          summary: "Replica rebuild appears stalled ({{ $labels.volume }})"
+          description: "Rebuild progress hasn’t reached 100% within ~1h."
+
+  - name: longhorn.backup.rules
+    rules:
+      - alert: LonghornBackupError
+        expr: longhorn_backup_state == 4
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Backup error for {{ $labels.volume }} ({{ $labels.backup }})"
+          description: "Backup state is Error."
+
+  - name: longhorn.process.rules
+    rules:
+      - alert: LonghornInstanceManagerResourcePressure
+        expr: (longhorn_instance_manager_cpu_usage_millicpu / ignoring(instance_manager_type) longhorn_instance_manager_cpu_requests_millicpu) > 0.9
+        for: 15m
+        labels: {severity: warning}
+        annotations:
+          summary: "Instance manager CPU near limit ({{ $labels.instance_manager }})"
+          description: "Sustained CPU usage >90% of requested."

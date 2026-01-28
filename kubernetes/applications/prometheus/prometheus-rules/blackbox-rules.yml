@@ -1,0 +1,69 @@
+groups:
+- name: blackbox-http
+  rules:
+  - alert: WebsiteDown
+    expr: probe_success{job="blackbox-http"} == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Website down: {{ $labels.instance }}"
+      description: "Blackbox HTTP probe failed for {{ $labels.instance }} (for 2m)."
+
+  - alert: HTTPStatusNotOK
+    expr: probe_http_status_code{job="blackbox-http"} > 399
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Bad HTTP status at {{ $labels.instance }}"
+      description: "Got status {{ $value }} (≥400) for {{ $labels.instance }}."
+
+  - alert: WebsiteSlow
+    expr: probe_duration_seconds{job="blackbox-http"} > 2.5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Slow response at {{ $labels.instance }}"
+      description: "Probe duration > 2.5s for 5m."
+
+  - alert: TLSSlowHandshake
+    expr: sum by (instance) (probe_http_duration_seconds{phase="tls",job="blackbox-http"}) > 1.0
+    for: 5m
+    labels:
+      severity: info
+    annotations:
+      summary: "TLS handshake slow at {{ $labels.instance }}"
+      description: "TLS phase > 1s consistently."
+
+- name: blackbox-icmp
+  rules:
+  - alert: HostUnreachable
+    expr: probe_success{job="blackbox-icmp"} == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Host unreachable: {{ $labels.instance }}"
+      description: "ICMP probe failed for {{ $labels.instance }}."
+
+- name: blackbox-ssl
+  rules:
+  - alert: SSLCertExpiringSoon
+    expr: (probe_ssl_earliest_cert_expiry{job="blackbox-ssl"} - time()) < 21 * 24 * 3600
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: "TLS cert expiring soon: {{ $labels.instance }}"
+      description: "Earliest cert expires in <21 days."
+
+  - alert: SSLCertExpired
+    expr: (probe_ssl_earliest_cert_expiry{job="blackbox-ssl"} - time()) <= 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: "TLS cert expired: {{ $labels.instance }}"
+      description: "Certificate has already expired."

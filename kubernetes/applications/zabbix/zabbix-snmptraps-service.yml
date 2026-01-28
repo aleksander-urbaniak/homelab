@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-snmptraps
+  namespace: zabbix
+  labels:
+    app: zabbix-snmptraps
+spec:
+  type: ClusterIP
+  selector:
+    app: zabbix-snmptraps
+  ports:
+    - name: snmp
+      protocol: UDP
+      port: 162
+      targetPort: 1162
+

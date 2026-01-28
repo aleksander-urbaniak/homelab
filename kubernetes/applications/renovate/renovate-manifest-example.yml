@@ -1,0 +1,164 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: renovate
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mend-renovate-env
+  namespace: renovate
+type: Opaque
+stringData:
+  MEND_RNV_LICENSE_KEY: "REPLACE_ME"
+  MEND_RNV_ACCEPT_TOS: "REPLACE_ME"
+
+  MEND_RNV_ENDPOINT: "REPLACE_ME"
+  MEND_RNV_GITLAB_PAT: "REPLACE_ME"
+
+  MEND_RNV_API_SERVER_SECRET: "REPLACE_ME"
+
+  MEND_RNV_SERVER_PORT: "REPLACE_ME"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: renovate-gitlab-env
+  namespace: renovate
+type: Opaque
+stringData:
+  RENOVATE_PLATFORM: "REPLACE_ME"
+  RENOVATE_ENDPOINT: "REPLACE_ME"
+  RENOVATE_TOKEN: "REPLACE_ME"
+  RENOVATE_REPOSITORY_CACHE: "REPLACE_ME"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: renovate-logs-pvc
+  namespace: renovate
+spec:
+  storageClassName: longhorn
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: renovate-db-pvc
+  namespace: renovate
+spec:
+  storageClassName: longhorn
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: renovate
+  namespace: renovate
+  labels:
+    app: renovate
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: renovate
+  template:
+    metadata:
+      labels:
+        app: renovate
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 192.0.2.10
+          - 192.0.2.11
+
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+
+      containers:
+        - name: renovate
+          image: ghcr.io/mend/renovate-ce:13.1.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: MEND_RNV_REQUEST_LOGGER_ENABLED
+              value: "true"
+            - name: MEND_RNV_ADMIN_API_ENABLED
+              value: "true"
+            - name: MEND_RNV_REPORTING_ENABLED
+              value: "true"
+            - name: MEND_RNV_LOG_HISTORY_DIR
+              value: "/logs"
+            - name: MEND_RNV_SQLITE_FILE_PATH
+              value: "/db/renovate-db.sqlite"
+          envFrom:
+            - secretRef:
+                name: mend-renovate-env
+            - secretRef:
+                name: renovate-gitlab-env
+          volumeMounts:
+            - name: renovate-logs
+              mountPath: /logs
+            - name: renovate-db
+              mountPath: /db
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+      volumes:
+        - name: renovate-logs
+          persistentVolumeClaim:
+            claimName: renovate-logs-pvc
+        - name: renovate-db
+          persistentVolumeClaim:
+            claimName: renovate-db-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: renovate
+  namespace: renovate
+spec:
+  type: ClusterIP
+  selector:
+    app: renovate
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

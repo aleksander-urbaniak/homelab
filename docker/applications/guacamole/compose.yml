@@ -1,0 +1,11 @@
+services:
+  guacamole:
+    image: abesnier/guacamole
+    user: root
+    environment:
+      - EXTENSIONS=${GUACAMOLE_EXTENSIONS}
+    volumes:
+      - /docker/guacamole:/config
+      - ./filetransfer:/tmp/filetransfer
+
+

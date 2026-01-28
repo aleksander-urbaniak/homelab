@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karma
+  namespace: karma
+  labels:
+    app: karma
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: karma
+  template:
+    metadata:
+      labels:
+        app: karma
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
+      initContainers:
+        - name: init-config
+          image: busybox:1.37
+          securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
+          command:
+            - sh
+            - -c
+            - |
+              cp -r /tmp-config/. /host-config/
+              chown -R 65534:65534 /host-config
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: config-cm
+              mountPath: /tmp-config
+            - name: config-host
+              mountPath: /host-config
+      containers:
+        - name: karma
+          image: ghcr.io/prymitive/karma:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ALERTMANAGER_URI
+              value: "http://alertmanager.alertmanager.svc.k3s.example.com:9093"
+            - name: CONFIG_FILE
+              value: /etc/karma/karma.yaml
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: config-host
+              mountPath: /etc/karma
+      volumes:
+        - name: config-cm
+          configMap:
+            name: karma-config
+        - name: config-host
+          persistentVolumeClaim:
+            claimName: karma-config-pvc
+

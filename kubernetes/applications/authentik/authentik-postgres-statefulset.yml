@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: authentik-postgres-db
+  namespace: authentik
+  labels:
+    app: authentik-postgres-db
+spec:
+  serviceName: authentik-postgres-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-postgres-db
+  template:
+    metadata:
+      labels:
+        app: authentik-postgres-db
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: postgres
+          image: postgres:18
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              value: "REPLACE_ME"
+            - name: POSTGRES_DB
+              value: "authentik"
+            - name: POSTGRES_PASSWORD
+              value: "REPLACE_ME"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - name: postgres
+              containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -d authentik -U authentik"]
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          livenessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -d authentik -U authentik"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: longhorn
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi

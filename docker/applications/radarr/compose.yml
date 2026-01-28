@@ -1,0 +1,14 @@
+services:
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr:6.0.4
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /mnt/docker/radarr/config/:/config
+      - /mnt/docker/jellyfin/media/movies:/movies
+      - /mnt/docker/qbittorrent/downloads:/downloads
+    ports:
+      - "7878:7878"

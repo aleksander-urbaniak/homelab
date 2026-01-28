@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pulse
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pulse-data-pvc
+  namespace: pulse
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pulse-env
+  namespace: pulse
+type: Opaque
+stringData:
+  PULSE_AUTH_USER: "REPLACE_ME"
+  PULSE_AUTH_PASS: "REPLACE_ME"
+  LOG_LEVEL: "info"
+  DISCOVERY_SUBNET: "203.0.113.0/24"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulse
+  namespace: pulse
+  labels:
+    app: pulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulse
+  template:
+    metadata:
+      labels:
+        app: pulse
+    spec:
+      containers:
+        - name: pulse
+          image: rcourtman/pulse:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 7655
+          env:
+            - name: TZ
+              value: "Europe/Warsaw"
+          envFrom:
+            - secretRef:
+                name: pulse-env
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+          readinessProbe:
+            tcpSocket:
+              port: 7655
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            tcpSocket:
+              port: 7655
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pulse-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pulse
+  namespace: pulse
+  labels:
+    app: pulse
+spec:
+  type: ClusterIP
+  selector:
+    app: pulse
+  ports:
+    - name: http
+      protocol: TCP
+      port: 7655
+      targetPort: 7655

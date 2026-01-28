@@ -1,0 +1,137 @@
+# `cluster.fw` (Proxmox Cluster Firewall) — Markdown View
+
+Source file: `proxmox/firewall/cluster.fw`
+
+## Overview
+
+This is a Proxmox VE **cluster firewall** configuration that:
+
+- Defines reusable **aliases** (hosts/subnets)
+- Groups IPs into **ipsets** (e.g., `pihole`, `k3s-cluster`)
+- Applies rules in **groups** (e.g., allow SSH, DNS, HTTPS, node exporter, Proxmox UI)
+
+All addresses/hostnames here are **example placeholders** (RFC 5737 ranges like `192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`).
+
+## Sections
+
+### `[OPTIONS]`
+- Enables the firewall (`enable: 1`).
+
+### `[ALIASES]`
+- `exampleuser-PC`: example admin workstation
+- `gateway`: example default gateway
+- `local-network`: example LAN subnet
+- `servers-network`: example servers subnet
+
+### `[IPSET …]`
+- `pihole`: Pi-hole nodes and related hosts
+- `proxmox-node-1`: example Proxmox nodes
+- `k3s-cluster`: Kubernetes nodes, VIP, and example pod/service subnets
+
+### `[group …]`
+- `allow-ssh`: SSH access from `servers-network` and the admin PC
+- `k3s`: traffic needed for Kubernetes + Pi-hole access + inter-node traffic
+- `node_exporter`: allows scraping node exporter (`9100/tcp`)
+- `pihole`: DNS (53) and GUI access
+- `proxmox-node-1`: Proxmox UI (8006), PBS (8007), exporters (9221), ICMP
+
+## Raw `cluster.fw`
+
+```ini
+[OPTIONS]
+
+enable: 1
+
+[ALIASES]
+
+exampleuser-PC 198.51.100.200
+gateway 203.0.113.1
+local-network 198.51.100.0/24
+servers-network 203.0.113.0/24
+
+[IPSET pihole]
+
+203.0.113.14 # nas-1
+192.0.2.10 # pihole-ha (pihole-1 + nas-1)
+192.0.2.11 # pihole-2
+192.0.2.12 # pihole-1
+
+[IPSET proxmox-node-1]
+
+203.0.113.10 # proxmox-node-1
+203.0.113.11 # proxmox-node-2
+203.0.113.12 # proxmox-node-3
+203.0.113.13 # proxmox-node-4
+
+[IPSET k3s-cluster]
+
+192.0.2.10 # pihole-01
+192.0.2.11 # pihole-02
+192.0.2.40 # k3s-master-1
+192.0.2.41 # k3s-master-2
+192.0.2.42 # k3s-master-3
+192.0.2.50 # k3s-worker-1
+192.0.2.51 # k3s-worker-2
+192.0.2.52 # k3s-worker-3
+192.0.2.60 # longhorn-1
+192.0.2.61 # longhorn-2
+192.0.2.62 # longhorn-3
+192.0.2.70 # kube-vip
+192.0.2.71 # nginx-proxy-manager
+192.0.2.0/24 # Kubernetes pods subnet (example)
+198.51.100.0/24 # Kubernetes services subnet (example)
+
+[group allow-ssh]
+
+IN SSH(ACCEPT) -source dc/servers-network -log nolog # Allow SSH access from servers-network
+IN SSH(ACCEPT) -source dc/exampleuser-pc -log nolog # Allow SSH access from exampleuser's PC
+
+[group icmp-ping]
+
+
+[group k3s]
+
+IN ACCEPT -source 198.51.100.11 -dest +dc/k3s-cluster -log nolog
+IN HTTPS(ACCEPT) -source dc/local-network -dest +dc/k3s-cluster -log nolog
+IN HTTPS(ACCEPT) -source dc/servers-network -dest +dc/k3s-cluster -log nolog
+IN DNS(ACCEPT) -source dc/local-network -dest +dc/pihole -log nolog
+IN DNS(ACCEPT) -source dc/servers-network -dest +dc/pihole -log nolog
+IN HTTPS(ACCEPT) -source dc/exampleuser-pc -dest +dc/pihole -log nolog
+IN LDAP(ACCEPT) -source dc/servers-network -dest +dc/k3s-cluster -log nolog
+IN ACCEPT -source dc/servers-network -dest +dc/k3s-cluster -p tcp -dport 80 -log nolog
+IN ACCEPT -source dc/servers-network -dest +dc/k3s-cluster -p tcp -dport 443 -log nolog
+OUT ACCEPT -source +dc/k3s-cluster -dest +dc/k3s-cluster -log nolog # Allow ALL traffic between nodes, pods and services
+IN ACCEPT -source +dc/k3s-cluster -dest +dc/k3s-cluster -log nolog # Allow ALL traffic between nodes, pods and services
+IN ACCEPT -source dc/exampleuser-pc -dest +dc/k3s-cluster -p tcp -dport 443 -log nolog
+IN ACCEPT -source dc/exampleuser-pc -dest +dc/k3s-cluster -p tcp -dport 80 -log nolog
+IN ACCEPT -source dc/exampleuser-pc -dest +dc/k3s-cluster -p tcp -dport 81 -log nolog # Allow
+|IN Ping(ACCEPT) -source dc/servers-network -dest +dc/k3s-cluster -log nolog # Allow ICMP PING from servers-network
+
+[group node_exporter]
+
+IN ACCEPT -source 198.51.100.10 -dest dc/servers-network -p tcp -dport 9100 -log nolog
+IN ACCEPT -source +dc/k3s-cluster -dest dc/servers-network -p tcp -dport 9100 -log nolog
+
+[group pihole]
+
+IN HTTPS(ACCEPT) -source +dc/k3s-cluster -dest +dc/pihole -log nolog # Allow HTTPS GUI access from K3S Cluster
+IN DNS(ACCEPT) -source dc/servers-network -dest +dc/pihole -log nolog # Allow port 53 TCP/UDP from servers-network
+IN DNS(ACCEPT) -source dc/local-network -dest +dc/pihole -log nolog # Allow port 53 TCP/UDP from local-network
+IN HTTPS(ACCEPT) -source dc/exampleuser-pc -dest +dc/pihole -log nolog # Allow HTTPS GUI access from exampleuser's PC
+IN Ping(ACCEPT) -source dc/servers-network -dest +dc/pihole -log nolog # Allow ICMP PING from servers-network
+
+[group proxmox-node-1]
+
+OUT ACCEPT -dest dc/gateway -log nolog # Allow ALL outgoing traffic to gateway
+IN ACCEPT -source +dc/proxmox-node-1 -dest dc/servers-network -p tcp -dport 8007 -log nolog # Allow traffic to Proxmox Backup Server
+OUT ACCEPT -source +dc/proxmox-node-1 -log nolog # Allow ALL traffic between nodes
+IN ACCEPT -source +dc/proxmox-node-1 -log nolog # Allow ALL traffic between nodes
+IN ACCEPT -source dc/exampleuser-pc -dest +dc/proxmox-node-1 -p tcp -dport 8006 -log nolog
+IN ACCEPT -source +dc/k3s-cluster -dest +dc/proxmox-node-1 -p tcp -dport 8006 -log nolog
+IN ACCEPT -source +dc/k3s-cluster -dest +dc/proxmox-node-1 -p tcp -dport 9283 -log nolog
+IN SSH(ACCEPT) -source dc/exampleuser-pc -dest +dc/proxmox-node-1 -log nolog
+IN ACCEPT -source +dc/k3s-cluster -dest +dc/proxmox-node-1 -p tcp -dport 9221 -log nolog
+IN Ping(ACCEPT) -source dc/servers-network -dest +dc/proxmox-node-1 -log nolog
+IN Ping(ACCEPT) -source dc/exampleuser-pc -dest +dc/proxmox-node-1 -log nolog
+```
+

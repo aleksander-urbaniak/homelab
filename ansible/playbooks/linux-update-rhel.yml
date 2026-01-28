@@ -1,0 +1,10 @@
+- name: Updates linux all family
+  become: yes
+  hosts: all
+  tasks:
+
+    - name: Check for updates on RHEL
+      yum:
+        name: "*"
+        state: latest
+      when: ansible_os_family == 'RedHat'

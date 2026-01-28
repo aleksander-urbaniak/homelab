@@ -1,0 +1,3 @@
+{
+  "data-root": "/mnt/docker" # Change Docker's data directory to /mnt/docker
+}

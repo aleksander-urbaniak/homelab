@@ -1,0 +1,133 @@
+- name: Install and Configure Zabbix Agent 2 on Debian-based Systems
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars:
+    # Replace these with your actual .deb URLs
+    zabbix_repo_debian: "https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian12_all.deb"
+    zabbix_repo_ubuntu: "https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.0+ubuntu24.04_all.deb"
+    zabbix_packages:
+      - zabbix-agent2
+      - zabbix-agent2-plugin-mongodb
+      - zabbix-agent2-plugin-mssql
+      - zabbix-agent2-plugin-postgresql
+
+  tasks:
+    - name: Check if Zabbix Agent 2 is installed
+      command: dpkg-query -W -f='${Status}' zabbix-agent2
+      register: zabbix_installed
+      ignore_errors: true
+      changed_when: false
+      failed_when: false
+
+    - name: Debug Output Zabbix installation check result
+      debug:
+        msg: "Zabbix installation check result: {{ zabbix_installed }}"
+
+    - name: Check Zabbix Agent 2 service status (if installed)
+      command: systemctl is-active zabbix-agent2
+      register: installed_status
+      failed_when: false
+      changed_when: false
+      when: zabbix_installed.rc == 0
+
+    - name: Display installed Zabbix Agent 2 service status
+      debug:
+        var: installed_status.stdout
+      when: zabbix_installed.rc == 0
+
+    - name: Debug - Zabbix Agent 2 not installed or inactive, proceeding with installation
+      debug:
+        msg: "Zabbix Agent 2 not installed or inactive, proceeding with installation."
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Download Zabbix repo package for Debian
+      get_url:
+        url: "{{ zabbix_repo_debian }}"
+        dest: /tmp/zabbix-release.deb
+        mode: '0644'
+      when:
+        - ansible_distribution | lower == "debian"
+        - (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Download Zabbix repo package for Ubuntu
+      get_url:
+        url: "{{ zabbix_repo_ubuntu }}"
+        dest: /tmp/zabbix-release.deb
+        mode: '0644'
+      when:
+        - ansible_distribution | lower == "ubuntu"
+        - (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Install Zabbix release package
+      apt:
+        deb: /tmp/zabbix-release.deb
+        state: present
+      when:
+        - (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      when:
+        - (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+
+    - name: Install Zabbix Agent 2 and plugins
+      apt:
+        name: "{{ zabbix_packages }}"
+        state: present
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Install git package (required for cloning repos)
+      apt:
+        name: git
+        state: present
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Ensure /etc/zabbix directory ownership
+      file:
+        path: /etc/zabbix
+        owner: zabbix
+        group: zabbix
+        state: directory
+
+    - name: Copy zabbix-example.psk from playbook
+      copy:
+        src: "{{ playbook_dir }}/zabbix/zabbix-example.psk"
+        dest: /etc/zabbix/zabbix-example.psk
+        owner: root
+        group: zabbix
+        mode: '0640'
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Copy zabbix_agent2.conf from playbook
+      copy:
+        src: "{{ playbook_dir }}/zabbix/zabbix_agent2.conf"
+        dest: /etc/zabbix/zabbix_agent2.conf
+        owner: root
+        group: root
+        mode: '0644'
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Start and enable Zabbix Agent 2 service
+      service:
+        name: zabbix-agent2
+        state: started
+        enabled: yes
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Restart Zabbix Agent 2 Service
+      command: systemctl restart zabbix-agent2
+
+    - name: Check Zabbix Agent 2 service status after installation
+      command: systemctl status zabbix-agent2
+      register: zabbix_status_post
+      changed_when: false
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Display Zabbix Agent 2 service status after installation
+      debug:
+        var: zabbix_status_post.stdout_lines
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")

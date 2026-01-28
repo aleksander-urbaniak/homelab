@@ -1,0 +1,12 @@
+---
+- name: Set timezone to Europe/Warsaw
+  hosts: all
+  become: true
+  vars:
+    timezone_name: Europe/Warsaw
+  tasks:
+    - name: Install bpytop manually
+      ansible.builtin.command: pip3 install bpytop --upgrade
+      register: pip_result
+      # Reports "changed" only if actual installation work happened
+      changed_when: "'Successfully installed' in pip_result.stdout"

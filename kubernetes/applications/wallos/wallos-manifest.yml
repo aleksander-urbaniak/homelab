@@ -1,0 +1,135 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wallos
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wallos-db-pvc
+  namespace: wallos
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wallos-logos-pvc
+  namespace: wallos
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 3Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallos
+  namespace: wallos
+  labels:
+    app: wallos
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wallos
+  template:
+    metadata:
+      labels:
+        app: wallos
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              chmod -R 777 /var/www/html/db /var/www/html/images/uploads/logos
+          volumeMounts:
+            - name: db
+              mountPath: /var/www/html/db
+            - name: logos
+              mountPath: /var/www/html/images/uploads/logos
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+      containers:
+        - name: wallos
+          image: bellamy/wallos:v4.5.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "Europe/Warsaw"
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: db
+              mountPath: /var/www/html/db
+            - name: logos
+              mountPath: /var/www/html/images/uploads/logos
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 30
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: wallos-db-pvc
+        - name: logos
+          persistentVolumeClaim:
+            claimName: wallos-logos-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wallos-app
+  namespace: wallos
+  labels:
+    app: wallos
+spec:
+  type: ClusterIP
+  selector:
+    app: wallos
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

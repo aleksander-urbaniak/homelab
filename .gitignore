@@ -1,0 +1,22 @@
+# Secrets
+.env
+*.env
+*.key
+*.pem
+*.pfx
+*.p12
+*.kdbx
+*.sqlite
+
+# Backups
+*.bak
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Tooling
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

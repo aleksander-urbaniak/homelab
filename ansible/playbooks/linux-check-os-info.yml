@@ -1,0 +1,132 @@
+---
+- name: Gather and export Linux system information
+  hosts: all
+  gather_facts: yes
+
+  vars:
+    gitlab_repo_dest: "/tmp/gitlab_repo"
+    info_file_prefix: "system_info"
+    repo_subdir_path: "ansible/output/os-info"
+
+    # pulled from your runner/CI environment
+    gitlab_token: "{{ lookup('env','GITLAB_TOKEN') }}"
+    git_user_name: "{{ lookup('env','GIT_USER_NAME') }}"
+    git_user_email: "{{ lookup('env','GIT_USER_EMAIL') }}"
+
+    # build a single‑line HTTPS URL with PAT
+    gitlab_repo_url: "https://oauth2:{{ gitlab_token }}@gitlab.example.com/exampleuser/homelab.git"
+
+  pre_tasks:
+    - name: Fail if no GitLab token provided
+      fail:
+        msg: >
+          You must set GITLAB_TOKEN in your environment
+      when: gitlab_token is undefined or gitlab_token == ""
+
+  tasks:
+    - name: Display OS and Hostname
+      debug:
+        msg: "Hostname: {{ ansible_hostname }} System: {{ ansible_system }} {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Check System Uptime
+      command: uptime -p
+      register: uptime_info
+
+    - name: Calculate CPU usage percentage
+      shell: |
+        top -bn1 | grep 'Cpu(s)' | awk '{print 100 - $8}'
+      register: cpu_usage_percent
+
+    - name: Calculate Memory usage percentage
+      shell: |
+        free -m | awk '/Mem:/ {printf("%.2f", $3/$2 * 100)}'
+      register: mem_usage_percent
+
+    - name: Check Load Average
+      shell: |
+        awk '{print $1, $2, $3}' /proc/loadavg
+      register: load_avg_info
+
+    - name: Check Disk Usage
+      command: df -h
+      register: disk_usage
+
+    - name: Gather system info into fact
+      set_fact:
+        system_info: |
+          Hostname: {{ ansible_hostname }}
+          System: {{ ansible_system }} {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Kernel: {{ ansible_kernel }}
+          CPU: {{ cpu_usage_percent.stdout }}% of 100% ({{ ansible_processor_count }} cores)
+          Memory: {{ mem_usage_percent.stdout }}% of 100% ({{ ansible_memtotal_mb }} MB total)
+          Default IP: {{ ansible_default_ipv4.address }}
+          Uptime: {{ uptime_info.stdout | default('N/A') }}
+          Load Average: {{ load_avg_info.stdout | default('N/A') }}
+
+    # … (any additional debug tasks you like) …
+
+    # ——— Git steps, on localhost only ———
+    - name: Remove old clone directory (if present)
+      file:
+        path: "{{ gitlab_repo_dest }}"
+        state: absent
+      delegate_to: localhost
+      run_once: true
+
+    - name: Clone GitLab repository using HTTPS+token
+      git:
+        repo: "{{ gitlab_repo_url }}"
+        dest: "{{ gitlab_repo_dest }}"
+        version: main
+        force: yes
+      delegate_to: localhost
+      run_once: true
+
+    - name: Configure Git user.email
+      command: git -C "{{ gitlab_repo_dest }}" config user.email "{{ git_user_email }}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Configure Git user.name
+      command: git -C "{{ gitlab_repo_dest }}" config user.name "{{ git_user_name }}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Ensure subdirectory exists
+      file:
+        path: "{{ gitlab_repo_dest }}/{{ repo_subdir_path }}"
+        state: directory
+      delegate_to: localhost
+      run_once: true
+
+    - name: Write system info to file in repo
+      copy:
+        content: |
+          {{ system_info }}
+          Disk Usage:
+          {% for line in disk_usage.stdout_lines %}
+          {{ line }}
+          {% endfor %}
+        dest: "{{ gitlab_repo_dest }}/{{ repo_subdir_path }}/{{ info_file_prefix }}_{{ ansible_hostname }}.txt"
+      delegate_to: localhost
+
+    - name: Commit changes if anything new
+      shell: |
+        cd "{{ gitlab_repo_dest }}"
+        git add .
+        git diff-index --quiet HEAD || git commit -m "Update system info on {{ ansible_date_time.iso8601 }}"
+      args:
+        executable: /bin/bash
+      delegate_to: localhost
+      run_once: true
+      register: git_commit
+      changed_when: "'nothing to commit' not in git_commit.stdout"
+
+    - name: Push updates back to GitLab
+      shell: |
+        cd "{{ gitlab_repo_dest }}"
+        git push origin main
+      args:
+        executable: /bin/bash
+      delegate_to: localhost
+      run_once: true

@@ -1,0 +1,247 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: semaphore
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: semaphore-db-init
+  namespace: semaphore
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS `semaphore`;
+    CREATE USER IF NOT EXISTS 'semaphore'@'%' IDENTIFIED BY 'OSm#7m#jN!ELKsAqZ5FhelcprRMMtwlz';
+    GRANT ALL PRIVILEGES ON `semaphore`.* TO 'semaphore'@'%';
+    FLUSH PRIVILEGES;
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: semaphore-db
+  namespace: semaphore
+  labels:
+    app: semaphore-db
+spec:
+  serviceName: semaphore-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: semaphore-db
+  template:
+    metadata:
+      labels:
+        app: semaphore-db
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: mysql
+        image: mysql:9
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_ROOT_HOST
+          value: "%"
+        - name: MYSQL_USER
+          value: "REPLACE_ME"
+        - name: MYSQL_PASSWORD
+          value: "REPLACE_ME"
+        - name: MYSQL_DATABASE
+          value: "semaphore"
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: "yes"
+        ports:
+        - name: mysql
+          containerPort: 3306
+        readinessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 30
+          periodSeconds: 15
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d/init.sql
+          subPath: init.sql
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+      volumes:
+      - name: init-script
+        configMap:
+          name: semaphore-db-init
+          items:
+          - key: init.sql
+            path: init.sql
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: longhorn
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 3Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: semaphore-db
+  namespace: semaphore
+  labels:
+    app: semaphore-db
+spec:
+  clusterIP: None
+  selector:
+    app: semaphore-db
+  ports:
+  - name: mysql
+    protocol: TCP
+    port: 3306
+    targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: semaphore
+  namespace: semaphore
+  labels:
+    app: semaphore
+spec:
+  serviceName: semaphore
+  replicas: 1
+  selector:
+    matchLabels:
+      app: semaphore
+  template:
+    metadata:
+      labels:
+        app: semaphore
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      securityContext:
+        fsGroup: 0
+      containers:
+      - name: semaphore
+        image: semaphoreui/semaphore:v2.16.50
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+        ports:
+        - name: http
+          containerPort: 3000
+        env:
+        - name: SEMAPHORE_DB_DIALECT
+          value: "mysql"
+        - name: SEMAPHORE_DB_HOST
+          value: "semaphore-db"
+        - name: SEMAPHORE_DB_PORT
+          value: "3306"
+        - name: SEMAPHORE_DB_NAME
+          value: "semaphore"
+        - name: SEMAPHORE_DB_USER
+          value: "REPLACE_ME"
+        - name: SEMAPHORE_DB_PASS
+          value: "REPLACE_ME"
+        - name: SEMAPHORE_ADMIN
+          value: "exampleuser"
+        - name: SEMAPHORE_ADMIN_PASSWORD
+          value: "REPLACE_ME"
+        - name: SEMAPHORE_ADMIN_NAME
+          value: "Aleksander Urbaniak"
+        - name: SEMAPHORE_ADMIN_EMAIL
+          value: "exampleuser@example.com"
+        - name: SEMAPHORE_PORT
+          value: "3000"
+        - name: SEMAPHORE_INTERFACE
+          value: "0.0.0.0"
+        readinessProbe:
+          httpGet:
+            path: "/"
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: "/"
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/semaphore
+        - name: config
+          mountPath: /etc/semaphore
+        - name: tmp
+          mountPath: /tmp/semaphore
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 300m
+            memory: 512Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: longhorn
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 3Gi
+  - metadata:
+      name: config
+    spec:
+      storageClassName: longhorn
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: tmp
+    spec:
+      storageClassName: longhorn
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: semaphore-app
+  namespace: semaphore
+  labels:
+    app: semaphore
+spec:
+  type: ClusterIP
+  selector:
+    app: semaphore
+  ports:
+  - name: http
+    protocol: TCP
+    port: 3000
+    targetPort: 3000

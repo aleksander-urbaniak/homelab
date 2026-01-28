@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nebula-sync
+  namespace: nebula-sync
+  labels:
+    app.kubernetes.io/name: nebula-sync
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: nebula-sync
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

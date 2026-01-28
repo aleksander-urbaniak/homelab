@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: alertmanager
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+
+    route:
+      group_by: ['alertname','instance']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 9999h
+      receiver: 'discord'
+
+    receivers:
+      - name: 'discord'
+        discord_configs:
+          - webhook_url: 'https://discord.com/api/webhooks/1387482313645887691/Qkty4ScCeb0jF6Xzo5MFMkt_xGbH8VCRTuJU_-gMJnkwvelGvLblPlhiJXN2lcQykUa9'
+

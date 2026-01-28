@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speedtest-tracker
+  namespace: speedtest-tracker
+  labels:
+    app: speedtest-tracker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: speedtest-tracker
+  template:
+    metadata:
+      labels:
+        app: speedtest-tracker
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.37
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z speedtest-tracker-db 5432; do
+                echo "Waiting for Postgres...";
+                sleep 3;
+              done
+      containers:
+        - name: speedtest-tracker
+          image: lscr.io/linuxserver/speedtest-tracker:1.13.5
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: DB_CONNECTION
+              value: "pgsql"
+            - name: DB_HOST
+              value: "speedtest-tracker-db"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: speedtest-tracker-db-secret
+                  key: POSTGRES_DB
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: speedtest-tracker-db-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: speedtest-tracker-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: TZ
+              value: "Europe/Warsaw"
+            - name: CACHE_DRIVER
+              value: "file"
+            - name: SESSION_DRIVER
+              value: "file"
+            - name: SPEEDTEST_SCHEDULE
+              value: "0 */3 * * *"
+            - name: SPEEDTEST_SERVERS
+              value: "22844,7202,23677,60356"
+            - name: APP_KEY
+              value: "REPLACE_ME"
+          ports:
+            - name: https
+              containerPort: 443
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: web
+              mountPath: /etc/ssl/web
+          readinessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 300m
+              memory: 512Mi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: speedtest-tracker-config
+        - name: web
+          persistentVolumeClaim:
+            claimName: speedtest-tracker-web

@@ -1,0 +1,556 @@
+---
+# ==============================================================================
+# MEGA PLAYBOOK: 1-Step Setup (Fix: SSH Service Name for Debian)
+# ==============================================================================
+- name: "1-Step Setup: System, Security, Tools, Metrics, Logs, SIEM"
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    # --- SECURITY / PASSWORDS ---
+    pwd_chars: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
+    pwd_length: 32
+
+    # --- WAZUH CONFIG ---
+    wazuh_manager_ip: "wazuh.example.com"
+    wazuh_agent_name: "{{ ansible_hostname }}"
+
+    # --- NODE EXPORTER CONFIG ---
+    node_exporter_version: "1.9.1"
+    node_exporter_user: "nodeusr"
+    
+    # --- PROMTAIL CONFIG ---
+    loki_url: "https://grafana-loki.example.com/loki/api/v1/push"
+    promtail_version: "" # Puste = latest
+    promtail_install_dir: "/usr/local/bin"
+    promtail_config_dir: "/etc/promtail"
+    promtail_user: "root" # Root for access to all logs
+    promtail_group: "root"
+
+    # --- PAKIETY (COMMON) ---
+    common_packages:
+      - curl
+      - unzip
+      - wget
+      - git
+      - tree
+      - htop
+      - tmux
+      - screen
+      - mc
+      - python3
+      - python3-pip
+      - rlwrap
+
+    # --- PAKIETY (RHEL/ORACLE) ---
+    rhel_packages:
+      - tig
+      - iotop
+      - chrony
+      - pciutils
+      - usbutils
+      - smartmontools
+      - ipmitool
+      - freeipmi
+      - upower
+      - autofs
+      - xhost
+      - cronie
+      - gcc
+      - python3-devel
+      - python3-pip
+      - policycoreutils-python-utils
+      - tar
+      - gzip
+
+    # --- PAKIETY (DEBIAN/UBUNTU) ---
+    debian_packages:
+      - tig
+      - iotop
+      - chrony
+      - pciutils
+      - usbutils
+      - smartmontools
+      - ipmitool
+      - upower
+      - autofs
+      - x11-xserver-utils
+      - cron
+      - build-essential
+      - python3-dev
+      - python3-venv
+
+  tasks:
+    # ==========================================================================
+    # 0. CONTROLLER PRE-REQUISITES
+    # ==========================================================================
+    - name: "[INIT] Install passlib on controller (Localhost)"
+      pip:
+        name: passlib
+      delegate_to: localhost
+      run_once: true
+      become: false 
+      ignore_errors: true 
+
+    # ==========================================================================
+    # 1. SYSTEM INITIALIZATION & REPOSITORIES
+    # ==========================================================================
+    - name: "[INIT] Update /etc/hosts with correct IP and FQDN (example.com)"
+      lineinfile:
+        path: /etc/hosts
+        regexp: "^{{ ansible_default_ipv4.address }}"
+        line: "{{ ansible_default_ipv4.address }} {{ ansible_hostname }} {{ ansible_hostname }}.example.com"
+        state: present
+      when: ansible_default_ipv4.address is defined
+
+    # --- FIX: ENABLE CRB FOR ORACLE LINUX 9 ---
+    - name: "[RHEL] Enable CodeReady Builder (Oracle Linux 9)"
+      command: dnf config-manager --set-enabled ol9_codeready_builder
+      when: 
+        - ansible_distribution == "OracleLinux" 
+        - ansible_distribution_major_version == "9"
+      ignore_errors: true
+
+    # --- FIX: ENABLE CRB FOR RHEL/CENTOS/ROCKY 9 ---
+    - name: "[RHEL] Enable CRB (RHEL/Rocky/Alma 9)"
+      command: dnf config-manager --set-enabled crb
+      when: 
+        - ansible_os_family == "RedHat"
+        - ansible_distribution != "OracleLinux"
+        - ansible_distribution_major_version == "9"
+      ignore_errors: true
+
+    - name: "[RHEL] Install EPEL Release (Oracle)"
+      dnf:
+        name: oracle-epel-release-el{{ ansible_distribution_major_version }}
+        state: present
+      when: ansible_os_family == "RedHat" and ansible_distribution == "OracleLinux"
+      ignore_errors: true
+
+    - name: "[RHEL] Install EPEL Release (Generic)"
+      dnf:
+        name: epel-release
+        state: present
+      when: ansible_os_family == "RedHat" and ansible_distribution != "OracleLinux"
+
+    - name: "[RHEL] Update Cache & Upgrade"
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: "[DEBIAN] Update Cache & Upgrade"
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    # ==========================================================================
+    # 2. PACKAGE INSTALLATION
+    # ==========================================================================
+    - name: "[PKG] Install Common Packages"
+      package:
+        name: "{{ common_packages }}"
+        state: present
+
+    - name: "[PKG] Install RHEL Specific Packages"
+      dnf:
+        name: "{{ rhel_packages }}"
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: "[PKG] Install Debian Specific Packages"
+      apt:
+        name: "{{ debian_packages }}"
+        state: present
+      when: ansible_os_family == "Debian"
+
+    # ==========================================================================
+    # 3. SECURITY & USERS
+    # ==========================================================================
+    - name: "[SEC] Generate Random Passwords"
+      set_fact:
+        example_pass: "{{ lookup('password', '/dev/null', length=pwd_length, chars=pwd_chars) }}"
+        root_pass: "{{ lookup('password', '/dev/null', length=pwd_length, chars=pwd_chars) }}"
+
+    - name: "[SEC] !!! DISPLAY PASSWORDS !!! (Save them now)"
+      debug:
+        msg:
+          - "=============================================="
+          - " HOST: {{ inventory_hostname }}"
+          - "----------------------------------------------"
+          - " USER: example"
+          - " PASS: {{ example_pass }}"
+          - "----------------------------------------------"
+          - " USER: root"
+          - " PASS: {{ root_pass }}"
+          - "=============================================="
+
+    - name: "[SEC] Update/Create user 'example'"
+      user:
+        name: example
+        password: "{{ example_pass | password_hash('sha512') }}"
+        state: present
+        shell: /bin/bash
+        groups: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
+        append: yes
+      ignore_errors: true
+
+    - name: "[SEC] Update root password"
+      user:
+        name: root
+        password: "{{ root_pass | password_hash('sha512') }}"
+
+    - name: "[SEC] Create .ssh directory for example"
+      file:
+        path: /home/example/.ssh
+        state: directory
+        owner: example
+        group: example
+        mode: '0700'
+      ignore_errors: true
+
+    - name: "[SEC] Disable Root SSH Login"
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#?PermitRootLogin"
+        line: "PermitRootLogin no"
+        validate: /usr/sbin/sshd -t -f %s
+      notify: Restart SSH
+
+    - name: "[SEC] Set SELinux Permissive (RHEL)"
+      selinux:
+        policy: targeted
+        state: permissive
+      when: ansible_os_family == "RedHat"
+      ignore_errors: true
+
+    # --- DISABLE FIREWALLS ---
+    - name: "[SEC] Disable Firewalld (RHEL/Oracle)"
+      service:
+        name: firewalld
+        state: stopped
+        enabled: no
+      when: ansible_os_family == "RedHat"
+      ignore_errors: true
+
+    - name: "[SEC] Disable UFW (Debian/Ubuntu)"
+      ufw:
+        state: disabled
+      when: ansible_os_family == "Debian"
+      ignore_errors: true
+
+    # ==========================================================================
+    # 4. SHELL CONFIGURATION
+    # ==========================================================================
+    - name: "[SHELL] Setup History Timestamp"
+      copy:
+        dest: /etc/profile.d/history-timestamp.sh
+        content: |
+          #!/bin/bash
+          export HISTTIMEFORMAT='%d-%m-%Y %T '
+        mode: '0755'
+
+    - name: "[SHELL] Ensure /usr/local in PATH"
+      copy:
+        dest: /etc/profile.d/00-localpath.sh
+        content: |
+          case ":$PATH:" in *:/usr/local/bin:*) ;; *) export PATH="/usr/local/bin:$PATH" ;; esac
+          case ":$PATH:" in *:/usr/local/sbin:*) ;; *) export PATH="/usr/local/sbin:$PATH" ;; esac
+        mode: '0644'
+
+    - name: "[SHELL] Setup rlwrap aliases"
+      copy:
+        dest: /etc/profile.d/rlwrap_aliases.sh
+        content: |
+          alias rlsqlplus='rlwrap sqlplus'
+          alias rlrman='rlwrap rman'
+        mode: '0644'
+
+    # ==========================================================================
+    # 5. SERVICES & TOOLS (Chrony, Bpytop, Inxi)
+    # ==========================================================================
+    - name: "[TIME] Configure Chrony"
+      copy:
+        dest: "{{ '/etc/chrony.conf' if ansible_os_family == 'RedHat' else '/etc/chrony/chrony.conf' }}"
+        content: |
+          pool tempus1.gum.gov.pl iburst
+          pool tempus2.gum.gov.pl iburst
+          pool 0.pl.pool.ntp.org iburst
+          driftfile /var/lib/chrony/drift
+          makestep 1.0 3
+          rtcsync
+          logdir /var/log/chrony
+        mode: '0644'
+      notify: Restart Chrony
+
+    - name: Install bpytop manually
+      ansible.builtin.command: pip3 install bpytop --upgrade
+      register: pip_result
+      # Reports "changed" only if actual installation work happened
+      changed_when: "'Successfully installed' in pip_result.stdout"
+
+    - name: "[TOOLS] Install Inxi"
+      block:
+        - file:
+            path: /root/inxi
+            state: directory
+            mode: '0700'
+        - git:
+            repo: 'https://codeberg.org/smxi/inxi'
+            dest: /root/inxi/inxi
+            version: master
+        - copy:
+            dest: /root/inxi/run_inxi.sh
+            mode: '0755'
+            content: |
+              #!/usr/bin/env bash
+              cd /root/inxi/inxi
+              ./inxi -bpodDniAGrFxzjLmas
+        - cron:
+            name: "Weekly inxi report"
+            minute: "30"
+            hour: "23"
+            weekday: "1"
+            job: "/root/inxi/run_inxi.sh > /etc/inxi.txt 2>&1"
+
+    # ==========================================================================
+    # 6. NODE EXPORTER INSTALLATION
+    # ==========================================================================
+    - name: "[METRICS] Check if Node Exporter exists"
+      stat:
+        path: /usr/local/bin/node_exporter
+      register: node_exp_check
+
+    - name: "[METRICS] Create Node Exporter User"
+      user:
+        name: "{{ node_exporter_user }}"
+        shell: /usr/sbin/nologin
+        system: true
+        create_home: false
+
+    - name: "[METRICS] Install Node Exporter"
+      block:
+        - name: Create temp dir for NodeExp
+          tempfile:
+            state: directory
+            suffix: node_exp
+          register: ne_temp
+
+        - name: Download Node Exporter
+          get_url:
+            url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+            dest: "{{ ne_temp.path }}/node_exporter.tar.gz"
+            timeout: 300
+
+        - name: Unarchive Node Exporter
+          unarchive:
+            src: "{{ ne_temp.path }}/node_exporter.tar.gz"
+            dest: "{{ ne_temp.path }}"
+            remote_src: yes
+
+        - name: Install Binary
+          copy:
+            src: "{{ ne_temp.path }}/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+            dest: /usr/local/bin/node_exporter
+            mode: '0755'
+            owner: root
+            group: root
+            remote_src: yes
+          notify: Restart NodeExporter
+
+        - name: Cleanup NodeExp Temp
+          file:
+            path: "{{ ne_temp.path }}"
+            state: absent
+      when: not node_exp_check.stat.exists
+
+    - name: "[METRICS] Apply SELinux Context (RHEL)"
+      command: restorecon -v /usr/local/bin/node_exporter
+      when: 
+        - ansible_os_family == "RedHat"
+        - not node_exp_check.stat.exists
+
+    - name: "[METRICS] Configure Service"
+      copy:
+        dest: /etc/systemd/system/node_exporter.service
+        content: |
+          [Unit]
+          Description=Node Exporter
+          After=network.target
+          [Service]
+          User={{ node_exporter_user }}
+          Group={{ node_exporter_user }}
+          Type=simple
+          ExecStart=/usr/local/bin/node_exporter
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart NodeExporter
+
+    # ==========================================================================
+    # 7. PROMTAIL INSTALLATION
+    # ==========================================================================
+    - name: "[LOGS] Check if Promtail exists"
+      stat:
+        path: "{{ promtail_install_dir }}/promtail"
+      register: promtail_bin_check
+
+    - name: "[LOGS] Resolve Version"
+      block:
+        - uri:
+            url: https://api.github.com/repos/grafana/loki/releases/latest
+            return_content: yes
+          register: gh_resp
+          when: promtail_version | length == 0
+        - set_fact:
+            pt_ver: "{{ promtail_version if promtail_version | length > 0 else gh_resp.json.tag_name }}"
+      when: not promtail_bin_check.stat.exists
+
+    - name: "[LOGS] Install Promtail"
+      block:
+        - set_fact:
+            pt_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+        - tempfile:
+            state: directory
+            suffix: pt_dl
+          register: pt_temp
+        - get_url:
+            url: "https://github.com/grafana/loki/releases/download/{{ pt_ver }}/promtail-linux-{{ pt_arch }}.zip"
+            dest: "{{ pt_temp.path }}/promtail.zip"
+            timeout: 300
+        - unarchive:
+            src: "{{ pt_temp.path }}/promtail.zip"
+            dest: "{{ pt_temp.path }}"
+            remote_src: yes
+        - copy:
+            src: "{{ pt_temp.path }}/promtail-linux-{{ pt_arch }}"
+            dest: "{{ promtail_install_dir }}/promtail"
+            mode: '0755'
+            remote_src: yes
+          notify: Restart Promtail
+        - file:
+            path: "{{ pt_temp.path }}"
+            state: absent
+      when: not promtail_bin_check.stat.exists
+
+    - name: "[LOGS] Create Config Dirs"
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop: ["{{ promtail_config_dir }}", "/var/lib/promtail"]
+
+    - name: "[LOGS] Configure Promtail"
+      copy:
+        dest: "{{ promtail_config_dir }}/promtail-config.yaml"
+        content: |
+          server:
+            http_listen_port: 9080
+            grpc_listen_port: 0
+          positions:
+            filename: /var/lib/promtail/positions.yaml
+          clients:
+            - url: {{ loki_url }}
+          scrape_configs:
+            - job_name: varlogs-root
+              static_configs:
+                - targets: [localhost]
+                  labels:
+                    job: varlogs
+                    host: ${HOSTNAME}
+                    __path__: /var/log/*log
+            - job_name: varlogs-subdirs
+              static_configs:
+                - targets: [localhost]
+                  labels:
+                    job: varlogs
+                    host: ${HOSTNAME}
+                    __path__: /var/log/*/*log
+              pipeline_stages:
+                - match:
+                    selector: '{filename=~"/var/log/anaconda/.*"}'
+                    action: drop
+      notify: Restart Promtail
+
+    - name: "[LOGS] Systemd Service"
+      copy:
+        dest: /etc/systemd/system/promtail.service
+        content: |
+          [Unit]
+          Description=Promtail log shipper
+          After=network-online.target
+          [Service]
+          User={{ promtail_user }}
+          Group={{ promtail_group }}
+          Type=simple
+          Environment=HOSTNAME=%H
+          ExecStart={{ promtail_install_dir }}/promtail -log.level=info -config.expand-env=true -config.file={{ promtail_config_dir }}/promtail-config.yaml
+          Restart=always
+          RestartSec=5s
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart Promtail
+
+    # ==========================================================================
+    # 8. WAZUH AGENT
+    # ==========================================================================
+    - name: "[WAZUH] Check Installation"
+      shell: "rpm -q wazuh-agent || dpkg -s wazuh-agent"
+      register: wazuh_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: "[WAZUH] Install (RHEL)"
+      block:
+        - get_url:
+            url: "https://packages.wazuh.com/4.x/yum/wazuh-agent-4.12.0-1.x86_64.rpm"
+            dest: "/tmp/wazuh-agent.rpm"
+        - shell: |
+            WAZUH_MANAGER="{{ wazuh_manager_ip }}" WAZUH_AGENT_NAME="{{ wazuh_agent_name }}" rpm -ihv /tmp/wazuh-agent.rpm
+      when: ansible_os_family == "RedHat" and wazuh_check.rc != 0
+
+    - name: "[WAZUH] Install (Debian)"
+      block:
+        - get_url:
+            url: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.12.0-1_amd64.deb"
+            dest: "/tmp/wazuh-agent.deb"
+        - shell: |
+            WAZUH_MANAGER="{{ wazuh_manager_ip }}" WAZUH_AGENT_NAME="{{ wazuh_agent_name }}" dpkg -i /tmp/wazuh-agent.deb
+      when: ansible_os_family == "Debian" and wazuh_check.rc != 0
+
+    - name: "[WAZUH] Start Service"
+      service:
+        name: wazuh-agent
+        state: started
+        enabled: yes
+
+  # ==========================================================================
+  # HANDLERS
+  # ==========================================================================
+  handlers:
+    - name: Restart SSH
+      service:
+        # FIX: Debian uses 'ssh', RHEL uses 'sshd'
+        name: "{{ 'sshd' if ansible_os_family == 'RedHat' else 'ssh' }}"
+        state: restarted
+
+    - name: Restart Chrony
+      service:
+        name: "{{ 'chronyd' if ansible_os_family == 'RedHat' else 'chrony' }}"
+        state: restarted
+
+    - name: Restart Promtail
+      systemd:
+        name: promtail
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+
+    - name: Restart NodeExporter
+      systemd:
+        name: node_exporter
+        state: restarted
+        daemon_reload: yes
+        enabled: yes

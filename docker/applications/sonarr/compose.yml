@@ -1,0 +1,14 @@
+services:
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr:4.0.16
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /mnt/docker/sonarr/config/:/config
+      - /mnt/docker/jellyfin/media/series:/tv
+      - /mnt/docker/qbittorrent/downloads/:/downloads
+    ports:
+      - "8989:8989"

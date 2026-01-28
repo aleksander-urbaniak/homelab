@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: semaphore-app
+  namespace: semaphore
+  labels:
+    app: semaphore
+spec:
+  type: ClusterIP
+  selector:
+    app: semaphore
+  ports:
+  - name: http
+    protocol: TCP
+    port: 3000
+    targetPort: 3000

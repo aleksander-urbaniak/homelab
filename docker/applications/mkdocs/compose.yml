@@ -1,0 +1,5 @@
+services:
+  mkdocs:
+    image: squidfunk/mkdocs-material:latest
+    volumes:
+      - /docker/mkdocs/:/docs

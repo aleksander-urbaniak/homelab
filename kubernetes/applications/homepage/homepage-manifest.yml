@@ -1,0 +1,102 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homepage
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homepage-config-pvc
+  namespace: homepage
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app: homepage
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: homepage
+        image: ghcr.io/gethomepage/homepage:v1.8.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 3000
+        env:
+        - name: PUID
+          value: "0"
+        - name: PGID
+          value: "0"
+        - name: HOMEPAGE_ALLOWED_HOSTS
+          value: "homepage.example.com,homepage-app.homepage.svc.k3s.example.com:3000"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: homepage-config-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage-app
+  namespace: homepage
+  labels:
+    app: homepage
+spec:
+  type: ClusterIP
+  selector:
+    app: homepage
+  ports:
+  - name: http
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
+

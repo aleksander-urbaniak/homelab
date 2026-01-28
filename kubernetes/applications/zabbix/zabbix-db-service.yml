@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-db
+  namespace: zabbix
+  labels:
+    app: zabbix-db
+spec:
+  type: ClusterIP
+  selector:
+    app: zabbix-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+

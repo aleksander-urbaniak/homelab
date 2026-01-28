@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab
+  namespace: gitlab
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 192.0.2.10
+          - 192.0.2.11
+      securityContext:
+        fsGroup: 998
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [996, 998]
+      initContainers:
+        - name: fix-permissions
+          image: alpine:3.23
+          command: ["sh","-lc"]
+          args:
+            - >
+              mkdir -p /var/opt/gitlab/postgresql &&
+              chown -R 998:998 /etc/gitlab /var/log/gitlab &&
+              chown -R 996:996 /var/opt/gitlab/postgresql || true
+          volumeMounts:
+            - name: config
+              mountPath: /etc/gitlab
+            - name: logs
+              mountPath: /var/log/gitlab
+            - name: data
+              mountPath: /var/opt/gitlab
+            - name: pgdata
+              mountPath: /var/opt/gitlab/postgresql
+      containers:
+        - name: gitlab
+          image: gitlab/gitlab-ce:18.6.2-ce.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "Europe/Warsaw"
+            - name: GITLAB_OMNIBUS_CONFIG
+              value: |
+                external_url 'https://gitlab.example.com'
+
+                gitlab_rails['gitlab_shell_ssh_port'] = 22
+
+                letsencrypt['enable'] = false
+
+                nginx['listen_port'] = 80
+                nginx['listen_https'] = false
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+            - name: ssh
+              containerPort: 22
+          volumeMounts:
+            - name: config
+              mountPath: /etc/gitlab
+            - name: logs
+              mountPath: /var/log/gitlab
+            - name: data
+              mountPath: /var/opt/gitlab
+            - name: pgdata
+              mountPath: /var/opt/gitlab/postgresql
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: gitlab-config-pvc
+        - name: logs
+          persistentVolumeClaim:
+            claimName: gitlab-logs-pvc
+        - name: data
+          persistentVolumeClaim:
+            claimName: gitlab-data-pvc
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: gitlab-pgdata-pvc

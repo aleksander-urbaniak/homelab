@@ -1,0 +1,11 @@
+services:
+  jellyfin:
+    container_name: jellyfin
+    image: 'jellyfin/jellyfin:10.11.5'
+    volumes:
+      - /mnt/docker/jellyfin/config:/config
+      - /mnt/docker/jellyfin/cache:/cache
+      - /mnt/docker/jellyfin/media:/media
+    ports:
+      - "8096:8096"
+      - "8920:8920"

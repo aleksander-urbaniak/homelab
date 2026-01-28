@@ -1,0 +1,15 @@
+services:
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett:0.24.671
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - AUTO_UPDATE=${AUTO_UPDATE}
+      - RUN_OPTS=${RUN_OPTS}
+    volumes:
+      - /mnt/docker/jackett/config:/config
+      - /mnt/docker/jackett/downloads:/downloads
+    ports:
+      - "9117:9117"
