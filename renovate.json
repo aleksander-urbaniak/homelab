@@ -12,7 +12,5 @@
       "^docker/applications/.+/(?:docker-)?compose\\.ya?ml$",
       "^docker/applications/.+/.+-compose\\.ya?ml$"
     ]
-  },
-  "dependencyDashboard": true,
-  "autoApprove": true
+  }
 }
