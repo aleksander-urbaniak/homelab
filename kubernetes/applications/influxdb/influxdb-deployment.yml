@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+  namespace: influxdb
+  labels:
+    app: influxdb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: influxdb
+          image: influxdb:2.8.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: "setup"
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              value: "REPLACE_ME"
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              value: "REPLACE_ME"
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: "example"
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: "bucket"
+            - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+              value: "REPLACE_ME"
+          ports:
+            - name: http
+              containerPort: 8086
+          volumeMounts:
+            - name: influxdb-storage
+              mountPath: /var/lib/influxdb2
+      volumes:
+        - name: influxdb-storage
+          persistentVolumeClaim:
+            claimName: influxdb-data-pvc

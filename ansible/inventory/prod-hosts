@@ -1,0 +1,52 @@
+all:
+  vars:
+    ansible_user: ansible@example.com
+
+  children:
+    
+    k3s_cluster:
+      hosts:
+        k3s-master-1: { ansible_host: REPLACE_ME }
+        k3s-master-2: { ansible_host: REPLACE_ME }
+        k3s-master-3: { ansible_host: REPLACE_ME }
+        k3s-worker-1: { ansible_host: REPLACE_ME }
+        k3s-worker-2: { ansible_host: REPLACE_ME }
+        k3s-worker-3: { ansible_host: REPLACE_ME }
+        longhorn-1: { ansible_host: REPLACE_ME }
+        longhorn-2: { ansible_host: REPLACE_ME }
+        longhorn-3: { ansible_host: REPLACE_ME }
+
+    docker_hosts:
+      hosts:
+        docker-host-1: { ansible_host: REPLACE_ME }
+
+    lxc_hosts:
+      hosts:
+        lxc-host-1: { ansible_host: REPLACE_ME }
+        lxc-host-2: { ansible_host: REPLACE_ME }
+
+    pihole_hosts:
+      hosts:
+        pihole-1: { ansible_host: REPLACE_ME }
+        pihole-2: { ansible_host: REPLACE_ME }
+
+    linux:
+      children:
+        oracle_linux:
+          children:
+            k3s_cluster:
+            docker_hosts:
+        
+        rocky_linux:
+          children:
+            lxc_hosts:
+            
+        ubuntu:
+          children:
+            pihole_hosts:
+
+    vm:
+      children:
+        k3s_cluster:
+        docker_hosts:
+        pihole_hosts:

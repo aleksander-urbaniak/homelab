@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-config
+  namespace: blackbox
+data:
+  blackbox.yml: |
+    modules:
+      http_ok_relaxed:
+        prober: http
+        timeout: 10s
+        http:
+          method: GET
+          follow_redirects: true
+          preferred_ip_protocol: "ip4"
+          enable_http2: true
+          valid_http_versions: ["HTTP/1.1", "HTTP/2"]
+          valid_status_codes: [200,201,202,204,301,302,308]
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          headers:
+            User-Agent: "Mozilla/5.0 (compatible; Prometheus-Blackbox/1.0; +https://prometheus.io)"
+
+      http_2xx_strict:
+        prober: http
+        timeout: 10s
+        http:
+          method: GET
+          follow_redirects: true
+          preferred_ip_protocol: "ip4"
+          enable_http2: true
+          valid_http_versions: ["HTTP/1.1", "HTTP/2"]
+          valid_status_codes: [200,201,202,204]
+          headers:
+            User-Agent: "Mozilla/5.0 (compatible; Prometheus-Blackbox/1.0; +https://prometheus.io)"
+
+      http_2xx_insecure:
+        prober: http
+        timeout: 10s
+        http:
+          method: GET
+          follow_redirects: true
+          preferred_ip_protocol: "ip4"
+          enable_http2: true
+          valid_http_versions: ["HTTP/1.1", "HTTP/2"]
+          valid_status_codes: [200,201,202,204,301,302,308]
+          tls_config:
+            insecure_skip_verify: true
+          headers:
+            User-Agent: "Mozilla/5.0 (compatible; Prometheus-Blackbox/1.0; +https://prometheus.io)"
+
+      icmp:
+        prober: icmp
+        timeout: 3s
+        icmp:
+          preferred_ip_protocol: "ip4"
+
+      tls_connect:
+        prober: tcp
+        timeout: 10s
+        tcp:
+          tls: true
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+

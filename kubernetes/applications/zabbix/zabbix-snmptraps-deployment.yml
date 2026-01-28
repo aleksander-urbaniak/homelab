@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-snmptraps
+  namespace: zabbix
+  labels:
+    app: zabbix-snmptraps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-snmptraps
+  template:
+    metadata:
+      labels:
+        app: zabbix-snmptraps
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+        - key: CriticalAddonsOnly
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: zabbix-snmptraps
+          image: zabbix/zabbix-snmptraps:alpine-trunk
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: snmp
+              containerPort: 1162
+              protocol: UDP
+          volumeMounts:
+            - name: snmptraps
+              mountPath: /var/lib/zabbix/snmptraps
+            - name: mibs
+              mountPath: /usr/share/snmp/mibs
+          resources:
+            requests:
+              cpu:              "100m"
+              memory:           "128Mi"
+              ephemeral-storage: "500Mi"
+            limits:
+              cpu:              "200m"
+              memory:           "256Mi"
+              ephemeral-storage: "1Gi"
+      volumes:
+        - name: snmptraps
+          persistentVolumeClaim:
+            claimName: zabbix-snmptraps-data
+        - name: mibs
+          persistentVolumeClaim:
+            claimName: zabbix-snmptraps-mibs
+

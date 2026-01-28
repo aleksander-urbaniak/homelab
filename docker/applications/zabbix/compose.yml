@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  zabbix-db:
+    image: postgres:16
+    volumes:
+      - './db:/var/lib/postgresql/data'
+    environment:
+      - POSTGRES_PASSWORD=${ZABBIX_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${ZABBIX_POSTGRES_DB}
+      - POSTGRES_USER=${ZABBIX_POSTGRES_USER}
+
+
+  zabbix-snmptraps:
+    image: zabbix/zabbix-snmptraps:alpine-trunk
+    volumes:
+      - './snmptraps:/var/lib/zabbix/snmptraps:rw'
+      - './mibs:/usr/share/snmp/mibs:ro'
+    ports:
+      - '162:1162/udp'
+
+  zabbix-server-pgsql:
+    user: root
+    image: zabbix/zabbix-server-pgsql:alpine-trunk
+    volumes:
+      - './snmptraps:/var/lib/zabbix/snmptraps:rw'
+      - './mibs:/usr/share/snmp/mibs:ro'
+      - './export:/var/lib/zabbix/export'
+    environment:
+      - POSTGRES_PASSWORD=${ZABBIX_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${ZABBIX_POSTGRES_DB}
+      - POSTGRES_USER=${ZABBIX_POSTGRES_USER}
+      - DB_SERVER_HOST=${ZABBIX_DB_SERVER_HOST}
+      - ZBX_ENABLE_SNMP_TRAPS=${ZABBIX_ENABLE_SNMP_TRAPS}
+    ports:
+      - '10051:10051'
+
+
+  zabbix-server-web:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-trunk
+    volumes:
+      - './nginx:/etc/ssl/nginx:ro'
+    environment:
+      - POSTGRES_PASSWORD=${ZABBIX_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${ZABBIX_POSTGRES_DB}
+      - POSTGRES_USER=${ZABBIX_POSTGRES_USER}
+      - DB_SERVER_HOST=${ZABBIX_DB_SERVER_HOST}
+      - ZBX_SERVER_HOST=${ZABBIX_SERVER_HOST}
+
+

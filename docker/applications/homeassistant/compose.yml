@@ -1,0 +1,13 @@
+services:
+  homeassistant:
+    ports:
+      - 8123:8123
+    container_name: homeassistant
+    image: "homeassistant/home-assistant:2025.12"
+    volumes:
+      - /mnt/docker/homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host

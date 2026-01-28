@@ -1,0 +1,177 @@
+groups:
+- name: PveExporter
+  rules:
+    - alert: PveExporterScrapeSlow
+      expr: scrape_duration_seconds{job="pve"} > 5
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Slow pve_exporter scrape on {{ $labels.instance }}"
+        description: "Scrape duration > 5s for 10m (possible resource or network issue)."
+
+    - alert: PveExporterTargetDown
+      expr: up{job="pve"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "PVE exporter target {{ $labels.instance }} is down"
+        description: "No scrape data from pve_exporter for 5m."
+
+- name: PveNodes
+  rules:
+    - alert: PveNodeDown
+      expr: pve_up{id=~"node/.+"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "PVE node down: {{ $labels.id }}"
+        description: "Node is reported offline by PVE (pve_up=0) for 5m."
+
+    - alert: PveNodeRecentlyRebooted
+      expr: (pve_uptime_seconds{id=~"node/.+"} < 10 * 60) and on(id) pve_up == 1
+      for: 0m
+      labels:
+        severity: info
+      annotations:
+        summary: "PVE node recently rebooted: {{ $labels.id }}"
+        description: "Node rebooted recently. Uptime: {{ humanizeDuration $value }}."
+
+    - alert: PveNodeHighCpuLoad
+      expr: pve_cpu_usage_ratio{id=~"node/.+"} > 0.90
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Sustained High CPU on {{ $labels.id }}"
+        description: "CPU usage > 90% for 30m."
+
+
+    - alert: PveNodeHighMemory
+      expr: (pve_memory_usage_bytes{id=~"node/.+"} / pve_memory_size_bytes{id=~"node/.+"}) > 0.95
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory usage on {{ $labels.id }}"
+        description: "Memory usage > 95% for 15m."
+
+
+    - alert: PveNodeOutOfDiskSpace
+      expr: (pve_disk_usage_bytes{id=~"node/.+"} / pve_disk_size_bytes{id=~"node/.+"}) > 0.90
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Node storage nearly full on {{ $labels.id }}"
+        description: "Used > 90% for 15m."
+
+    - alert: PveNodeDiskMayFillIn48Hours
+      expr: (pve_disk_size_bytes{id=~"node/.+"} - predict_linear(pve_disk_usage_bytes{id=~"node/.+"}[6h], 48*3600)) <= 0
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Node storage filling up {{ $labels.id }}"
+        description: "Trend predicts 0 free space within 48 hours."
+
+- name: PveStorages
+  rules:
+    - alert: PveStorageAlmostFull
+      expr: (pve_disk_usage_bytes{id=~"storage/.+"} / pve_disk_size_bytes{id=~"storage/.+"}) > 0.90
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: "PVE storage almost full: {{ $labels.id }}"
+        description: "Used > 90% for 15m."
+
+- name: PveGuests
+  rules:
+    - alert: PveGuestDown
+      expr: pve_up{id=~"(qemu|lxc)/.+"} == 0
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Guest down: {{ $labels.id }}"
+        description: "VM/CT is reported down by PVE for 10m."
+
+    - alert: PveGuestRecentlyRebooted
+      expr: pve_uptime_seconds{id=~"(qemu|lxc)/.+"} < 10 * 60
+      for: 0m
+      labels:
+        severity: info
+      annotations:
+        summary: "Guest recently rebooted: {{ $labels.id }}"
+        description: "Uptime < 10m."
+
+    - alert: PveGuestHighCpuLoad
+      expr: pve_cpu_usage_ratio{id=~"(qemu|lxc)/.+"} > 0.95
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Sustained High CPU on {{ $labels.id }}"
+        description: "CPU usage > 95% for 30m."
+
+
+    - alert: PveGuestHighMemory
+      expr: (pve_memory_usage_bytes{id=~"(qemu|lxc)/.+"} / pve_memory_size_bytes{id=~"(qemu|lxc)/.+"}) > 0.95
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Low free memory on {{ $labels.id }}"
+        description: "Memory usage > 95% for 15m."
+
+    - alert: PveGuestMemoryIsUnderutilized
+      expr: max_over_time(
+               (pve_memory_usage_bytes{id=~"(qemu|lxc)/.+"} / pve_memory_size_bytes{id=~"(qemu|lxc)/.+"})[1w:]
+             ) < 0.20
+      for: 0m
+      labels:
+        severity: info
+      annotations:
+        summary: "Memory underutilized on {{ $labels.id }}"
+        description: "Memory usage < 20% for 1 week."
+
+    - alert: PveGuestDiskAlmostFull
+      expr: (pve_disk_usage_bytes{id=~"(qemu|lxc)/.+"} / pve_disk_size_bytes{id=~"(qemu|lxc)/.+"}) > 0.90
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Guest disk almost full: {{ $labels.id }}"
+        description: "Used > 90% for 30m."
+
+    - alert: PveGuestHighNetworkIn
+      expr: rate(pve_network_receive_bytes{id=~"(qemu|lxc)/.+"}[5m]) > 100000000
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Sustained High RX on {{ $labels.id }}"
+        description: ">100 MB/s RX for 30m."
+
+    - alert: PveGuestHighNetworkOut
+      expr: rate(pve_network_transmit_bytes{id=~"(qemu|lxc)/.+"}[5m]) > 100000000
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Sustained High TX on {{ $labels.id }}"
+        description: ">100 MB/s TX for 30m."
+
+- name: PveHA
+  rules:
+    - alert: PveHAProblem
+      expr: pve_ha_state{state!="started"} == 1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "PVE HA not in 'started' for {{ $labels.id }}"
+        description: "HA state is {{ $labels.state }} for 5m."

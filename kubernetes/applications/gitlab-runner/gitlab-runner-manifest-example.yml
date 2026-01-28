@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitlab-runner
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-runner-sa
+  namespace: gitlab-runner
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitlab-runner-admin-binding
+subjects:
+  - kind: ServiceAccount
+    name: gitlab-runner-sa
+    namespace: gitlab-runner
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitlab-runner-pvc
+  namespace: gitlab-runner
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-runner-config
+  namespace: gitlab-runner
+data:
+  config.toml: |
+    concurrent = 4
+    check_interval = 3
+    log_level = "info"
+    listen_address = ":8093"
+
+    [[runners]]
+      name = "k3s-cluster-runner"
+      url = "https://gitlab.example.com"
+      token = "REPLACE_ME"
+      executor = "kubernetes"
+
+
+      [runners.kubernetes]
+        namespace = "gitlab-runner"
+        service_account = "gitlab-runner-sa"
+
+        helper_image = "gitlab/gitlab-runner-helper:x86_64-latest"
+        pull_policy = "if-not-present"
+
+        dns_policy = "none"
+
+        [runners.kubernetes.dns_config]
+          nameservers = ["192.0.2.10", "192.0.2.11"]
+
+        helper_cpu_limit = "500m"
+        helper_memory_limit = "512Mi"
+        cpu_limit = "1"
+        memory_limit = "1Gi"
+
+        [runners.kubernetes.node_selector]
+          "node-role.kubernetes.io/worker" = ""
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-runner
+  namespace: gitlab-runner
+  labels:
+    app: gitlab-runner
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gitlab-runner
+  template:
+    metadata:
+      labels:
+        app: gitlab-runner
+    spec:
+      serviceAccountName: gitlab-runner-sa
+
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 192.0.2.10
+          - 192.0.2.11
+
+      containers:
+      - name: gitlab-runner
+        image: gitlab/gitlab-runner:alpine
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash", "-c"]
+        args:
+          - cp /config-template/config.toml /etc/gitlab-runner/config.toml && /usr/bin/gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
+
+        env:
+        - name: KUBERNETES_SERVICE_ACCOUNT_OVERWRITE
+          value: "gitlab-runner-sa"
+
+        ports:
+        - containerPort: 8093
+          name: metrics
+
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config-template
+        - name: runner-data
+          mountPath: /home/gitlab-runner
+        - name: etc-gitlab-runner
+          mountPath: /etc/gitlab-runner
+
+        livenessProbe:
+          exec:
+            command: ["/usr/bin/pgrep", "gitlab-runner"]
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          periodSeconds: 10
+
+      volumes:
+      - name: config-volume
+        configMap:
+          name: gitlab-runner-config
+      - name: runner-data
+        persistentVolumeClaim:
+          claimName: gitlab-runner-pvc
+      - name: etc-gitlab-runner
+        emptyDir: {}

@@ -1,0 +1,27 @@
+services:
+  pastefy-db:
+    image: mariadb:10.11
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${PASTEFY_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${PASTEFY_MYSQL_DATABASE}
+      - MYSQL_USER=${PASTEFY_MYSQL_USER}
+      - MYSQL_PASSWORD=${PASTEFY_MYSQL_PASSWORD}
+
+  pastefy-app:
+    depends_on:
+      - pastefy-db
+    image: interaapps/pastefy
+    environment:
+      - HTTP_SERVER_PORT=${PASTEFY_HTTP_SERVER_PORT}
+      - HTTP_SERVER_CORS=${PASTEFY_HTTP_SERVER_CORS}
+      - DATABASE_DRIVER=${PASTEFY_DATABASE_DRIVER}
+      - DATABASE_NAME=${PASTEFY_DATABASE_NAME}
+      - DATABASE_USER=${PASTEFY_DATABASE_USER}
+      - DATABASE_PASSWORD=${PASTEFY_DATABASE_PASSWORD}
+      - DATABASE_HOST=${PASTEFY_DATABASE_HOST}
+      - DATABASE_PORT=${PASTEFY_DATABASE_PORT}
+      - SERVER_NAME=${PASTEFY_SERVER_NAME}
+    ports:
+       - 8880:80

@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+    speedtest-tracker:
+        environment:
+            - PUID=${SPEEDTEST_TRACKER_PUID}
+            - PGID=${SPEEDTEST_TRACKER_PGID}
+            - DB_CONNECTION=${SPEEDTEST_TRACKER_DB_CONNECTION}
+            - DB_HOST=${SPEEDTEST_TRACKER_DB_HOST}
+            - DB_PORT=${SPEEDTEST_TRACKER_DB_PORT}
+            - DB_DATABASE=${SPEEDTEST_TRACKER_DB_DATABASE}
+            - DB_USERNAME=${SPEEDTEST_TRACKER_DB_USERNAME}
+            - DB_PASSWORD=${SPEEDTEST_TRACKER_DB_PASSWORD}
+            - TZ=${SPEEDTEST_TRACKER_TZ}
+            - SPEEDTEST_SCHEDULE=${SPEEDTEST_TRACKER_SCHEDULE}
+            - SPEEDTEST_SERVERS=${SPEEDTEST_TRACKER_SERVERS}
+            - APP_KEY=${SPEEDTEST_TRACKER_APP_KEY}
+        volumes:
+            - './directory:/config'
+            - './web:/etc/ssl/web'
+        image: 'lscr.io/linuxserver/speedtest-tracker:latest'
+        depends_on:
+            - speedtest-tracker-db
+
+    speedtest-tracker-db:
+        image: postgres:15
+        environment:
+            - POSTGRES_DB=${SPEEDTEST_TRACKER_POSTGRES_DB}
+            - POSTGRES_USER=${SPEEDTEST_TRACKER_POSTGRES_USER}
+            - POSTGRES_PASSWORD=${SPEEDTEST_TRACKER_POSTGRES_PASSWORD}
+        volumes:
+            - ./db:/var/lib/postgresql/data

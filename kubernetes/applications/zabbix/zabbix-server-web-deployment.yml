@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server-web
+  namespace: zabbix
+  labels:
+    app: zabbix-server-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server-web
+  template:
+    metadata:
+      labels:
+        app: zabbix-server-web
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+        - key: CriticalAddonsOnly
+          operator: Exists
+          effect: NoSchedule
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z zabbix-db 5432; do
+                echo "Waiting for postgres…";
+                sleep 3;
+              done
+      containers:
+        - name: zabbix-server-web
+          image: zabbix/zabbix-web-nginx-pgsql:alpine-trunk
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: DB_SERVER_HOST
+              value: "zabbix-db"
+            - name: DB_SERVER_PORT
+              value: "5432"
+            - name: DB_SERVER_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_DB
+            - name: ZBX_SERVER_HOST
+              value: "zabbix-server-pgsql"
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: ssl
+              mountPath: /etc/ssl/nginx
+          resources:
+            requests:
+              cpu:              "100m"
+              memory:           "256Mi"
+              ephemeral-storage: "500Mi"
+            limits:
+              cpu:              "250m"
+              memory:           "512Mi"
+              ephemeral-storage: "1Gi"
+      volumes:
+        - name: ssl
+          persistentVolumeClaim:
+            claimName: zabbix-web-ssl
+

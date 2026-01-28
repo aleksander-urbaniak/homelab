@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wallos-app
+  namespace: wallos
+  labels:
+    app: wallos
+spec:
+  type: ClusterIP
+  selector:
+    app: wallos
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

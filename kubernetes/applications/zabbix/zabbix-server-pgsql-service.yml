@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server-pgsql
+  namespace: zabbix
+  labels:
+    app: zabbix-server-pgsql
+spec:
+  type: ClusterIP
+  selector:
+    app: zabbix-server-pgsql
+  ports:
+    - name: trapper
+      protocol: TCP
+      port: 10051
+      targetPort: 10051
+

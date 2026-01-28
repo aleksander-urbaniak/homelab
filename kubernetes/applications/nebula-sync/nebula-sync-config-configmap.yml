@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nebula-sync-config
+  namespace: nebula-sync
+data:
+  FULL_SYNC: "true"
+  RUN_GRAVITY: "true"
+  CRON: "0 * * * *"
+  WEBHOOK_CLIENT_SKIP_TLS_VERIFICATION: "true"

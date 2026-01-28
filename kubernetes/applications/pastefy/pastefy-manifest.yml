@@ -1,0 +1,230 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pastefy
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pastefy-db-secret
+  namespace: pastefy
+type: Opaque
+data:
+  MYSQL_ROOT_PASSWORD: "REPLACE_ME"
+  MYSQL_DATABASE:    cGFzdGVmeQ==
+  MYSQL_USER: "REPLACE_ME"
+  MYSQL_PASSWORD: "REPLACE_ME"
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pastefy-db-headless
+  namespace: pastefy
+spec:
+  clusterIP: None
+  selector:
+    app: pastefy-db
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pastefy-mariadb-db
+  namespace: pastefy
+spec:
+  serviceName: pastefy-db-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pastefy-db
+  template:
+    metadata:
+      labels:
+        app: pastefy-db
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: mariadb
+          image: mariadb:12.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_PASSWORD
+          ports:
+            - name: mysql
+              containerPort: 3306
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: longhorn
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pastefy-db
+  namespace: pastefy
+spec:
+  type: ClusterIP
+  selector:
+    app: pastefy-db
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pastefy-app
+  namespace: pastefy
+  labels:
+    app: pastefy-app
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pastefy-app
+  template:
+    metadata:
+      labels:
+        app: pastefy-app
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z pastefy-db 3306; do
+                echo "Waiting for mariaDB...";
+                sleep 3;
+              done
+      containers:
+        - name: pastefy-app
+          image: interaapps/pastefy:7.1.5
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: HTTP_SERVER_PORT
+              value: "80"
+            - name: HTTP_SERVER_CORS
+              value: "*"
+            - name: DATABASE_DRIVER
+              value: "mysql"
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_DATABASE
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_USER
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pastefy-db-secret
+                  key: MYSQL_PASSWORD
+            - name: DATABASE_HOST
+              value: "pastefy-db"
+            - name: DATABASE_PORT
+              value: "3306"
+            - name: SERVER_NAME
+              value: "http://pastefy.example.com"
+          readinessProbe:
+            httpGet:
+              path: "/healthz"
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: "/healthz"
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pastefy-app
+  namespace: pastefy
+spec:
+  type: ClusterIP
+  selector:
+    app: pastefy-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

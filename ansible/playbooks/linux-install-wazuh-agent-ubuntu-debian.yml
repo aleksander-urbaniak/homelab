@@ -1,0 +1,69 @@
+- name: Install and Configure Wazuh Agent on Debian-based Systems
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars:
+    WAZUH_MANAGER: "wazuh.example.com"
+    WAZUH_AGENT_NAME: "{{ ansible_hostname }}"
+
+  tasks:
+    - name: Check if Wazuh Agent is installed
+      command: dpkg-query -W -f='${Status}' wazuh-agent
+      register: wazuh_installed
+      ignore_errors: true
+      changed_when: false
+      failed_when: false
+
+    - name: Debug Output Wazuh installation check result
+      debug:
+        msg: "Wazuh Agent installation check result: {{ wazuh_installed }}"
+
+    - name: Check Wazuh Agent service status (if installed)
+      command: systemctl is-active wazuh-agent
+      register: installed_status
+      failed_when: false
+      changed_when: false
+      when: wazuh_installed.rc == 0
+
+    - name: Display installed Wazuh Agent service status
+      debug:
+        var: installed_status.stdout
+      when: wazuh_installed.rc == 0
+
+    - name: Debug - Wazuh Agent not installed or inactive, proceeding with installation
+      debug:
+        msg: "Wazuh Agent not installed or inactive, proceeding with installation."
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Download Wazuh Agent .deb package
+      get_url:
+        url: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.12.0-1_amd64.deb"
+        dest: "/tmp/wazuh-agent_4.12.0-1_amd64.deb"
+        mode: '0644'
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Install Wazuh Agent
+      shell: |
+        WAZUH_MANAGER="{{ WAZUH_MANAGER }}" \
+        WAZUH_AGENT_NAME="{{ WAZUH_AGENT_NAME }}" \
+        dpkg -i /tmp/wazuh-agent_4.12.0-1_amd64.deb
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Start and enable Wazuh Agent service
+      service:
+        name: wazuh-agent
+        state: started
+        enabled: yes
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Check Wazuh Agent service status after installation
+      command: systemctl status wazuh-agent
+      register: wazuh_status_post
+      changed_when: false
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Display Wazuh Agent service status after installation
+      debug:
+        var: wazuh_status_post.stdout_lines
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")

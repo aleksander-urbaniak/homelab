@@ -1,0 +1,134 @@
+- name: Install and Configure Zabbix Agent 2 on RHEL-based Systems
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars:
+    zabbix_repo_oracle: "https://repo.zabbix.com/zabbix/7.0/oracle/10/x86_64/zabbix-release-latest-7.0.el10.noarch.rpm"
+    zabbix_repo_rocky: "https://repo.zabbix.com/zabbix/7.0/rocky/10/x86_64/zabbix-release-latest-7.0.el10.noarch.rpm"
+    zabbix_packages:
+      - zabbix-agent2
+      - zabbix-agent2-plugin-mongodb
+      - zabbix-agent2-plugin-mssql
+      - zabbix-agent2-plugin-postgresql
+    zabbix_conf_path: "/etc/zabbix/zabbix_agent2.conf"
+    psk_dir: "/etc/zabbix/psk"
+    psk_file: "example_zabbix_agent2.psk"
+    psk_content: "REPLACE_ME"
+
+  tasks:
+    - name: Check if Zabbix Agent 2 is installed
+      command: rpm -q zabbix-agent2
+      register: zabbix_installed
+      ignore_errors: true
+      changed_when: false
+      failed_when: false
+
+    - name: Debug Output Zabbix installation check result
+      debug:
+        msg: "Zabbix installation check result: {{ zabbix_installed }}"
+
+    - name: Check Zabbix Agent 2 service status (if installed)
+      command: systemctl is-active zabbix-agent2
+      register: installed_status
+      failed_when: false
+      changed_when: false
+      when: zabbix_installed.rc == 0
+
+    - name: Display installed Zabbix Agent 2 service status
+      debug:
+        var: installed_status.stdout
+      when: zabbix_installed.rc == 0
+
+    - name: Debug - Zabbix Agent 2 not installed or inactive, proceeding with installation
+      debug:
+        msg: "Zabbix Agent 2 not installed or inactive, proceeding with installation."
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Install Zabbix repo for Oracle Linux
+      yum:
+        name: "{{ zabbix_repo_oracle }}"
+        state: present
+        disable_gpg_check: yes
+      when: ansible_distribution | lower == "oraclelinux" and ((zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active"))
+
+    - name: Install Zabbix repo for Rocky Linux
+      yum:
+        name: "{{ zabbix_repo_rocky }}"
+        state: present
+        disable_gpg_check: yes
+      when: ansible_distribution | lower == "rocky" and ((zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active"))
+
+    - name: Install Zabbix Agent 2 and plugins
+      yum:
+        name: "{{ zabbix_packages }}"
+        state: present
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Create PSK directory
+      ansible.builtin.file:
+        path: "{{ psk_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create PSK file
+      ansible.builtin.copy:
+        dest: "{{ psk_dir }}/{{ psk_file }}"
+        content: "{{ psk_content }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Update Zabbix Agent 2 configuration
+      ansible.builtin.lineinfile:
+        path: "{{ zabbix_conf_path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        backrefs: no
+      loop:
+        # Change Server IP
+        - { regexp: '^Server=', line: 'Server=zabbix.example.com' }
+        
+        # Change ServerActive IP
+        - { regexp: '^ServerActive=', line: 'ServerActive=zabbix.example.com' }
+        
+        # Change Hostname (Using empty value implies system hostname detection)
+        - { regexp: '^Hostname=', line: 'Hostname=' }
+        
+        # Set HostMetadataItem
+        - { regexp: '^#?\s*=HostMetadata', line: 'HostMetadata=Linux Servers' }
+
+        # Enable TLSConnect (handling potential commented line)
+        - { regexp: '^#?\s*TLSConnect=', line: 'TLSConnect=psk' }
+        
+        # Enable TLSAccept (handling potential commented line)
+        - { regexp: '^#?\s*TLSAccept=', line: 'TLSAccept=psk' }
+        
+        # Set PSK File path (handling potential commented line)
+        - { regexp: '^#?\s*TLSPSKFile=', line: 'TLSPSKFile={{ psk_dir }}/{{ psk_file }}' }
+        
+        # Set PSK Identity (handling potential commented line)
+        - { regexp: '^#?\s*TLSPSKIdentity=', line: 'TLSPSKIdentity=example.com' }
+
+    - name: Start and enable Zabbix Agent 2 service
+      service:
+        name: zabbix-agent2
+        state: started
+        enabled: yes
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Restart Zabbix Agent 2 Service
+      command: systemctl restart zabbix-agent2
+
+    - name: Check Zabbix Agent 2 service status after installation
+      command: systemctl status zabbix-agent2
+      register: zabbix_status_post
+      changed_when: false
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Display Zabbix Agent 2 service status after installation
+      debug:
+        var: zabbix_status_post.stdout_lines
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")

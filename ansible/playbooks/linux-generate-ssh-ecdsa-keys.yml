@@ -1,0 +1,62 @@
+---
+- name: Generate SSH ECDSA keys and configure SSH daemon securely
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Generate SSH ECDSA key pair for user exampleuser
+      community.crypto.openssh_keypair:
+        path: /home/exampleuser/.ssh/id_ecdsa
+        type: ecdsa
+        size: 521
+        owner: exampleuser
+        group: exampleuser
+        mode: '0600'
+    
+    - name: Read generated SSH ECDSA private key
+      slurp:
+        src: /home/exampleuser/.ssh/id_ecdsa
+      register: ecdsa_key_content
+    
+    - name: Display generated SSH ECDSA private key for exampleuser
+      debug:
+        msg: "{{ ecdsa_key_content.content | b64decode }}"
+    
+    - name: Configure SSH daemon securely
+      block:
+        - name: Set secure options in sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: '^#?\s*{{ item.option }}'
+            line: "{{ item.option }} {{ item.value }}"
+            state: present
+          loop:
+            - { option: "SyslogFacility", value: "AUTH" }
+            - { option: "LogLevel", value: "INFO" }
+            - { option: "PermitRootLogin", value: "no" }
+            - { option: "StrictModes", value: "yes" }
+            - { option: "MaxAuthTries", value: "3" }
+            - { option: "PubkeyAuthentication", value: "yes" }
+            - { option: "PasswordAuthentication", value: "no" }
+            - { option: "PermitEmptyPasswords", value: "no" }
+        - name: Restart SSH service (Debian-based)
+          service:
+            name: ssh
+            state: restarted
+          when: ansible_os_family == "Debian"
+        - name: Restart SSH service (RHEL-based)
+          service:
+            name: sshd
+            state: restarted
+          when: ansible_os_family == "RedHat"
+    
+    - name: Rename SSH public key to authorized_keys for user exampleuser
+      command: mv /home/exampleuser/.ssh/id_ecdsa.pub /home/exampleuser/.ssh/authorized_keys
+
+    - name: Fix ownership and permissions of authorized_keys
+      file:
+        path: /home/exampleuser/.ssh/authorized_keys
+        owner: exampleuser
+        group: exampleuser
+        mode: '0600'

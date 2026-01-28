@@ -1,0 +1,16 @@
+---
+- name: Configure system-wide Bash History Timestamp Format
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create a system-wide profile script for bash history timestamp
+      copy:
+        dest: /etc/profile.d/history-timestamp.sh
+        content: |
+          #!/bin/bash
+          export HISTTIMEFORMAT='%d-%m-%Y %T '
+        mode: '0755'
+
+    - name: Inform that the system-wide configuration has been deployed
+      debug:
+        msg: "The system-wide HISTTIMEFORMAT setting has been configured in /etc/profile.d/history-timestamp.sh. Users need to log out and back in (or source the file) for changes to take effect."

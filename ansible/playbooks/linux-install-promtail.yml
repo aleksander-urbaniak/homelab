@@ -1,0 +1,226 @@
+---
+- name: Install Promtail (Run as Root to fix permissions)
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    # --- MAIN CONFIG ---
+    loki_url: "https://grafana-loki.example.com/loki/api/v1/push"
+    promtail_version: "" # Leave empty for "latest"
+    
+    # --- PATHS & USERS ---
+    install_dir: "/usr/local/bin"
+    config_dir: "/etc/promtail"
+    config_file: "{{ config_dir }}/promtail-config.yaml"
+    positions_dir: "/var/lib/promtail"
+    
+    # NOTE: Run as root to access /var/log and container logs
+    promtail_user: "root"
+    promtail_group: "root"
+
+    # --- UPDATE CONTROL ---
+    force_update: false 
+
+  tasks:
+    # ==============================================================================
+    # 1. STATE CHECKS
+    # ==============================================================================
+    - name: Check if Promtail binary exists
+      stat:
+        path: "{{ install_dir }}/promtail"
+      register: promtail_bin_check
+
+    - name: Check if Promtail config exists
+      stat:
+        path: "{{ config_file }}"
+      register: promtail_conf_check
+
+    - name: VERBOSE - Installation Status Report
+      debug:
+        msg: "[INFO] Binary found: {{ promtail_bin_check.stat.exists }} | Config found: {{ promtail_conf_check.stat.exists }}"
+
+    # ==============================================================================
+    # 2. SYSTEM PREP
+    # ==============================================================================
+    - name: Detect Architecture
+      set_fact:
+        promtail_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+      failed_when: ansible_architecture not in ['x86_64', 'aarch64']
+
+    - name: Install dependencies (curl, unzip)
+      package:
+        name:
+          - curl
+          - unzip
+        state: present
+
+    # Create the group only if it is NOT root
+    - name: Ensure Promtail group exists
+      group:
+        name: "{{ promtail_group }}"
+        system: true
+        state: present
+      when: promtail_group != 'root'
+
+    # Create the user only if it is NOT root
+    - name: Ensure Promtail user exists
+      user:
+        name: "{{ promtail_user }}"
+        group: "{{ promtail_group }}"
+        shell: /usr/sbin/nologin
+        system: true
+        create_home: false
+        state: present
+      when: promtail_user != 'root'
+
+    - name: Create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ promtail_user }}"
+        group: "{{ promtail_group }}"
+        mode: '0755'
+      loop:
+        - "{{ config_dir }}"
+        - "{{ positions_dir }}"
+
+    # ==============================================================================
+    # 3. DOWNLOAD & INSTALL
+    # ==============================================================================
+    - name: Resolve Promtail Version
+      block:
+        - name: Fetch latest release tag from GitHub API
+          uri:
+            url: https://api.github.com/repos/grafana/loki/releases/latest
+            return_content: yes
+          register: github_response
+          when: promtail_version | length == 0
+
+        - name: Set target version
+          set_fact:
+            target_version: "{{ promtail_version if promtail_version | length > 0 else github_response.json.tag_name }}"
+      when: force_update or not promtail_bin_check.stat.exists
+
+    - name: Download and Install Promtail Binary
+      block:
+        - name: Create temporary download directory
+          tempfile:
+            state: directory
+            suffix: promtail_dl
+          register: temp_dl
+
+        - name: Download Promtail zip
+          get_url:
+            url: "https://github.com/grafana/loki/releases/download/{{ target_version }}/promtail-linux-{{ promtail_arch }}.zip"
+            dest: "{{ temp_dl.path }}/promtail.zip"
+            mode: '0644'
+            timeout: 300
+
+        - name: Unarchive Promtail
+          unarchive:
+            src: "{{ temp_dl.path }}/promtail.zip"
+            dest: "{{ temp_dl.path }}"
+            remote_src: yes
+
+        - name: Install Promtail binary to final location
+          copy:
+            src: "{{ temp_dl.path }}/promtail-linux-{{ promtail_arch }}"
+            dest: "{{ install_dir }}/promtail"
+            mode: '0755'
+            remote_src: yes
+          notify: Restart Promtail
+
+        - name: Cleanup temp files
+          file:
+            path: "{{ temp_dl.path }}"
+            state: absent
+      when: force_update or not promtail_bin_check.stat.exists
+
+    # ==============================================================================
+    # 4. CONFIGURATION
+    # ==============================================================================
+    - name: Generate Promtail Config File
+      copy:
+        dest: "{{ config_file }}"
+        owner: "{{ promtail_user }}"
+        group: "{{ promtail_group }}"
+        mode: '0644'
+        content: |
+          server:
+            http_listen_port: 9080
+            grpc_listen_port: 0
+
+          positions:
+            filename: {{ positions_dir }}/positions.yaml
+
+          clients:
+            - url: {{ loki_url }}
+
+          scrape_configs:
+            - job_name: varlogs-root
+              static_configs:
+                - targets: [localhost]
+                  labels:
+                    job: varlogs
+                    host: ${HOSTNAME}
+                    __path__: /var/log/*log
+
+            # Exclude anaconda/ and other noise; collect remaining subdirectories
+            - job_name: varlogs-subdirs
+              static_configs:
+                - targets: [localhost]
+                  labels:
+                    job: varlogs
+                    host: ${HOSTNAME}
+                    __path__: /var/log/*/*log
+              # Optional: pipeline to drop anaconda logs if __path__ does not exclude them
+              pipeline_stages:
+                - match:
+                    selector: '{filename=~"/var/log/anaconda/.*"}'
+                    action: drop
+      # Force a config update to refresh file ownership to root
+      # (Remove 'or true' if you prefer to rely on the force_update flag)
+      when: force_update or not promtail_conf_check.stat.exists or true
+      notify: Restart Promtail
+
+    # ==============================================================================
+    # 5. SYSTEMD SERVICE
+    # ==============================================================================
+    - name: Create/Update Systemd service file
+      copy:
+        dest: "/etc/systemd/system/promtail.service"
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Promtail log shipper
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          # Run as root
+          User={{ promtail_user }}
+          Group={{ promtail_group }}
+          Type=simple
+          Environment=HOSTNAME=%H
+          ExecStart={{ install_dir }}/promtail -log.level=info -config.expand-env=true -config.file={{ config_file }}
+          Restart=always
+          RestartSec=5s
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart Promtail
+
+    - name: Ensure Promtail service is enabled and started
+      systemd:
+        name: promtail
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+  handlers:
+    - name: Restart Promtail
+      systemd:
+        name: promtail
+        state: restarted
+        daemon_reload: yes

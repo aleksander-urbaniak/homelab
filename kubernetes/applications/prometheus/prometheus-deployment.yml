@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: prometheus
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      securityContext:
+        fsGroup: 65534
+
+      initContainers:
+        - name: init-config
+          image: busybox:1.37
+          command:
+            - sh
+            - -euxc
+            - |
+              echo "Syncing Prometheus config from ConfigMap to PVC..."
+              for p in /host-config/* /host-config/.*; do
+                b="$(basename "$p")"
+                case "$b" in "."|".."|"lost+found") continue ;; esac
+                rm -rf "$p"
+              done
+              cp -r /tmp-config/. /host-config/
+              chown -R 65534:65534 /host-config /prometheus
+          volumeMounts:
+            - name: config-cm
+              mountPath: /tmp-config
+            - name: config-host
+              mountPath: /host-config
+            - name: storage
+              mountPath: /prometheus
+
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v3.9.1
+          args:
+            - --config.file=/host-config/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --web.enable-lifecycle
+            - --web.external-url=https://prometheus.example.com
+            - --storage.tsdb.retention.time=15d
+            - --storage.tsdb.retention.size=20GiB
+            - --storage.tsdb.wal-compression
+          ports:
+            - name: web
+              containerPort: 9090
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          volumeMounts:
+            - name: config-host
+              mountPath: /host-config
+            - name: storage
+              mountPath: /prometheus
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+
+      volumes:
+        - name: config-cm
+          configMap:
+            name: prometheus-config
+        - name: config-host
+          persistentVolumeClaim:
+            claimName: prometheus-config-pvc
+        - name: storage
+          persistentVolumeClaim:
+            claimName: prometheus-data-pvc

@@ -1,0 +1,39 @@
+# 🗂️ MkDocs (Docker)
+
+> ✨ **What is MkDocs?**
+>
+> MkDocs (Material) builds a static documentation site from Markdown.
+
+---
+
+This folder contains a Docker Compose setup for **MkDocs**.
+
+## 🎯 Quick facts
+
+- Compose file(s): `compose.yml`
+- Services: `mkdocs`
+- Images: `squidfunk/mkdocs-material:latest`
+- Published ports: none (likely exposed via reverse proxy or host networking)
+
+---
+
+## 🧱 What gets deployed
+
+- `compose.yml`: Docker Compose stack
+- `mkdocs-config.yml`: Configuration file
+
+## Configuration notes
+
+- **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
+- **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+
+## Deploy 🚀
+
+Run commands from this folder (so relative paths like `./data` work).
+
+### Option A: start the stack
+
+Start the stack:
+```bash
+docker compose -f compose.yml up -d
+```

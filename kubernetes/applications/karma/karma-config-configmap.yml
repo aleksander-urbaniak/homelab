@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: karma-config
+  namespace: karma
+data:
+  karma.yaml: |
+    alertmanager:
+      servers:
+        - name: default
+          uri: "http://alertmanager.alertmanager.svc.k3s.example.com:9093"
+          proxy: true
+

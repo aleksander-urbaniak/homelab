@@ -1,0 +1,222 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: n8n
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-data-pvc
+  namespace: n8n
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-postgres-db
+  namespace: n8n
+spec:
+  type: ClusterIP
+  selector:
+    app:        postgres
+    component: statefulset
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-statefulset
+  namespace: n8n
+  labels:
+    app:        postgres
+    component: statefulset
+spec:
+  serviceName: n8n-postgres-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app:        postgres
+      component: statefulset
+  template:
+    metadata:
+      labels:
+        app:        postgres
+        component: statefulset
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: postgres
+          image: postgres:18
+          env:
+            - name: POSTGRES_USER
+              value: "REPLACE_ME"
+            - name: POSTGRES_DB
+              value: "n8n"
+            - name: POSTGRES_PASSWORD
+              value: "REPLACE_ME"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - name: postgres
+              containerPort: 5432
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1
+              memory: 1Gi
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        storageClassName: longhorn
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: n8n
+  labels:
+    app: n8n
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 192.0.2.10
+          - 192.0.2.11
+        searches:
+            - n8n-postgres-db.svc.k3s.example.com
+            - svc.k3s.example.com
+            - k3s.example.com
+      securityContext:
+        fsGroup: 1000
+
+      dnsPolicy: ClusterFirst
+
+      initContainers:
+        - name: init-chown
+          image: busybox:1.37
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /home/node/.n8n
+          securityContext:
+            runAsUser: 0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: n8n-storage
+              mountPath: /home/node/.n8n
+
+      containers:
+        - name: n8n
+          image: n8nio/n8n:2.3.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - start
+          ports:
+            - containerPort: 5678
+          env:
+            - name: WEBHOOK_URL
+              value: "https://n8n.example.com/"
+
+            - name: N8N_HOST
+              value: "n8n.example.com"
+            - name: N8N_PROTOCOL
+              value: "https"
+            - name: N8N_SKIP_WEBHOOK_TEST
+              value: "true"
+            - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+              value: "true"
+
+            - name: DB_TYPE
+              value: postgresdb
+
+            - name: DB_POSTGRESDB_HOST
+              value: "n8n-postgres-db"
+
+            - name: DB_POSTGRESDB_DATABASE
+              value: n8n
+            - name: DB_POSTGRESDB_USER
+              value: "REPLACE_ME"
+            - name: DB_POSTGRESDB_PASSWORD
+              value: "REPLACE_ME"
+            - name: N8N_RUNNERS_ENABLED
+              value: "true"
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 2Gi
+          volumeMounts:
+            - name: n8n-storage
+              mountPath: /home/node/.n8n
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+
+      volumes:
+        - name: n8n-storage
+          persistentVolumeClaim:
+            claimName: n8n-data-pvc
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-app
+  namespace: n8n
+  labels:
+    app: n8n
+spec:
+  type: ClusterIP
+  selector:
+    app: n8n
+  ports:
+    - name: http
+      port: 5678
+      targetPort: 5678

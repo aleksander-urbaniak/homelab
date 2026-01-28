@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: semaphore-db
+  namespace: semaphore
+  labels:
+    app: semaphore-db
+spec:
+  serviceName: semaphore-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: semaphore-db
+  template:
+    metadata:
+      labels:
+        app: semaphore-db
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: mysql
+        image: mysql:9
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_ROOT_HOST
+          value: "%"
+        - name: MYSQL_USER
+          value: "REPLACE_ME"
+        - name: MYSQL_PASSWORD
+          value: "REPLACE_ME"
+        - name: MYSQL_DATABASE
+          value: "semaphore"
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: "yes"
+        ports:
+        - name: mysql
+          containerPort: 3306
+        readinessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 30
+          periodSeconds: 15
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d/init.sql
+          subPath: init.sql
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+      volumes:
+      - name: init-script
+        configMap:
+          name: semaphore-db-init
+          items:
+          - key: init.sql
+            path: init.sql
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: longhorn
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 3Gi
+

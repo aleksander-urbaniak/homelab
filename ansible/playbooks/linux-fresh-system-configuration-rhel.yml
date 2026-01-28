@@ -1,0 +1,357 @@
+- name: Updates linux all family
+  become: yes
+  hosts: all
+  tasks:
+
+    - name: Check for updates on RHEL
+      yum:
+        name: "*"
+        state: latest
+      when: ansible_os_family == 'RedHat'
+
+
+- name: Ensure passlib is installed on the controller
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Install passlib via pip
+      pip:
+        name: passlib
+      run_once: true
+
+- name: Set timezone to Europe/Warsaw
+  hosts: all
+  become: true
+  vars:
+    timezone_name: Europe/Warsaw
+  tasks:
+    - name: Ensure the timezone is set correctly
+      ansible.builtin.timezone:
+        name: "{{ timezone_name }}"
+
+- name: Change passwords for users
+  hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+    pwd_chars: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
+    pwd_length: 32
+  tasks:
+    - name: Generate random password for user exampleuser
+      set_fact:
+        exampleuser_random_pass: "{{ lookup('password', '/dev/null', length=pwd_length, chars=pwd_chars) }}"
+
+    - name: Generate random password for root user
+      set_fact:
+        root_random_pass: "{{ lookup('password', '/dev/null', length=pwd_length, chars=pwd_chars) }}"
+
+    - name: Update password for user exampleuser
+      user:
+        name: exampleuser
+        password: "{{ exampleuser_random_pass | password_hash('sha512') }}"
+
+    - name: Update password for root
+      user:
+        name: root
+        password: "{{ root_random_pass | password_hash('sha512') }}"
+
+    - name: Display new password for user exampleuser
+      debug:
+        msg: "New password for exampleuser: {{ exampleuser_random_pass }}"
+
+    - name: Display new password for root
+      debug:
+        msg: "New password for root: {{ root_random_pass }}"
+
+    - name: Ensure .ssh directory exists for user exampleuser
+      file:
+        path: /home/exampleuser/.ssh
+        state: directory
+        owner: exampleuser
+        group: exampleuser
+        mode: '0700'
+
+- name: Configure system-wide Bash History Timestamp Format
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create a system-wide profile script for bash history timestamp
+      copy:
+        dest: /etc/profile.d/history-timestamp.sh
+        content: |
+          #!/bin/bash
+          export HISTTIMEFORMAT='%d-%m-%Y %T '
+        mode: '0755'
+
+    - name: Inform that the system-wide configuration has been deployed
+      debug:
+        msg: "The system-wide HISTTIMEFORMAT setting has been configured in /etc/profile.d/history-timestamp.sh. Users need to log out and back in (or source the file) for changes to take effect."
+
+- name: Fresh VM Configuration
+  hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+    pwd_chars: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
+    pwd_length: 32
+  tasks:
+    - name: Generate random password for user exampleuser
+      set_fact:
+        exampleuser_random_pass: "{{ lookup('password', '/dev/null', length=pwd_length, chars=pwd_chars) }}"
+
+    - name: Generate random password for root user
+      set_fact:
+        root_random_pass: "{{ lookup('password', '/dev/null', length=pwd_length, chars=pwd_chars) }}"
+
+    - name: Update password for user exampleuser
+      user:
+        name: exampleuser
+        password: "{{ exampleuser_random_pass | password_hash('sha512') }}"
+
+    - name: Update password for root
+      user:
+        name: root
+        password: "{{ root_random_pass | password_hash('sha512') }}"
+
+    - name: Display new password for user exampleuser
+      debug:
+        msg: "New password for exampleuser: {{ exampleuser_random_pass }}"
+
+    - name: Display new password for root
+      debug:
+        msg: "New password for root: {{ root_random_pass }}"
+
+    - name: Ensure .ssh directory exists for user exampleuser
+      file:
+        path: /home/exampleuser/.ssh
+        state: directory
+        owner: exampleuser
+        group: exampleuser
+        mode: '0700'
+
+    - name: Generate SSH ECDSA key pair for user exampleuser
+      community.crypto.openssh_keypair:
+        path: /home/exampleuser/.ssh/id_ecdsa
+        type: ecdsa
+        size: 521
+        owner: exampleuser
+        group: exampleuser
+        mode: '0600'
+
+    - name: Read generated SSH ECDSA private key
+      slurp:
+        src: /home/exampleuser/.ssh/id_ecdsa
+      register: ecdsa_key_content
+
+    - name: Display generated SSH ECDSA private key for exampleuser
+      debug:
+        msg: "{{ ecdsa_key_content.content | b64decode }}"
+
+    - name: Configure SSH daemon securely
+      block:
+        - name: Set secure options in sshd_config
+          lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: '^#?\s*{{ item.option }}'
+            line: '{{ item.option }} {{ item.value }}'
+            state: present
+          loop:
+            - { option: "SyslogFacility", value: "AUTH" }
+            - { option: "LogLevel", value: "INFO" }
+            - { option: "PermitRootLogin", value: "no" }
+            - { option: "StrictModes", value: "yes" }
+            - { option: "MaxAuthTries", value: "3" }
+            - { option: "PubkeyAuthentication", value: "yes" }
+            - { option: "PasswordAuthentication", value: "no" }
+            - { option: "PermitEmptyPasswords", value: "no" }
+
+        - name: Restart sshd service to apply configuration changes
+          service:
+            name: sshd
+            state: restarted
+
+- name: Install and Configure Zabbix Agent 2 on RHEL-based Systems
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars:
+    zabbix_repo_oracle: "https://repo.zabbix.com/zabbix/7.0/oracle/9/x86_64/zabbix-release-latest-7.0.el9.noarch.rpm"
+    zabbix_repo_rocky: "https://repo.zabbix.com/zabbix/7.0/rocky/9/x86_64/zabbix-release-latest-7.0.el9.noarch.rpm"
+    zabbix_packages:
+      - zabbix-agent2
+      - zabbix-agent2-plugin-mongodb
+      - zabbix-agent2-plugin-mssql
+      - zabbix-agent2-plugin-postgresql
+
+  tasks:
+    - name: Check if Zabbix Agent 2 is installed
+      command: rpm -q zabbix-agent2
+      register: zabbix_installed
+      ignore_errors: true
+      changed_when: false
+      failed_when: false
+
+    - name: Debug Output Zabbix installation check result
+      debug:
+        msg: "Zabbix installation check result: {{ zabbix_installed }}"
+
+    - name: Check Zabbix Agent 2 service status (if installed)
+      command: systemctl is-active zabbix-agent2
+      register: installed_status
+      failed_when: false
+      changed_when: false
+      when: zabbix_installed.rc == 0
+
+    - name: Display installed Zabbix Agent 2 service status
+      debug:
+        var: installed_status.stdout
+      when: zabbix_installed.rc == 0
+
+    - name: Debug - Zabbix Agent 2 not installed or inactive, proceeding with installation
+      debug:
+        msg: "Zabbix Agent 2 not installed or inactive, proceeding with installation."
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Install Zabbix repo for Oracle Linux
+      yum:
+        name: "{{ zabbix_repo_oracle }}"
+        state: present
+        disable_gpg_check: yes
+      when: ansible_distribution | lower == "oraclelinux" and ((zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active"))
+
+    - name: Install Zabbix repo for Rocky Linux
+      yum:
+        name: "{{ zabbix_repo_rocky }}"
+        state: present
+        disable_gpg_check: yes
+      when: ansible_distribution | lower == "rocky" and ((zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active"))
+
+    - name: Install Zabbix Agent 2 and plugins
+      yum:
+        name: "{{ zabbix_packages }}"
+        state: present
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Install git package (required for cloning repos)
+      yum:
+        name: git
+        state: present
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Ensure /etc/zabbix directory ownership
+      file:
+        path: /etc/zabbix
+        owner: zabbix
+        group: zabbix
+        state: directory
+
+    - name: Copy zabbix-example.psk from Semaphore checkout
+      copy:
+        src: "{{ playbook_dir }}/zabbix/zabbix-example.psk"
+        dest: /etc/zabbix/zabbix-example.psk
+        owner: root
+        group: zabbix
+        mode: '0640'
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Copy zabbix_agent2.conf from Semaphore checkout
+      copy:
+        src: "{{ playbook_dir }}/zabbix/zabbix_agent2.conf"
+        dest: /etc/zabbix/zabbix_agent2.conf
+        owner: root
+        group: root
+        mode: '0644'
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Start and enable Zabbix Agent 2 service
+      service:
+        name: zabbix-agent2
+        state: started
+        enabled: yes
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Restart Zabbix Agent 2 Service
+      command: systemctl restart zabbix-agent2
+
+    - name: Check Zabbix Agent 2 service status after installation
+      command: systemctl status zabbix-agent2
+      register: zabbix_status_post
+      changed_when: false
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Display Zabbix Agent 2 service status after installation
+      debug:
+        var: zabbix_status_post.stdout_lines
+      when: (zabbix_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+- name: Install and Configure Wazuh Agent on RHEL-based Systems
+  hosts: rhel
+  become: yes
+  gather_facts: yes
+
+  vars:
+    WAZUH_MANAGER: "wazuh.example.com"
+    WAZUH_AGENT_NAME: "{{ ansible_hostname }}"
+
+  tasks:
+    - name: Check if Wazuh Agent is installed
+      command: rpm -q wazuh-agent
+      register: wazuh_installed
+      ignore_errors: true
+      changed_when: false
+      failed_when: false
+
+    - name: Debug Output Wazuh installation check result
+      debug:
+        msg: "Wazuh Agent installation check result: {{ wazuh_installed }}"
+
+    - name: Check Wazuh Agent service status (if installed)
+      command: systemctl is-active wazuh-agent
+      register: installed_status
+      failed_when: false
+      changed_when: false
+      when: wazuh_installed.rc == 0
+
+    - name: Display installed Wazuh Agent service status
+      debug:
+        var: installed_status.stdout
+      when: wazuh_installed.rc == 0
+
+    - name: Debug - Wazuh Agent not installed or inactive, proceeding with installation
+      debug:
+        msg: "Wazuh Agent not installed or inactive, proceeding with installation."
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Download Wazuh Agent RPM
+      get_url:
+        url: "https://packages.wazuh.com/4.x/yum/wazuh-agent-4.12.0-1.x86_64.rpm"
+        dest: "/tmp/wazuh-agent-4.12.0-1.x86_64.rpm"
+        mode: '0644'
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Install Wazuh Agent
+      shell: |
+        WAZUH_MANAGER="{{ WAZUH_MANAGER }}" \
+        WAZUH_AGENT_NAME="{{ WAZUH_AGENT_NAME }}" \
+        rpm -ihv /tmp/wazuh-agent-4.12.0-1.x86_64.rpm
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Start and enable Wazuh Agent service
+      service:
+        name: wazuh-agent
+        state: started
+        enabled: yes
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Check Wazuh Agent service status after installation
+      command: systemctl status wazuh-agent
+      register: wazuh_status_post
+      changed_when: false
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")
+
+    - name: Display Wazuh Agent service status after installation
+      debug:
+        var: wazuh_status_post.stdout_lines
+      when: (wazuh_installed.rc != 0) or (installed_status.stdout | default('inactive') != "active")

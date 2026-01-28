@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-proxy-manager
+  namespace: nginx-proxy-manager
+  labels:
+    app: nginx-proxy-manager
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 192.0.2.71
+  selector:
+    app: nginx-proxy-manager
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: webui
+      protocol: TCP
+      port: 81
+      targetPort: 81
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 443
+    - name: ldap
+      protocol: TCP
+      port: 389
+      targetPort: 389
+    - name: ldaps
+      protocol: TCP
+      port: 636
+      targetPort: 636

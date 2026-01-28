@@ -1,0 +1,484 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: zabbix
+
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zabbix-db-secret
+  namespace: zabbix
+type: Opaque
+stringData:
+  POSTGRES_DB:       "zabbix"
+  POSTGRES_USER: "REPLACE_ME"
+  POSTGRES_PASSWORD: "REPLACE_ME"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zabbix-snmptraps-data
+  namespace: zabbix
+spec:
+  storageClassName: longhorn
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zabbix-snmptraps-mibs
+  namespace: zabbix
+spec:
+  storageClassName: longhorn
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zabbix-server-export
+  namespace: zabbix
+spec:
+  storageClassName: longhorn
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zabbix-web-ssl
+  namespace: zabbix
+spec:
+  storageClassName: longhorn
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-db-headless
+  namespace: zabbix
+  labels:
+    app: zabbix-db
+spec:
+  clusterIP: None
+  selector:
+    app: zabbix-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zabbix-db
+  namespace: zabbix
+  labels:
+    app: zabbix-db
+spec:
+  serviceName: zabbix-db-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-db
+  template:
+    metadata:
+      labels:
+        app: zabbix-db
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+        - key: CriticalAddonsOnly
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: postgres
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - name: postgres
+              containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu:              "250m"
+              memory:           "512Mi"
+              ephemeral-storage: "1Gi"
+            limits:
+              cpu:              "500m"
+              memory:           "1Gi"
+              ephemeral-storage: "2Gi"
+          readinessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -U zabbix -d zabbix"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -U zabbix -d zabbix"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: longhorn
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-db
+  namespace: zabbix
+  labels:
+    app: zabbix-db
+spec:
+  type: ClusterIP
+  selector:
+    app: zabbix-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-snmptraps
+  namespace: zabbix
+  labels:
+    app: zabbix-snmptraps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-snmptraps
+  template:
+    metadata:
+      labels:
+        app: zabbix-snmptraps
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+        - key: CriticalAddonsOnly
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: zabbix-snmptraps
+          image: zabbix/zabbix-snmptraps:alpine-trunk
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: snmp
+              containerPort: 1162
+              protocol: UDP
+          volumeMounts:
+            - name: snmptraps
+              mountPath: /var/lib/zabbix/snmptraps
+            - name: mibs
+              mountPath: /usr/share/snmp/mibs
+          resources:
+            requests:
+              cpu:              "100m"
+              memory:           "128Mi"
+              ephemeral-storage: "500Mi"
+            limits:
+              cpu:              "200m"
+              memory:           "256Mi"
+              ephemeral-storage: "1Gi"
+      volumes:
+        - name: snmptraps
+          persistentVolumeClaim:
+            claimName: zabbix-snmptraps-data
+        - name: mibs
+          persistentVolumeClaim:
+            claimName: zabbix-snmptraps-mibs
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-snmptraps
+  namespace: zabbix
+  labels:
+    app: zabbix-snmptraps
+spec:
+  type: ClusterIP
+  selector:
+    app: zabbix-snmptraps
+  ports:
+    - name: snmp
+      protocol: UDP
+      port: 162
+      targetPort: 1162
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server-pgsql
+  namespace: zabbix
+  labels:
+    app: zabbix-server-pgsql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server-pgsql
+  template:
+    metadata:
+      labels:
+        app: zabbix-server-pgsql
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+        - key: CriticalAddonsOnly
+          operator: Exists
+          effect: NoSchedule
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z zabbix-db 5432; do
+                echo "Waiting for postgres…";
+                sleep 3;
+              done
+      containers:
+        - name: zabbix-server-pgsql
+          image: zabbix/zabbix-server-pgsql:alpine-trunk
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_DB
+            - name: DB_SERVER_HOST
+              value: "zabbix-db"
+            - name: DB_SERVER_PORT
+              value: "5432"
+            - name: DB_SERVER_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_DB
+            - name: ZBX_ENABLE_SNMP_TRAPS
+              value: "true"
+          ports:
+            - name: trapper
+              containerPort: 10051
+              protocol: TCP
+          volumeMounts:
+            - name: snmptraps
+              mountPath: /var/lib/zabbix/snmptraps
+            - name: mibs
+              mountPath: /usr/share/snmp/mibs
+            - name: export
+              mountPath: /var/lib/zabbix/export
+          resources:
+            requests:
+              cpu:              "250m"
+              memory:           "512Mi"
+              ephemeral-storage: "1Gi"
+            limits:
+              cpu:              "500m"
+              memory:           "1Gi"
+              ephemeral-storage: "2Gi"
+      volumes:
+        - name: snmptraps
+          persistentVolumeClaim:
+            claimName: zabbix-snmptraps-data
+        - name: mibs
+          persistentVolumeClaim:
+            claimName: zabbix-snmptraps-mibs
+        - name: export
+          persistentVolumeClaim:
+            claimName: zabbix-server-export
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server-pgsql
+  namespace: zabbix
+  labels:
+    app: zabbix-server-pgsql
+spec:
+  type: ClusterIP
+  selector:
+    app: zabbix-server-pgsql
+  ports:
+    - name: trapper
+      protocol: TCP
+      port: 10051
+      targetPort: 10051
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server-web
+  namespace: zabbix
+  labels:
+    app: zabbix-server-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server-web
+  template:
+    metadata:
+      labels:
+        app: zabbix-server-web
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+        - key: CriticalAddonsOnly
+          operator: Exists
+          effect: NoSchedule
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z zabbix-db 5432; do
+                echo "Waiting for postgres…";
+                sleep 3;
+              done
+      containers:
+        - name: zabbix-server-web
+          image: zabbix/zabbix-web-nginx-pgsql:alpine-trunk
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: DB_SERVER_HOST
+              value: "zabbix-db"
+            - name: DB_SERVER_PORT
+              value: "5432"
+            - name: DB_SERVER_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-db-secret
+                  key: POSTGRES_DB
+            - name: ZBX_SERVER_HOST
+              value: "zabbix-server-pgsql"
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: ssl
+              mountPath: /etc/ssl/nginx
+          resources:
+            requests:
+              cpu:              "100m"
+              memory:           "256Mi"
+              ephemeral-storage: "500Mi"
+            limits:
+              cpu:              "250m"
+              memory:           "512Mi"
+              ephemeral-storage: "1Gi"
+      volumes:
+        - name: ssl
+          persistentVolumeClaim:
+            claimName: zabbix-web-ssl
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server-web
+  namespace: zabbix
+  labels:
+    app: zabbix-server-web
+spec:
+  type: ClusterIP
+  selector:
+    app: zabbix-server-web
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
