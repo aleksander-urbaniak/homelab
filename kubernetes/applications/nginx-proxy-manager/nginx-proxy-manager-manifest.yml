@@ -193,7 +193,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
         - name: nginx-proxy-manager
-          image: jc21/nginx-proxy-manager:2.13.5
+          image: jc21/nginx-proxy-manager:2.13.6
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
