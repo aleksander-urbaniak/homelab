@@ -188,6 +188,7 @@ Services are divided between Kubernetes (HA/in-cluster) and Docker (standalone).
 | Affine | Knowledge base (Notion alternative) | K8s |
 | Homepage | Static dashboard start page | K8s |
 | n8n | Workflow automation | K8s |
+| Apprise | Notification gateway for multi-channel alerts | K8s |
 | Pastefy | Self-hosted pastebin | K8s |
 | Vaultwarden | Password manager | K8s |
 | Guacamole | Clientless remote desktop gateway | K8s |

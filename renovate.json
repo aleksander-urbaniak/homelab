@@ -4,6 +4,14 @@
     "config:recommended"
   ],
   "labels": ["update"],
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
+  ],
   "kubernetes": {
     "fileMatch": ["^kubernetes/applications/.+\\.ya?ml$"]
   },
