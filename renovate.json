@@ -14,10 +14,10 @@
     }
   ],
   "kubernetes": {
-    "managerFilePatterns": ["^kubernetes/applications/.+\\.ya?ml$"]
+    "fileMatch": ["^kubernetes/applications/.+\\.ya?ml$"]
   },
   "docker-compose": {
-    "managerFilePatterns": [
+    "fileMatch": [
       "^docker/applications/.+/(?:docker-)?compose\\.ya?ml$",
       "^docker/applications/.+/.+-compose\\.ya?ml$"
     ]
