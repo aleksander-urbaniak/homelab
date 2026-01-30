@@ -1,9 +1,7 @@
----
 apiVersion: v1
 kind: Namespace
 metadata:
   name: vaultwarden
-
 ---
 apiVersion: v1
 kind: Secret
@@ -17,7 +15,6 @@ data:
   POSTGRES_DB: "REPLACE_ME"
   POSTGRES_USER: "REPLACE_ME"
   POSTGRES_PASSWORD: "REPLACE_ME"
-
 ---
 apiVersion: v1
 kind: Service
@@ -35,7 +32,6 @@ spec:
       protocol: TCP
       port: 5432
       targetPort: 5432
-
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -112,7 +108,6 @@ spec:
         resources:
           requests:
             storage: 1Gi
-
 ---
 apiVersion: v1
 kind: Service
@@ -130,7 +125,6 @@ spec:
       protocol: TCP
       port: 5432
       targetPort: 5432
-
 ---
 apiVersion: v1
 kind: Secret
@@ -142,7 +136,6 @@ metadata:
 type: Opaque
 data:
   DATABASE_URL: "REPLACE_ME"
-
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -156,7 +149,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -218,7 +210,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: vaultwarden-data-pvc
-
 ---
 apiVersion: v1
 kind: Service
@@ -236,3 +227,33 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vaultwarden-ingress
+  namespace: vaultwarden
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/auth-type: "basic"
+    nginx.ingress.kubernetes.io/auth-secret: vaultwarden-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - vaultwarden.example.com
+      secretName: vaultwarden-tls
+  rules:
+    - host: vaultwarden.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vaultwarden
+                port:
+                  number: 80

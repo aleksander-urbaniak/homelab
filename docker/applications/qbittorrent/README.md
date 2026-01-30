@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **qBittorrent**.
 
 - Compose file(s): `compose.yml`
 - Services: `qbittorrent`
-- Images: `linuxserver/qbittorrent:20.04.1`
+- Image: `linuxserver/qbittorrent:20.04.1`
 - Published ports: `8080`
 - Environment: uses `.env` (see `.env.example`)
 
@@ -28,6 +28,7 @@ This folder contains a Docker Compose setup for **qBittorrent**.
 - **Environment**: copy `.env.example` to `.env` and fill in values before starting the stack.
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

@@ -11,8 +11,8 @@ This folder contains a k3s-ready Kubernetes configuration for **Speedtest Tracke
 ## 🎯 Quick facts
 
 - Namespace: `speedtest-tracker`
-- Images: `busybox:1.37`, `lscr.io/linuxserver/speedtest-tracker:1.13.5`, `postgres:18`
-- Ports (from Services): `443`, `5432`
+- Images: `postgres:18`, `busybox:1.37`, `lscr.io/linuxserver/speedtest-tracker:1.13.5`
+- Ports (from Services): `5432`, `443`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload
 
@@ -20,24 +20,24 @@ This folder contains a k3s-ready Kubernetes configuration for **Speedtest Tracke
 
 ## 🧱 What gets deployed
 
-- `secrets-example.yml`: Example secrets (placeholders)
-- `speedtest-tracker-app-service.yml`: Service
+- `speedtest-tracker-namespace.yml`: Namespace
+- `speedtest-tracker-secrets.yml`: Secret
 - `speedtest-tracker-config-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
+- `speedtest-tracker-web-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
+- `speedtest-tracker-app-service.yml`: Service
 - `speedtest-tracker-db-headless-service.yml`: Service
 - `speedtest-tracker-db-service.yml`: Service
-- `speedtest-tracker-db-statefulset.yml`: StatefulSet
 - `speedtest-tracker-deployment.yml`: Deployment
-- `speedtest-tracker-manifest-example.yml`: Example combined manifest (with placeholders)
+- `speedtest-tracker-db-statefulset.yml`: StatefulSet
+- `speedtest-tracker-ingress.yml`: Ingress
 - `speedtest-tracker-manifest.yml`: Combined multi-document manifest
-- `speedtest-tracker-namespace.yml`: Namespace
-- `speedtest-tracker-secrets.yml`: Secrets
-- `speedtest-tracker-web-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -45,11 +45,11 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `speedtest-tracker-manifest-example.yml` and replace placeholders.
+1. Edit `speedtest-tracker-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-manifest-example.yml
+kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-manifest.yml
 ```
 
 ### Option B: apply the split manifests
@@ -62,8 +62,9 @@ kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-web
 kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-app-service.yml
 kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-db-headless-service.yml
 kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-db-service.yml
-kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-db-statefulset.yml
 kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-deployment.yml
+kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-db-statefulset.yml
+kubectl apply -f kubernetes/applications/speedtest-tracker/speedtest-tracker-ingress.yml
 ```
 
 Tip: start by copying/editing `secrets-example.yml` (and any `*-secrets.yml`) before applying.

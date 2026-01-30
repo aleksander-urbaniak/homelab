@@ -12,8 +12,8 @@ This folder contains a Docker Compose setup for **Uptime Kuma**.
 
 - Compose file(s): `compose.yml`
 - Services: `uptime-kuma`
-- Images: `louislam/uptime-kuma:1.23.17`
-- Published ports: none (likely exposed via reverse proxy or host networking)
+- Image: `louislam/uptime-kuma:2.0.2`
+- Published ports: `3001`
 
 ---
 
@@ -25,6 +25,7 @@ This folder contains a Docker Compose setup for **Uptime Kuma**.
 
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

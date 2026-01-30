@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Pi-hole Exporter
 ## 🎯 Quick facts
 
 - Namespace: `pihole-exporter`
-- Images: `ekofr/pihole-exporter:1.2.0`
+- Image: `ekofr/pihole-exporter:1.2.0`
 - Ports (from Services): `9617`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload
@@ -20,20 +20,20 @@ This folder contains a k3s-ready Kubernetes configuration for **Pi-hole Exporter
 
 ## 🧱 What gets deployed
 
-- `pihole-exporter-certs-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
-- `pihole-exporter-deployment.yml`: Deployment
-- `pihole-exporter-manifest-example.yml`: Example combined manifest (with placeholders)
-- `pihole-exporter-manifest.yml`: Combined multi-document manifest
 - `pihole-exporter-namespace.yml`: Namespace
-- `pihole-exporter-secrets.yml`: Secrets
+- `pihole-exporter-secrets.yml`: Secret
+- `pihole-exporter-certs-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
 - `pihole-exporter-service.yml`: Service
-- `secrets-example.yml`: Example secrets (placeholders)
+- `pihole-exporter-deployment.yml`: Deployment
+- `pihole-exporter-ingress.yml`: Ingress
+- `pihole-exporter-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -41,11 +41,11 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `pihole-exporter-manifest-example.yml` and replace placeholders.
+1. Edit `pihole-exporter-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/pihole-exporter/pihole-exporter-manifest-example.yml
+kubectl apply -f kubernetes/applications/pihole-exporter/pihole-exporter-manifest.yml
 ```
 
 ### Option B: apply the split manifests
@@ -56,6 +56,7 @@ kubectl apply -f kubernetes/applications/pihole-exporter/pihole-exporter-secrets
 kubectl apply -f kubernetes/applications/pihole-exporter/pihole-exporter-certs-persistentvolumeclaim.yml
 kubectl apply -f kubernetes/applications/pihole-exporter/pihole-exporter-service.yml
 kubectl apply -f kubernetes/applications/pihole-exporter/pihole-exporter-deployment.yml
+kubectl apply -f kubernetes/applications/pihole-exporter/pihole-exporter-ingress.yml
 ```
 
 Tip: start by copying/editing `secrets-example.yml` (and any `*-secrets.yml`) before applying.

@@ -12,8 +12,8 @@ This folder contains a Docker Compose setup for **Wallos**.
 
 - Compose file(s): `compose.yml`
 - Services: `wallos`
-- Images: `bellamy/wallos:4.6.0`
-- Published ports: none (likely exposed via reverse proxy or host networking)
+- Image: `bellamy/wallos:4.6.0`
+- Published ports: `80/tcp`
 - Environment: uses `.env` (see `.env.example`)
 
 ---
@@ -28,6 +28,7 @@ This folder contains a Docker Compose setup for **Wallos**.
 - **Environment**: copy `.env.example` to `.env` and fill in values before starting the stack.
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **GitLab Runner** 
 ## 🎯 Quick facts
 
 - Namespace: `gitlab-runner`
-- Images: `gitlab/gitlab-runner:alpine`
+- Image: `gitlab/gitlab-runner:alpine`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload
 
@@ -19,20 +19,20 @@ This folder contains a k3s-ready Kubernetes configuration for **GitLab Runner** 
 
 ## 🧱 What gets deployed
 
-- `gitlab-runner-admin-binding-clusterrolebinding.yml`: ClusterRoleBinding (RBAC)
-- `gitlab-runner-config-configmap.yml`: ConfigMap
-- `gitlab-runner-deployment.yml`: Deployment
-- `gitlab-runner-manifest-example.yml`: Example combined manifest (with placeholders)
-- `gitlab-runner-manifest.yml`: Combined multi-document manifest
 - `gitlab-runner-namespace.yml`: Namespace
+- `gitlab-runner-config-configmap.yml`: ConfigMap
 - `gitlab-runner-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
-- `gitlab-runner-sa-serviceaccount.yml`: ServiceAccount / RBAC
+- `gitlab-runner-sa-serviceaccount.yml`: ServiceAccount
+- `gitlab-runner-admin-binding-clusterrolebinding.yml`: Combined multi-document manifest
+- `gitlab-runner-deployment.yml`: Deployment
+- `gitlab-runner-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -40,20 +40,20 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `gitlab-runner-manifest-example.yml` and replace placeholders.
+1. Edit `gitlab-runner-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-manifest-example.yml
+kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-manifest.yml
 ```
 
 ### Option B: apply the split manifests
 
 ```bash
 kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-namespace.yml
-kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-sa-serviceaccount.yml
-kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-admin-binding-clusterrolebinding.yml
 kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-config-configmap.yml
 kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-pvc-persistentvolumeclaim.yml
+kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-sa-serviceaccount.yml
+kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-admin-binding-clusterrolebinding.yml
 kubectl apply -f kubernetes/applications/gitlab-runner/gitlab-runner-deployment.yml
 ```

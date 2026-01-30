@@ -20,19 +20,20 @@ This folder contains a k3s-ready Kubernetes configuration for **Karma** (namespa
 
 ## 🧱 What gets deployed
 
+- `karma-namespace.yml`: Namespace
 - `karma-config-configmap.yml`: ConfigMap
 - `karma-config-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
-- `karma-deployment.yml`: Deployment
-- `karma-manifest-example.yml`: Example combined manifest (with placeholders)
-- `karma-manifest.yml`: Combined multi-document manifest
-- `karma-namespace.yml`: Namespace
 - `karma-service.yml`: Service
+- `karma-deployment.yml`: Deployment
+- `karma-ingress.yml`: Ingress
+- `karma-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -40,11 +41,11 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `karma-manifest-example.yml` and replace placeholders.
+1. Edit `karma-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/karma/karma-manifest-example.yml
+kubectl apply -f kubernetes/applications/karma/karma-manifest.yml
 ```
 
 ### Option B: apply the split manifests
@@ -55,4 +56,5 @@ kubectl apply -f kubernetes/applications/karma/karma-config-configmap.yml
 kubectl apply -f kubernetes/applications/karma/karma-config-pvc-persistentvolumeclaim.yml
 kubectl apply -f kubernetes/applications/karma/karma-service.yml
 kubectl apply -f kubernetes/applications/karma/karma-deployment.yml
+kubectl apply -f kubernetes/applications/karma/karma-ingress.yml
 ```

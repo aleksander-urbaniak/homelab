@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Pulse** (namespa
 ## 🎯 Quick facts
 
 - Namespace: `pulse`
-- Images: `rcourtman/pulse:5.0.17`
+- Image: `rcourtman/pulse:5.0.17`
 - Ports (from Services): `7655`
 - StorageClass: `longhorn`
 
@@ -19,18 +19,19 @@ This folder contains a k3s-ready Kubernetes configuration for **Pulse** (namespa
 
 ## 🧱 What gets deployed
 
-- `pulse-data-pvc-pvc.yml`: PersistentVolumeClaim (storage)
-- `pulse-deployment.yml`: Deployment
-- `pulse-manifest.yml`: Combined multi-document manifest
 - `pulse-namespace.yml`: Namespace
-- `pulse-secrets.yml`: Secrets
+- `pulse-secrets.yml`: Secret
+- `pulse-data-pvc-pvc.yml`: PersistentVolumeClaim (storage)
 - `pulse-service.yml`: Service
-- `secrets-example.yml`: Example secrets (placeholders)
+- `pulse-deployment.yml`: Deployment
+- `pulse-ingress.yml`: Ingress
+- `pulse-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -52,6 +53,7 @@ kubectl apply -f kubernetes/applications/pulse/pulse-secrets.yml
 kubectl apply -f kubernetes/applications/pulse/pulse-data-pvc-pvc.yml
 kubectl apply -f kubernetes/applications/pulse/pulse-service.yml
 kubectl apply -f kubernetes/applications/pulse/pulse-deployment.yml
+kubectl apply -f kubernetes/applications/pulse/pulse-ingress.yml
 ```
 
 Tip: start by copying/editing `secrets-example.yml` (and any `*-secrets.yml`) before applying.
