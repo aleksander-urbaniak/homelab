@@ -17,7 +17,9 @@ services:
         volumes:
             - './directory:/config'
             - './web:/etc/ssl/web'
-        image: 'lscr.io/linuxserver/speedtest-tracker:latest'
+        ports:
+            - "80:80"
+        image: 'lscr.io/linuxserver/speedtest-tracker:1.13.5'
         depends_on:
             - speedtest-tracker-db
 

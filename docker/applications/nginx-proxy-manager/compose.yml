@@ -1,6 +1,6 @@
 services:
   nginx-proxy-manager:
-    image: 'jc21/nginx-proxy-manager:latest'
+    image: 'jc21/nginx-proxy-manager:2.13.6'
     restart: unless-stopped
     ports:
       - '80:80'
@@ -19,7 +19,7 @@ services:
       - nginx-proxy-manager-db
 
   nginx-proxy-manager-db:
-    image: 'jc21/mariadb-aria:latest'
+    image: 'jc21/mariadb-aria:10.11.5-innodb'
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}

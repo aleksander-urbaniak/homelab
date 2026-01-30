@@ -1,8 +1,10 @@
 services:
   wallos:
-    image: bellamy/wallos:latest
+    image: bellamy/wallos:4.6.0
     environment:
       TZ: ${WALLOS_TZ}
+    ports:
+      - "80:80/tcp"
     volumes:
       - './db:/var/www/html/db'
       - './logos:/var/www/html/images/uploads/logos'

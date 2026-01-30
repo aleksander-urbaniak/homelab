@@ -12,8 +12,8 @@ This folder contains a Docker Compose setup for **Vaultwarden**.
 
 - Compose file(s): `compose.yml`
 - Services: `vaultwarden`, `vaultwarden-db`
-- Images: `postgres:16`, `vaultwarden/server:latest`
-- Published ports: none (likely exposed via reverse proxy or host networking)
+- Images: `vaultwarden/server:1.35.2`, `postgres:16`
+- Published ports: `80`
 - Environment: uses `.env` (see `.env.example`)
 
 ---
@@ -28,6 +28,7 @@ This folder contains a Docker Compose setup for **Vaultwarden**.
 - **Environment**: copy `.env.example` to `.env` and fill in values before starting the stack.
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

@@ -20,22 +20,23 @@ This folder contains a k3s-ready Kubernetes configuration for **Prometheus** (na
 
 ## 🧱 What gets deployed
 
-- `prometheus-clusterrole.yml`: ClusterRole (RBAC)
-- `prometheus-clusterrolebinding.yml`: ClusterRoleBinding (RBAC)
+- `prometheus-namespace.yml`: Namespace
 - `prometheus-config-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
 - `prometheus-data-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
-- `prometheus-deployment.yml`: Deployment
-- `prometheus-manifest-example.yml`: Example combined manifest (with placeholders)
-- `prometheus-manifest.yml`: Combined multi-document manifest
-- `prometheus-namespace.yml`: Namespace
+- `prometheus-serviceaccount.yml`: ServiceAccount
+- `prometheus-clusterrole.yml`: ClusterRole
+- `prometheus-clusterrolebinding.yml`: Combined multi-document manifest
 - `prometheus-service.yml`: Service
-- `prometheus-serviceaccount.yml`: ServiceAccount / RBAC
+- `prometheus-deployment.yml`: Deployment
+- `prometheus-ingress.yml`: Ingress
+- `prometheus-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -43,22 +44,23 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `prometheus-manifest-example.yml` and replace placeholders.
+1. Edit `prometheus-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/prometheus/prometheus-manifest-example.yml
+kubectl apply -f kubernetes/applications/prometheus/prometheus-manifest.yml
 ```
 
 ### Option B: apply the split manifests
 
 ```bash
 kubectl apply -f kubernetes/applications/prometheus/prometheus-namespace.yml
+kubectl apply -f kubernetes/applications/prometheus/prometheus-config-pvc-persistentvolumeclaim.yml
+kubectl apply -f kubernetes/applications/prometheus/prometheus-data-pvc-persistentvolumeclaim.yml
 kubectl apply -f kubernetes/applications/prometheus/prometheus-serviceaccount.yml
 kubectl apply -f kubernetes/applications/prometheus/prometheus-clusterrole.yml
 kubectl apply -f kubernetes/applications/prometheus/prometheus-clusterrolebinding.yml
-kubectl apply -f kubernetes/applications/prometheus/prometheus-config-pvc-persistentvolumeclaim.yml
-kubectl apply -f kubernetes/applications/prometheus/prometheus-data-pvc-persistentvolumeclaim.yml
 kubectl apply -f kubernetes/applications/prometheus/prometheus-service.yml
 kubectl apply -f kubernetes/applications/prometheus/prometheus-deployment.yml
+kubectl apply -f kubernetes/applications/prometheus/prometheus-ingress.yml
 ```

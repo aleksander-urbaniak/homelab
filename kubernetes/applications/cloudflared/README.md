@@ -11,26 +11,25 @@ This folder contains a k3s-ready Kubernetes configuration for **cloudflared** (n
 ## 🎯 Quick facts
 
 - Namespace: `cloudflared`
-- Images: `cloudflare/cloudflared:2025.11.1`
-- Ports (from Services): `2000`
+- Image: `cloudflare/cloudflared:2025.11.1`
+- Ports (from Services): none
 - Node placement: uses `nodeSelector` in at least one workload
 
 ---
 
 ## 🧱 What gets deployed
 
-- `cloudflared-deployment.yml`: Deployment
-- `cloudflared-manifest-example.yml`: Example combined manifest (with placeholders)
-- `cloudflared-manifest.yml`: Combined multi-document manifest
 - `cloudflared-namespace.yml`: Namespace
-- `cloudflared-secrets.yml`: Secrets
-- `secrets-example.yml`: Example secrets (placeholders)
+- `cloudflared-secrets.yml`: Secret
+- `cloudflared-deployment.yml`: Deployment
+- `cloudflared-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: If you add PVCs, ensure your cluster has a suitable default StorageClass.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -38,11 +37,11 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `cloudflared-manifest-example.yml` and replace placeholders.
+1. Edit `cloudflared-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/cloudflared/cloudflared-manifest-example.yml
+kubectl apply -f kubernetes/applications/cloudflared/cloudflared-manifest.yml
 ```
 
 ### Option B: apply the split manifests

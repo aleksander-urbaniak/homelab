@@ -18,35 +18,36 @@ This folder contains a self-hosted **Affine** deployment for a **k3s** Kubernete
 
 ## What gets deployed
 
-- `affine-namespace.yml`: Namespace `affine`
-- `affine-secrets.yml` / `secrets-example.yml`: App + database + Redis secrets (edit before applying)
-- `affine-config-pvc-persistentvolumeclaim.yml`: PVC for `/root/.affine/config` (default: `512Mi`)
-- `affine-storage-pvc-persistentvolumeclaim.yml`: PVC for `/root/.affine/storage` (default: `5Gi`)
-- `affine-postgres-statefulset.yml` + `affine-postgres-service.yml`: PostgreSQL (pgvector image) + Service
-- `affine-redis-deployment.yml` + `affine-redis-service.yml`: Redis (password protected) + Service
-- `affine-migration-job.yml`: Pre-deploy migration job (`node ./scripts/self-host-predeploy.js`)
-- `affine-deployment.yml` + `affine-service.yml`: Affine Deployment + ClusterIP Service (port `3010`)
-
-There is also an "all-in-one" manifest:
-
-- `affine-manifest.yml`: Combined multi-document YAML for the resources above
-- `affine-manifest-example.yml`: Same as above but with `REPLACE_ME` placeholders for secrets
+- `affine-namespace.yml`: Namespace
+- `affine-secrets.yml`: Secret
+- `affine-config-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
+- `affine-storage-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
+- `affine-postgres-service.yml`: Service
+- `affine-redis-service.yml`: Service
+- `affine-service.yml`: Service
+- `affine-deployment.yml`: Deployment
+- `affine-redis-deployment.yml`: Deployment
+- `affine-postgres-statefulset.yml`: StatefulSet
+- `affine-migration-job.yml`: Job
+- `affine-ingress.yml`: Ingress
+- `affine-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs default to `storageClassName: longhorn`. If you don't use Longhorn, change the storage class (or remove `storageClassName` to use the cluster default).
 - **Node placement**: Workloads use `nodeSelector: node-role.kubernetes.io/worker: ""`. Remove or adjust if your nodes don't have that label.
 - **External access**: The included Service is `ClusterIP`. Expose it via your preferred Ingress / Gateway / reverse proxy to `affine:3010` and set `AFFINE_SERVER_EXTERNAL_URL` accordingly.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
 ### Option A: apply the combined manifest
 
-1. Edit `affine-manifest-example.yml` and replace all `REPLACE_ME` values.
+1. Edit `affine-manifest.yml` and replace all `REPLACE_ME` values.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/affine/affine-manifest-example.yml
+kubectl apply -f kubernetes/applications/affine/affine-manifest.yml
 ```
 
 Note: the combined manifest includes both the migration Job and the Affine Deployment; for first-time installs, prefer Option B so you can run the migration Job before starting the app.
@@ -61,11 +62,11 @@ kubectl apply -f kubernetes/applications/affine/affine-secrets.yml
 kubectl apply -f kubernetes/applications/affine/affine-config-pvc-persistentvolumeclaim.yml
 kubectl apply -f kubernetes/applications/affine/affine-storage-pvc-persistentvolumeclaim.yml
 kubectl apply -f kubernetes/applications/affine/affine-postgres-service.yml
-kubectl apply -f kubernetes/applications/affine/affine-postgres-statefulset.yml
 kubectl apply -f kubernetes/applications/affine/affine-redis-service.yml
-kubectl apply -f kubernetes/applications/affine/affine-redis-deployment.yml
-kubectl apply -f kubernetes/applications/affine/affine-migration-job.yml
-kubectl -n affine wait --for=condition=complete job/affine-migration --timeout=10m
 kubectl apply -f kubernetes/applications/affine/affine-service.yml
 kubectl apply -f kubernetes/applications/affine/affine-deployment.yml
+kubectl apply -f kubernetes/applications/affine/affine-redis-deployment.yml
+kubectl apply -f kubernetes/applications/affine/affine-postgres-statefulset.yml
+kubectl apply -f kubernetes/applications/affine/affine-migration-job.yml
+kubectl apply -f kubernetes/applications/affine/affine-ingress.yml
 ```

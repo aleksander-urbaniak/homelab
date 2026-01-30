@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Jackett**.
 
 - Compose file(s): `compose.yml`
 - Services: `jackett`
-- Images: `linuxserver/jackett:0.24.671`
+- Image: `linuxserver/jackett:0.24.980`
 - Published ports: `9117`
 - Environment: uses `.env` (see `.env.example`)
 
@@ -28,6 +28,7 @@ This folder contains a Docker Compose setup for **Jackett**.
 - **Environment**: copy `.env.example` to `.env` and fill in values before starting the stack.
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

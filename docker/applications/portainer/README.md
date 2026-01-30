@@ -12,8 +12,8 @@ This folder contains a Docker Compose setup for **Portainer**.
 
 - Compose file(s): `compose.yml`
 - Services: `agent`, `portainer`
-- Images: `portainer/agent:2.27.3`, `portainer/portainer-ce:2.27.3`
-- Published ports: `8000`, `9000`, `9443`
+- Images: `portainer/agent:2.38.0`, `portainer/portainer-ce:2.38.0`
+- Published ports: `9443`, `9000`, `8000`
 
 ---
 
@@ -25,6 +25,7 @@ This folder contains a Docker Compose setup for **Portainer**.
 
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

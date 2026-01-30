@@ -11,8 +11,8 @@ This folder contains a k3s-ready Kubernetes configuration for **Nginx Proxy Mana
 ## 🎯 Quick facts
 
 - Namespace: `nginx-proxy-manager`
-- Images: `jc21/mariadb-aria:latest`, `jc21/nginx-proxy-manager:2.13.5`
-- Ports (from Services): `80`, `81`, `389`, `443`, `636`, `3306`
+- Images: `jc21/mariadb-aria:10.11.5`, `jc21/nginx-proxy-manager:2.13.6`
+- Ports (from Services): `3306`, `80`, `81`, `443`, `389`, `636`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload
 
@@ -20,24 +20,24 @@ This folder contains a k3s-ready Kubernetes configuration for **Nginx Proxy Mana
 
 ## 🧱 What gets deployed
 
-- `mariadb-headless-service.yml`: Service
-- `mariadb-service.yml`: Service
-- `mariadb-statefulset.yml`: StatefulSet
-- `nginx-proxy-manager-deployment.yml`: Deployment
-- `nginx-proxy-manager-manifest-example.yml`: Example combined manifest (with placeholders)
-- `nginx-proxy-manager-manifest.yml`: Combined multi-document manifest
 - `nginx-proxy-manager-namespace.yml`: Namespace
-- `nginx-proxy-manager-secrets.yml`: Secrets
-- `nginx-proxy-manager-service.yml`: Service
+- `nginx-proxy-manager-secrets.yml`: Secret
 - `npm-data-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
 - `npm-letsencrypt-pvc-persistentvolumeclaim.yml`: PersistentVolumeClaim (storage)
-- `secrets-example.yml`: Example secrets (placeholders)
+- `mariadb-headless-service.yml`: Service
+- `mariadb-service.yml`: Service
+- `nginx-proxy-manager-service.yml`: Service
+- `nginx-proxy-manager-deployment.yml`: Deployment
+- `mariadb-statefulset.yml`: StatefulSet
+- `nginx-proxy-manager-ingress.yml`: Ingress
+- `nginx-proxy-manager-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -45,11 +45,11 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `nginx-proxy-manager-manifest-example.yml` and replace placeholders.
+1. Edit `nginx-proxy-manager-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/nginx-proxy-manager/nginx-proxy-manager-manifest-example.yml
+kubectl apply -f kubernetes/applications/nginx-proxy-manager/nginx-proxy-manager-manifest.yml
 ```
 
 ### Option B: apply the split manifests
@@ -62,8 +62,9 @@ kubectl apply -f kubernetes/applications/nginx-proxy-manager/npm-letsencrypt-pvc
 kubectl apply -f kubernetes/applications/nginx-proxy-manager/mariadb-headless-service.yml
 kubectl apply -f kubernetes/applications/nginx-proxy-manager/mariadb-service.yml
 kubectl apply -f kubernetes/applications/nginx-proxy-manager/nginx-proxy-manager-service.yml
-kubectl apply -f kubernetes/applications/nginx-proxy-manager/mariadb-statefulset.yml
 kubectl apply -f kubernetes/applications/nginx-proxy-manager/nginx-proxy-manager-deployment.yml
+kubectl apply -f kubernetes/applications/nginx-proxy-manager/mariadb-statefulset.yml
+kubectl apply -f kubernetes/applications/nginx-proxy-manager/nginx-proxy-manager-ingress.yml
 ```
 
 Tip: start by copying/editing `secrets-example.yml` (and any `*-secrets.yml`) before applying.

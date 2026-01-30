@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Blackbox Exporte
 ## 🎯 Quick facts
 
 - Namespace: `blackbox`
-- Images: `quay.io/prometheus/blackbox-exporter:v0.28.0`
+- Image: `quay.io/prometheus/blackbox-exporter:v0.28.0`
 - Ports (from Services): `9115`
 - Node placement: uses `nodeSelector` in at least one workload
 
@@ -19,19 +19,21 @@ This folder contains a k3s-ready Kubernetes configuration for **Blackbox Exporte
 
 ## 🧱 What gets deployed
 
-- `blackbox-config-configmap.yml`: ConfigMap
-- `blackbox-exporter-deployment.yml`: Deployment
-- `blackbox-exporter-service.yml`: Service
-- `blackbox-manifest.yml`: Combined multi-document manifest
 - `blackbox-namespace.yml`: Namespace
+- `blackbox-config-configmap.yml`: ConfigMap
 - `config-map-blackbox-config-configmap.yml`: ConfigMap
-- `config-map-manifest.yml`: Combined multi-document manifest
+- `config-map-manifest.yml`: ConfigMap
+- `blackbox-exporter-service.yml`: Service
+- `blackbox-exporter-deployment.yml`: Deployment
+- `blackbox-ingress.yml`: Ingress
+- `blackbox-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: If you add PVCs, ensure your cluster has a suitable default StorageClass.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -51,6 +53,8 @@ kubectl apply -f kubernetes/applications/blackbox/blackbox-manifest.yml
 kubectl apply -f kubernetes/applications/blackbox/blackbox-namespace.yml
 kubectl apply -f kubernetes/applications/blackbox/blackbox-config-configmap.yml
 kubectl apply -f kubernetes/applications/blackbox/config-map-blackbox-config-configmap.yml
+kubectl apply -f kubernetes/applications/blackbox/config-map-manifest.yml
 kubectl apply -f kubernetes/applications/blackbox/blackbox-exporter-service.yml
 kubectl apply -f kubernetes/applications/blackbox/blackbox-exporter-deployment.yml
+kubectl apply -f kubernetes/applications/blackbox/blackbox-ingress.yml
 ```
