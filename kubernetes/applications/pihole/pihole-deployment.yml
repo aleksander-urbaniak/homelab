@@ -19,7 +19,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
         - name: pihole
-          image: pihole/pihole:2025.05.2
+          image: pihole/pihole:2025.11.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: dns-tcp
