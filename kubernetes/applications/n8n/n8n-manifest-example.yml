@@ -150,7 +150,7 @@ spec:
 
       containers:
         - name: n8n
-          image: n8nio/n8n:2.3.2
+          image: n8nio/n8n:2.6.2
           imagePullPolicy: IfNotPresent
           args:
             - start
