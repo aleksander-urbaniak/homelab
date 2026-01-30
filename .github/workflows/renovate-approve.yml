@@ -1,4 +1,4 @@
-name: Renovate - Auto-Approve & Auto-Merge
+name: Auto-Approve Renovate
 
 on:
   pull_request:
@@ -9,7 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  approve-and-automerge:
+  approve-renovate:
+    name: approve-renovate
     runs-on: ubuntu-latest
     if: github.actor == 'renovate[bot]'
     steps:
