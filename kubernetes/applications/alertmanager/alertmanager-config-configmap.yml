@@ -18,5 +18,5 @@ data:
     receivers:
       - name: 'discord'
         discord_configs:
-          - webhook_url: 'https://discord.com/api/webhooks/1387482313645887691/Qkty4ScCeb0jF6Xzo5MFMkt_xGbH8VCRTuJU_-gMJnkwvelGvLblPlhiJXN2lcQykUa9'
+          - webhook_url: 'REPLACE_ME'
 
