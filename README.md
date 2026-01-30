@@ -1,10 +1,34 @@
-﻿![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox-E57000?logo=proxmox&logoColor=white) ![Orchestration](https://img.shields.io/badge/Orchestration-k3s-FFC61C?logo=k3s&logoColor=white) ![Containerization](https://img.shields.io/badge/Containerization-Docker-2496ED?logo=docker&logoColor=white) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow) ![License](https://img.shields.io/badge/License-MIT-Green)
+﻿﻿﻿![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox-E57000?logo=proxmox&logoColor=white) ![Orchestration](https://img.shields.io/badge/Orchestration-k3s-FFC61C?logo=k3s&logoColor=white) ![Containerization](https://img.shields.io/badge/Containerization-Docker-2496ED?logo=docker&logoColor=white) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow) ![License](https://img.shields.io/badge/License-MIT-Green)
 
 
-## 🏠My Homelab Infrastructure
+## 🏠 My Homelab Infrastructure
 
 ##### A practical, "batteries-included" Infrastructure-as-Code repository.
 ##### Built with Proxmox, Kubernetes, and GitOps principles.
+
+---
+
+## 📌 Table of Contents
+- [Overview](#-overview)
+- [Repo Layout](#-repo-layout)
+- [Hardware](#-hardware)
+- [Core applications / services](#-core-applications--services)
+- [Applications](#-applications)
+  - [Infrastructure & Networking](#-infrastructure--networking)
+  - [Observability & Monitoring](#-observability--monitoring)
+  - [Media & Automation (*Arr Stack)](#-media--automation-arr-stack)
+  - [Productivity & Tools](#-productivity--tools)
+- [Features](#-features)
+  - [Platform](#-platform)
+  - [Kubernetes & Apps](#-kubernetes--apps)
+  - [Docker & Apps](#-docker--apps)
+  - [Observability & Security](#-observability--security)
+  - [Automation & Runbooks](#-automation--runbooks)
+  - [Git Hygiene](#-git-hygiene)
+- [Security](#-security)
+- [License](#-license)
+
+---
 
 ## 📖 Overview
 
@@ -15,45 +39,26 @@ This repository serves as the central brain for a homelab. It is designed to be 
 - 🐳 **Containerization**: a Docker Compose catalog for standalone services
 - 🤖 **Automation**: Ansible playbooks, n8n workflows and GitLab CI/CD pipelines
 
-## 📑 Table of Contents
-
-- [Overview](#overview)
-- [Repo Layout](#repo-layout)
-- [Hardware](#hardware)
-- [Core applications / services](#core-applications--services)
-- [Applications](#applications)
-  - [Infrastructure & Networking](#infrastructure--networking)
-  - [Observability & Monitoring](#observability--monitoring)
-  - [Media & Automation (*Arr Stack)](#media--automation-arr-stack)
-  - [Productivity & Tools](#productivity--tools)
-- [Features](#features)
-  - [Platform](#platform)
-  - [Kubernetes & Apps](#kubernetes--apps)
-  - [Docker & Apps](#docker--apps)
-  - [Observability & Security](#observability--security)
-  - [Automation & Runbooks](#automation--runbooks)
-  - [Git Hygiene](#git-hygiene)
-- [Security](#security)
-- [License](#license)
-
 ## 📂 Repo Layout
 
 ```text
 ├── .github/          # GitHub workflows/templates
 ├── ansible/          # Inventory + playbooks (bootstrap, agents, monitoring)
 ├── backups/          # Backup strategies, scripts, runbooks
-|   └──  README.md
 ├── diy-rpi5-nas/     # DIY Raspberry Pi 5 NAS setup
-|   └──  README.md
 ├── docker/           # Docker compose files and scripts
+│   ├── applications/
+│   ├── config/
+│   └── scripts/
 ├── img/              # Diagrams and screenshots
 ├── kubernetes/       # K3s docs and manifests
+│   ├── applications/
+│   └── k3s-setup/
 ├── linux/            # Linux scripts and docs
 ├── networking/       # DNS, reverse proxy, and network notes
-|   └──  README.md
+│   └── README.md
 ├── proxmox/          # Cluster config, firewall rules, scripts
 ├── secrets/          # Secrets handling guidance (no real keys)
-|   └──  README.md      
 └── windows/          # Windows notes/scripts
 ```
 
