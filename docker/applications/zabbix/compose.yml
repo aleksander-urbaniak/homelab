@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   zabbix-db:
-    image: postgres:16
+    image: postgres:18
     volumes:
       - './db:/var/lib/postgresql/data'
     environment:

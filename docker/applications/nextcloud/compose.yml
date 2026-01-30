@@ -1,7 +1,7 @@
 services:
   nextcloud-postgres:
     container_name: nextcloud-postgres
-    image: postgres:17
+    image: postgres:18
     restart: unless-stopped
     volumes:
       - ./postgres:/var/lib/postgresql/data
@@ -13,7 +13,7 @@ services:
 
   nextcloud-app:
     container_name: nextcloud-app
-    image: nextcloud:31
+    image: nextcloud:32
     restart: unless-stopped
     depends_on:
       - nextcloud-postgres

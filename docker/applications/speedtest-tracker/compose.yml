@@ -24,7 +24,7 @@ services:
             - speedtest-tracker-db
 
     speedtest-tracker-db:
-        image: postgres:15
+        image: postgres:18
         environment:
             - POSTGRES_DB=${SPEEDTEST_TRACKER_POSTGRES_DB}
             - POSTGRES_USER=${SPEEDTEST_TRACKER_POSTGRES_USER}
