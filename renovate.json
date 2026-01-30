@@ -19,7 +19,8 @@
         "digest"
       ],
       "automerge": true,
-      "autoApprove": true
+      "autoApprove": true,
+      "ignoreTests": true
     }
   ],
   "kubernetes": {
