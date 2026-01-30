@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Pulse** (namespa
 ## 🎯 Quick facts
 
 - Namespace: `pulse`
-- Images: `rcourtman/pulse:latest`
+- Images: `rcourtman/pulse:5.0.17`
 - Ports (from Services): `7655`
 - StorageClass: `longhorn`
 

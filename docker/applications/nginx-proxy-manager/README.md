@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Nginx Proxy Manager**.
 
 - Compose file(s): `compose.yml`
 - Services: `nginx-proxy-manager`, `nginx-proxy-manager-db`
-- Images: `jc21/mariadb-aria:latest`, `jc21/nginx-proxy-manager:latest`
+- Images: `jc21/mariadb-aria:10.11.5-innodb`, `jc21/nginx-proxy-manager:2.13.6`
 - Published ports: `80`, `443`, `8888`
 - Environment: uses `.env` (see `.env.example`)
 

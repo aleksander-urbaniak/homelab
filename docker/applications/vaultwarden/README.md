@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Vaultwarden**.
 
 - Compose file(s): `compose.yml`
 - Services: `vaultwarden`, `vaultwarden-db`
-- Images: `postgres:16`, `vaultwarden/server:latest`
+- Images: `postgres:16`, `vaultwarden/server:1.35.2`
 - Published ports: none (likely exposed via reverse proxy or host networking)
 - Environment: uses `.env` (see `.env.example`)
 

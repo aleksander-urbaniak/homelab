@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Pi-hole Exporter
 ## 🎯 Quick facts
 
 - Namespace: `pihole-exporter`
-- Images: `ekofr/pihole-exporter:latest`
+- Images: `ekofr/pihole-exporter:1.2.0`
 - Ports (from Services): `9617`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload

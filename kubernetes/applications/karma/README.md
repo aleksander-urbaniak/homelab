@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Karma** (namespa
 ## 🎯 Quick facts
 
 - Namespace: `karma`
-- Images: `busybox:1.37`, `ghcr.io/prymitive/karma:latest`
+- Images: `busybox:1.37`, `ghcr.io/prymitive/karma:v0.122`
 - Ports (from Services): `8080`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload

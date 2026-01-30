@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Wallos**.
 
 - Compose file(s): `compose.yml`
 - Services: `wallos`
-- Images: `bellamy/wallos:latest`
+- Images: `bellamy/wallos:4.6.0`
 - Published ports: none (likely exposed via reverse proxy or host networking)
 - Environment: uses `.env` (see `.env.example`)
 

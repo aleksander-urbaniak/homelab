@@ -7,5 +7,7 @@ services:
     volumes:
       - /docker/guacamole:/config
       - ./filetransfer:/tmp/filetransfer
+    ports:
+      - "8080:8080"
 
 

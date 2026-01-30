@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Uptime Kuma**.
 
 - Compose file(s): `compose.yml`
 - Services: `uptime-kuma`
-- Images: `louislam/uptime-kuma:latest`
+- Images: `louislam/uptime-kuma:1.23.17`
 - Published ports: none (likely exposed via reverse proxy or host networking)
 
 ---

@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Homepage**.
 
 - Compose file(s): `compose.yml`
 - Services: `homepage`
-- Images: `ghcr.io/gethomepage/homepage:latest`
+- Images: `ghcr.io/gethomepage/homepage:v1.9.0`
 - Published ports: none (likely exposed via reverse proxy or host networking)
 - Environment: uses `.env` (see `.env.example`)
 

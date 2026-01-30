@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **MkDocs**.
 
 - Compose file(s): `compose.yml`
 - Services: `mkdocs`
-- Images: `squidfunk/mkdocs-material:latest`
+- Images: `squidfunk/mkdocs-material:9.7.1`
 - Published ports: none (likely exposed via reverse proxy or host networking)
 
 ---

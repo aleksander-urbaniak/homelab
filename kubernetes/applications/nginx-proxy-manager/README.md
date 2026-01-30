@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Nginx Proxy Mana
 ## 🎯 Quick facts
 
 - Namespace: `nginx-proxy-manager`
-- Images: `jc21/mariadb-aria:latest`, `jc21/nginx-proxy-manager:2.13.5`
+- Images: `jc21/mariadb-aria:10.11.5-innodb`, `jc21/nginx-proxy-manager:2.13.6`
 - Ports (from Services): `80`, `81`, `389`, `443`, `636`, `3306`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload

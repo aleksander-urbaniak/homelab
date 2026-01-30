@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Speedtest Tracker**.
 
 - Compose file(s): `compose.yml`
 - Services: `speedtest-tracker`, `speedtest-tracker-db`
-- Images: `lscr.io/linuxserver/speedtest-tracker:latest`, `postgres:15`
+- Images: `lscr.io/linuxserver/speedtest-tracker:1.13.5`, `postgres:15`
 - Published ports: none (likely exposed via reverse proxy or host networking)
 - Environment: uses `.env` (see `.env.example`)
 
