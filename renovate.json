@@ -3,23 +3,34 @@
   "extends": [
     "config:recommended"
   ],
-  "labels": ["update"],
+  "labels": [
+    "update"
+  ],
   "platformAutomerge": false,
   "packageRules": [
     {
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
       "automerge": true,
       "autoApprove": true
     }
   ],
   "kubernetes": {
-    "fileMatch": ["^kubernetes/applications/.+\\.ya?ml$"]
+    "managerFilePatterns": [
+      "/^kubernetes/applications/.+\\.ya?ml$/"
+    ]
   },
   "docker-compose": {
-    "fileMatch": [
-      "^docker/applications/.+/(?:docker-)?compose\\.ya?ml$",
-      "^docker/applications/.+/.+-compose\\.ya?ml$"
+    "managerFilePatterns": [
+      "/^docker/applications/.+/(?:docker-)?compose\\.ya?ml$/",
+      "/^docker/applications/.+/.+-compose\\.ya?ml$/"
     ]
   }
 }
