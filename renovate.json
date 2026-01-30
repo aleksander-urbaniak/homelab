@@ -1,37 +1,24 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
-  "labels": [
-    "update"
-  ],
-  "platformAutomerge": false,
+  "extends": ["config:recommended"],
+  "labels": ["update"],
+
   "packageRules": [
     {
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
-      ],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
-      "autoApprove": true,
-      "ignoreTests": true
+      "automergeType": "pr"
     }
   ],
+
   "kubernetes": {
-    "managerFilePatterns": [
-      "/^kubernetes/applications/.+\\.ya?ml$/"
-    ]
+    "managerFilePatterns": ["/^kubernetes\\/applications\\/.+\\.ya?ml$/"]
   },
   "docker-compose": {
     "managerFilePatterns": [
-      "/^docker/applications/.+/(?:docker-)?compose\\.ya?ml$/",
-      "/^docker/applications/.+/.+-compose\\.ya?ml$/"
+      "/^docker\\/applications\\/.+\\/(?:docker-)?compose\\.ya?ml$/",
+      "/^docker\\/applications\\/.+\\/.+-compose\\.ya?ml$/"
     ]
   }
 }
