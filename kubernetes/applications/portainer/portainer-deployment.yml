@@ -21,7 +21,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
       - name: portainer
-        image: portainer/portainer-ce:2.36.0
+        image: portainer/portainer-ce:2.38.0
         imagePullPolicy: IfNotPresent
         ports:
         - name: edge
