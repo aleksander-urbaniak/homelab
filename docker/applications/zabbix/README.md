@@ -12,8 +12,8 @@ This folder contains a Docker Compose setup for **Zabbix**.
 
 - Compose file(s): `compose.yml`
 - Services: `zabbix-db`, `zabbix-snmptraps`, `zabbix-server-pgsql`, `zabbix-server-web`
-- Images: `postgres:16`, `zabbix/zabbix-server-pgsql:alpine-trunk`, `zabbix/zabbix-snmptraps:alpine-trunk`, `zabbix/zabbix-web-nginx-pgsql:alpine-trunk`
-- Published ports: `162`, `10051`
+- Images: `postgres:16`, `zabbix/zabbix-snmptraps:alpine-trunk`, `zabbix/zabbix-server-pgsql:alpine-trunk`, `zabbix/zabbix-web-nginx-pgsql:alpine-trunk`
+- Published ports: `162 -> 1162/udp`, `10051`
 - Environment: uses `.env` (see `.env.example`)
 
 ---
@@ -28,6 +28,7 @@ This folder contains a Docker Compose setup for **Zabbix**.
 - **Environment**: copy `.env.example` to `.env` and fill in values before starting the stack.
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

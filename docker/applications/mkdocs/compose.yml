@@ -1,5 +1,7 @@
 services:
   mkdocs:
-    image: squidfunk/mkdocs-material:latest
+    image: squidfunk/mkdocs-material:9.7.1
+    ports:
+      - "8000:8000"
     volumes:
       - /docker/mkdocs/:/docs

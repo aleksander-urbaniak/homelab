@@ -1,4 +1,4 @@
-![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox-E57000?logo=proxmox&logoColor=white) ![Orchestration](https://img.shields.io/badge/Orchestration-k3s-FFC61C?logo=k3s&logoColor=white) ![Containerization](https://img.shields.io/badge/Containerization-Docker-2496ED?logo=docker&logoColor=white) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow) ![License](https://img.shields.io/badge/License-MIT-Green)
+﻿![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox-E57000?logo=proxmox&logoColor=white) ![Orchestration](https://img.shields.io/badge/Orchestration-k3s-FFC61C?logo=k3s&logoColor=white) ![Containerization](https://img.shields.io/badge/Containerization-Docker-2496ED?logo=docker&logoColor=white) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow) ![License](https://img.shields.io/badge/License-MIT-Green)
 
 
 ## 🏠My Homelab Infrastructure
@@ -18,20 +18,29 @@ This repository serves as the central brain for a homelab. It is designed to be 
 ## 📂 Repo Layout
 
 ```text
+├── .github/          # GitHub workflows/templates
 ├── ansible/          # Inventory + playbooks (bootstrap, agents, monitoring)
 ├── backups/          # Backup strategies, scripts, runbooks
+|   └──  README.md
 ├── diy-rpi5-nas/     # DIY Raspberry Pi 5 NAS setup
-├── docker/           # Docker Compose catalog
-│   └── applications/
+|   └──  README.md
+├── docker/           # Docker compose files and scripts
+├── img/              # Diagrams and screenshots
 ├── kubernetes/       # K3s docs and manifests
-│   └── applications/
 ├── linux/            # Linux scripts and docs
 ├── networking/       # DNS, reverse proxy, and network notes
-│   └── overview.md
+|   └──  README.md
 ├── proxmox/          # Cluster config, firewall rules, scripts
 ├── secrets/          # Secrets handling guidance (no real keys)
-└── windows/          # Windows notes/scripts (if needed)
+|   └──  README.md      
+└── windows/          # Windows notes/scripts
 ```
+
+
+
+
+
+
 
 > NOTE: Each application folder under `kubernetes/applications/` and `docker/applications/` includes its own `README.md` with deployment commands and specific notes.
 

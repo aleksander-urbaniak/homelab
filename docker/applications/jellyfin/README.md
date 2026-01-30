@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Jellyfin**.
 
 - Compose file(s): `compose.yml`
 - Services: `jellyfin`
-- Images: `jellyfin/jellyfin:10.11.5`
+- Image: `jellyfin/jellyfin:10.11.6`
 - Published ports: `8096`, `8920`
 
 ---
@@ -25,6 +25,7 @@ This folder contains a Docker Compose setup for **Jellyfin**.
 
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

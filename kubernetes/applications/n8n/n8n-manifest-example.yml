@@ -3,7 +3,6 @@ kind: Namespace
 metadata:
   name: n8n
 ---
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -17,7 +16,6 @@ spec:
     requests:
       storage: 2Gi
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -33,7 +31,6 @@ spec:
       port: 5432
       targetPort: 5432
 ---
-
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -92,7 +89,6 @@ spec:
           requests:
             storage: 2Gi
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -204,7 +200,6 @@ spec:
           persistentVolumeClaim:
             claimName: n8n-data-pvc
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -220,3 +215,33 @@ spec:
     - name: http
       port: 5678
       targetPort: 5678
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n8n-ingress
+  namespace: n8n
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/auth-type: "basic"
+    nginx.ingress.kubernetes.io/auth-secret: n8n-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - n8n.example.com
+      secretName: n8n-tls
+  rules:
+    - host: n8n.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: n8n-app
+                port:
+                  number: 5678

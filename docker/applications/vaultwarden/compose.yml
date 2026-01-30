@@ -1,9 +1,11 @@
 version: '3.8'
 services:
   vaultwarden:
-    image: vaultwarden/server:latest
+    image: vaultwarden/server:1.35.2
     environment:
       DATABASE_URL: ${VAULTWARDEN_DATABASE_URL}
+    ports:
+      - "80:80"
     volumes:
       - '/docker/vaultwarden/:/data'
 

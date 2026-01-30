@@ -12,8 +12,8 @@ This folder contains a Docker Compose setup for **Pi-hole**.
 
 - Compose file(s): `compose.yml`
 - Services: `pihole`
-- Image: `pihole/pihole:2025.01.0`
-- Published ports: `53/tcp`, `53/udp`, `PIHOLE_WEB_PORT` → `80`
+- Image: `pihole/pihole:2025.11.1`
+- Published ports: `53/tcp`, `53/udp`, `${PIHOLE_WEB_PORT} -> 80/tcp`
 - Environment: uses `.env` (see `.env.example`)
 
 ---
@@ -28,6 +28,7 @@ This folder contains a Docker Compose setup for **Pi-hole**.
 - **Environment**: copy `.env.example` to `.env` and fill in values before starting the stack.
 - **DNS port**: this container binds host port `53`; ensure nothing else on the host is using it.
 - **Storage**: this stack uses bind mounts under `/mnt/docker/pihole/` for persistence.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

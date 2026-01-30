@@ -12,7 +12,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Vaultwarden** (n
 
 - Namespace: `vaultwarden`
 - Images: `postgres:18`, `vaultwarden/server:1.34.3`
-- Ports (from Services): `80`, `5432`
+- Ports (from Services): `5432`, `80`
 - StorageClass: `longhorn`
 - Node placement: uses `nodeSelector` in at least one workload
 
@@ -20,23 +20,23 @@ This folder contains a k3s-ready Kubernetes configuration for **Vaultwarden** (n
 
 ## 🧱 What gets deployed
 
-- `secrets-example.yml`: Example secrets (placeholders)
+- `vaultwarden-namespace.yml`: Namespace
+- `vaultwarden-secrets.yml`: Secret
+- `vaultwarden-pvc.yml`: PersistentVolumeClaim (storage)
 - `vaultwarden-db-headless-service.yml`: Service
 - `vaultwarden-db-service.yml`: Service
-- `vaultwarden-db-statefulset.yml`: StatefulSet
-- `vaultwarden-deployment.yml`: Deployment
-- `vaultwarden-manifest-example.yml`: Example combined manifest (with placeholders)
-- `vaultwarden-manifest.yml`: Combined multi-document manifest
-- `vaultwarden-namespace.yml`: Namespace
-- `vaultwarden-pvc.yml`: PersistentVolumeClaim (storage)
-- `vaultwarden-secrets.yml`: Secrets
 - `vaultwarden-service.yml`: Service
+- `vaultwarden-deployment.yml`: Deployment
+- `vaultwarden-db-statefulset.yml`: StatefulSet
+- `vaultwarden-ingress.yml`: Ingress
+- `vaultwarden-manifest.yml`: Combined multi-document manifest
 
 ## Configuration notes (k3s)
 
 - **Storage**: PVCs reference the StorageClass above; adjust it if your cluster uses something else.
 - **Node placement**: Some workloads pin to specific nodes via `nodeSelector`; adjust labels as needed.
 - **External access**: Most Services are `ClusterIP`; expose via Ingress / Gateway / reverse proxy as desired.
+- **Images**: manifest files are the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
@@ -44,11 +44,11 @@ This folder may include both **combined** manifests (`*-manifest*.yml`) and **sp
 
 ### Option A: apply the combined manifest
 
-1. Edit `vaultwarden-manifest-example.yml` and replace placeholders.
+1. Edit `vaultwarden-manifest.yml` and replace placeholders.
 2. Apply:
 
 ```bash
-kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-manifest-example.yml
+kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-manifest.yml
 ```
 
 ### Option B: apply the split manifests
@@ -60,8 +60,9 @@ kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-pvc.yml
 kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-db-headless-service.yml
 kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-db-service.yml
 kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-service.yml
-kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-db-statefulset.yml
 kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-deployment.yml
+kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-db-statefulset.yml
+kubectl apply -f kubernetes/applications/vaultwarden/vaultwarden-ingress.yml
 ```
 
 Tip: start by copying/editing `secrets-example.yml` (and any `*-secrets.yml`) before applying.

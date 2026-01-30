@@ -12,7 +12,7 @@ This folder contains a Docker Compose setup for **Home Assistant**.
 
 - Compose file(s): `compose.yml`
 - Services: `homeassistant`
-- Images: `homeassistant/home-assistant:2025.12`
+- Image: `homeassistant/home-assistant:2025.12`
 - Networking: at least one service uses `network_mode: host`
 - Published ports: `8123`
 
@@ -26,6 +26,7 @@ This folder contains a Docker Compose setup for **Home Assistant**.
 
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

@@ -16,8 +16,8 @@ This folder contains a k3s-ready Kubernetes configuration for **MetalLB** (names
 
 ## 🧱 What gets deployed
 
-- `metallb-addr-pool.yml`: Kubernetes manifest
-- `metallb-l2-advertisment.yml`: Kubernetes manifest
+- `metallb-addr-pool.yml`: IPAddressPool
+- `metallb-l2-advertisment.yml`: L2Advertisement
 
 ## Configuration notes (k3s)
 

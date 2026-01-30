@@ -11,9 +11,9 @@ This folder contains a Docker Compose setup for **Nextcloud** (app + PostgreSQL)
 ## 🎯 Quick facts
 
 - Compose file(s): `compose.yml`
-- Services: `nextcloud-app`, `nextcloud-postgres`
-- Images: `nextcloud:31`, `postgres:17`
-- Published ports: `NEXTCLOUD_PORT` → `80`
+- Services: `nextcloud-postgres`, `nextcloud-app`
+- Images: `postgres:17`, `nextcloud:31`
+- Published ports: `${NEXTCLOUD_PORT} -> 80`
 - Environment: uses `.env` (see `.env.example`)
 
 ---
@@ -28,6 +28,7 @@ This folder contains a Docker Compose setup for **Nextcloud** (app + PostgreSQL)
 - **Environment**: copy `.env.example` to `.env` and fill in values before starting the stack.
 - **Storage**: this stack uses bind mounts under `/mnt/docker/nextcloud/` (`db/` and `html/`).
 - **Reverse proxy**: expose the service on `NEXTCLOUD_PORT` and set `NEXTCLOUD_TRUSTED_DOMAINS` for your domain(s).
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 

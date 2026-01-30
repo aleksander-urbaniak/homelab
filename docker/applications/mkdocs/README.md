@@ -12,8 +12,8 @@ This folder contains a Docker Compose setup for **MkDocs**.
 
 - Compose file(s): `compose.yml`
 - Services: `mkdocs`
-- Images: `squidfunk/mkdocs-material:latest`
-- Published ports: none (likely exposed via reverse proxy or host networking)
+- Image: `squidfunk/mkdocs-material:9.7.1`
+- Published ports: `8000`
 
 ---
 
@@ -26,6 +26,7 @@ This folder contains a Docker Compose setup for **MkDocs**.
 
 - **Storage**: review bind mounts / volume paths and ensure host directories exist with correct permissions.
 - **Updates**: image tags are pinned in the compose file; update them when you want to upgrade.
+- **Images**: `compose.yml` is the source of truth; Renovate may update image tags automatically, so this README can drift.
 
 ## Deploy 🚀
 
