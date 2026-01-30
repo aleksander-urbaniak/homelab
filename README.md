@@ -15,6 +15,27 @@ This repository serves as the central brain for a homelab. It is designed to be 
 - 🐳 **Containerization**: a Docker Compose catalog for standalone services
 - 🤖 **Automation**: Ansible playbooks, n8n workflows and GitLab CI/CD pipelines
 
+## 📑 Table of Contents
+
+- [Overview](#overview)
+- [Repo Layout](#repo-layout)
+- [Hardware](#hardware)
+- [Core applications / services](#core-applications--services)
+- [Applications](#applications)
+  - [Infrastructure & Networking](#infrastructure--networking)
+  - [Observability & Monitoring](#observability--monitoring)
+  - [Media & Automation (*Arr Stack)](#media--automation-arr-stack)
+  - [Productivity & Tools](#productivity--tools)
+- [Features](#features)
+  - [Platform](#platform)
+  - [Kubernetes & Apps](#kubernetes--apps)
+  - [Docker & Apps](#docker--apps)
+  - [Observability & Security](#observability--security)
+  - [Automation & Runbooks](#automation--runbooks)
+  - [Git Hygiene](#git-hygiene)
+- [Security](#security)
+- [License](#license)
+
 ## 📂 Repo Layout
 
 ```text
@@ -35,12 +56,6 @@ This repository serves as the central brain for a homelab. It is designed to be 
 |   └──  README.md      
 └── windows/          # Windows notes/scripts
 ```
-
-
-
-
-
-
 
 > NOTE: Each application folder under `kubernetes/applications/` and `docker/applications/` includes its own `README.md` with deployment commands and specific notes.
 
