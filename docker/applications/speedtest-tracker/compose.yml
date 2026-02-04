@@ -19,7 +19,7 @@ services:
             - './web:/etc/ssl/web'
         ports:
             - "80:80"
-        image: 'lscr.io/linuxserver/speedtest-tracker:1.13.6'
+        image: 'lscr.io/linuxserver/speedtest-tracker:1.13.8'
         depends_on:
             - speedtest-tracker-db
 
