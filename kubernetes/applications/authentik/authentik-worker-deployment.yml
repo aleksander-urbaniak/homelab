@@ -72,7 +72,7 @@ spec:
               memory: 128Mi
       containers:
         - name: authentik-worker
-          image: ghcr.io/goauthentik/server:2025.12.1
+          image: ghcr.io/goauthentik/server:2025.12.3
           imagePullPolicy: IfNotPresent
           args: ["worker"]
           env:
