@@ -21,7 +21,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:2026.1.2
+          image: cloudflare/cloudflared:2026.2.0
           imagePullPolicy: Always
           command: ["cloudflared"]
           args:
