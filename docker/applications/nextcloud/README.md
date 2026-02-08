@@ -1,4 +1,4 @@
-# 🗂️ Nextcloud (Docker)
+# 🗂️ Nextcloud (Docker) ✨
 
 > ✨ **What is Nextcloud?**
 >

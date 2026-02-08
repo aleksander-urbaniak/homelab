@@ -1,4 +1,4 @@
-# 📂 Pi5-NAS-4Bay
+# 📂 Pi5-NAS-4Bay ✨
 
 ![Status](https://img.shields.io/badge/Status-Operational-success?style=flat-square) ![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_5-C51A4A?style=flat-square) ![OS](https://img.shields.io/badge/OS-Raspberry_Pi_OS_Lite-A22846?style=flat-square) ![Service](https://img.shields.io/badge/Service-OpenMediaVault-blue?style=flat-square)
 

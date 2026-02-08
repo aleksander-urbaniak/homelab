@@ -1,4 +1,4 @@
-# 🌐 Networking (Homelab)
+# 🌐 Networking (Homelab) ✨
 
 > ✨ **What is this?**
 >

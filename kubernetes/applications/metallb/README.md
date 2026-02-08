@@ -1,4 +1,4 @@
-# 🗂️ MetalLB (k3s)
+# 🗂️ MetalLB (k3s) ✨
 
 > ✨ **What is MetalLB?**
 >

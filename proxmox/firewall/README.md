@@ -1,4 +1,4 @@
-# `cluster.fw` (Proxmox Cluster Firewall) — Markdown View
+# `cluster.fw` (Proxmox Cluster Firewall) — Markdown View ✨
 
 Source file: `proxmox/firewall/cluster.fw`
 

@@ -1,4 +1,4 @@
-# 🗂️ Affine (k3s)
+# 🗂️ Affine (k3s) ✨
 
 > ✨ **What is Affine?**
 >

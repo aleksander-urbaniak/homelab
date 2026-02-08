@@ -1,4 +1,4 @@
-# 🗂️ Sonarr (Docker)
+# 🗂️ Sonarr (Docker) ✨
 
 > ✨ **What is Sonarr?**
 >

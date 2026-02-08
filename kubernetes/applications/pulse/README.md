@@ -1,4 +1,4 @@
-# 🗂️ Pulse (k3s)
+# 🗂️ Pulse (k3s) ✨
 
 > ✨ **What is Pulse?**
 >

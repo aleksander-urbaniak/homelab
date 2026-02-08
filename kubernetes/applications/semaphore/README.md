@@ -1,4 +1,4 @@
-# 🗂️ Semaphore (k3s)
+# 🗂️ Semaphore (k3s) ✨
 
 > ✨ **What is Semaphore?**
 >

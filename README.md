@@ -1,7 +1,7 @@
 ﻿﻿﻿![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox-E57000?logo=proxmox&logoColor=white) ![Orchestration](https://img.shields.io/badge/Orchestration-k3s-FFC61C?logo=k3s&logoColor=white) ![Containerization](https://img.shields.io/badge/Containerization-Docker-2496ED?logo=docker&logoColor=white) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow) ![License](https://img.shields.io/badge/License-MIT-Green)
 
 
-## 🏠 My Homelab Infrastructure
+## 🏠 My Homelab Infrastructure ✨
 
 ##### A practical, "batteries-included" Infrastructure-as-Code repository.
 ##### Built with Proxmox, Kubernetes, and GitOps principles.
@@ -53,12 +53,14 @@ This repository serves as the central brain for a homelab. It is designed to be 
 ├── img/              # Diagrams and screenshots
 ├── kubernetes/       # K3s docs and manifests
 │   ├── applications/
+│   ├── k3s-dns-setup/
 │   └── k3s-setup/
 ├── linux/            # Linux scripts and docs
 ├── networking/       # DNS, reverse proxy, and network notes
 │   └── README.md
 ├── proxmox/          # Cluster config, firewall rules, scripts
 ├── secrets/          # Secrets handling guidance (no real keys)
+├── vpn/              # VPN configs and runbooks
 └── windows/          # Windows notes/scripts
 ```
 
@@ -180,6 +182,7 @@ Services are divided between Kubernetes (HA/in-cluster) and Docker (standalone).
 | Nginx Proxy Manager | GUI-managed reverse proxy | K8s |
 | Pi-hole | DNS sinkhole / ad-blocking | K8s |
 | Nebula-sync | Sync Pi-hole configuration between instances | K8s |
+| WireGuard (wg-easy) | Remote access VPN | Docker |
 | Rancher / Fleet | Cluster management + GitOps-style deployments | K8s |
 | Renovate | Automated updates | K8s |
 | Portainer | Container management UI | K8s / Docker |
@@ -233,7 +236,7 @@ Services are divided between Kubernetes (HA/in-cluster) and Docker (standalone).
 
 - [x] Proxmox cluster firewall configuration (`proxmox/firewall/cluster.fw`)
 - [x] Human-friendly firewall markdown view (`proxmox/firewall/cluster.fw.md`)
-- [x] HA-style K3s install guide (`kubernetes/k3s/k3s-install-rhel.md`)
+- [x] HA-style K3s install guide (`kubernetes/k3s-setup/README.md`)
 
 ### ☸️ Kubernetes & Apps
 
@@ -261,6 +264,9 @@ Services are divided between Kubernetes (HA/in-cluster) and Docker (standalone).
 - [x] Promtail deployment playbook (`ansible/playbooks/linux-install-promtail.yml`)
 - [x] Authentik LDAP + SSSD guide (`linux/docs/README-authentik-ldap.md`)
 - [x] Backup strategy document (`backups/BACKUP-STRATEGY.md`)
+- [x] K3s CoreDNS + private DNS guide (`kubernetes/k3s-dns-setup/README.md`)
+- [x] Cloudflare Tunnel + WARP private access runbook (`vpn/cloudlfare-tunnel/README.md`)
+- [x] WireGuard (wg-easy) LXC + Docker guide (`vpn/wireguard/README.md`)
 
 ### 🔐 Git Hygiene
 

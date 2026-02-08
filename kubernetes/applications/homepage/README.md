@@ -1,4 +1,4 @@
-# 🗂️ Homepage (k3s)
+# 🗂️ Homepage (k3s) ✨
 
 > ✨ **What is Homepage?**
 >

@@ -1,4 +1,4 @@
-# 🗂️ Jackett (Docker)
+# 🗂️ Jackett (Docker) ✨
 
 > ✨ **What is Jackett?**
 >

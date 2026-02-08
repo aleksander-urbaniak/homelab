@@ -1,4 +1,4 @@
-# 🗂️ Guacamole (k3s)
+# 🗂️ Guacamole (k3s) ✨
 
 > ✨ **What is Guacamole?**
 >

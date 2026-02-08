@@ -1,4 +1,4 @@
-# 🗂️ Guacamole (Docker)
+# 🗂️ Guacamole (Docker) ✨
 
 > ✨ **What is Guacamole?**
 >

@@ -1,4 +1,4 @@
-# 🗂️ Pastefy (Docker)
+# 🗂️ Pastefy (Docker) ✨
 
 > ✨ **What is Pastefy?**
 >

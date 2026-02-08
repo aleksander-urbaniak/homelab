@@ -1,4 +1,4 @@
-# 🗂️ GitLab (k3s)
+# 🗂️ GitLab (k3s) ✨
 
 > ✨ **What is GitLab?**
 >

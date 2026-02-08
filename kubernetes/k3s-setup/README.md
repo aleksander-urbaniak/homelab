@@ -1,4 +1,4 @@
-# K3s Install on RHEL
+# 📘 K3s Install on RHEL ✨
 
 This guide sets up a highly available K3s cluster on RHEL-based systems with:
 - 3 control-plane nodes

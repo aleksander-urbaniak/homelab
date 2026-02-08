@@ -1,4 +1,4 @@
-﻿# 🔔 Apprise (k3s)
+# 🔔 Apprise (k3s) ✨
 
 > ✨ **What is Apprise?**
 >

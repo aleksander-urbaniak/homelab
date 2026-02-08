@@ -1,4 +1,4 @@
-# 🗂️ Alertmanager (k3s)
+# 🗂️ Alertmanager (k3s) ✨
 
 > ✨ **What is Alertmanager?**
 >

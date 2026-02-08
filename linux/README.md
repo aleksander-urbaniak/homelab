@@ -1,4 +1,4 @@
-# 🐧 Linux
+# 🐧 Linux ✨
 
 ![Platform](https://img.shields.io/badge/Platform-Linux-FCC624?style=flat-square&logo=linux&logoColor=black) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow?style=flat-square)
 

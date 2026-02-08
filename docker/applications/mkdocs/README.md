@@ -1,4 +1,4 @@
-# 🗂️ MkDocs (Docker)
+# 🗂️ MkDocs (Docker) ✨
 
 > ✨ **What is MkDocs?**
 >

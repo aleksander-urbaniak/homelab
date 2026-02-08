@@ -1,4 +1,4 @@
-# 🗂️ kube-state-metrics (k3s)
+# 🗂️ kube-state-metrics (k3s) ✨
 
 > ✨ **What is kube-state-metrics?**
 >

@@ -1,4 +1,4 @@
-# 🗂️ cloudflared (k3s)
+# 🗂️ cloudflared (k3s) ✨
 
 > ✨ **What is cloudflared?**
 >

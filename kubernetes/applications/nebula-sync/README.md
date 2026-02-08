@@ -1,4 +1,4 @@
-# 🗂️ nebula-sync (k3s)
+# 🗂️ nebula-sync (k3s) ✨
 
 > ✨ **What is nebula-sync?**
 >

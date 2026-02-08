@@ -1,4 +1,4 @@
-# 🗂️ Pi-hole Exporter (k3s)
+# 🗂️ Pi-hole Exporter (k3s) ✨
 
 > ✨ **What is Pi-hole Exporter?**
 >

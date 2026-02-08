@@ -1,4 +1,4 @@
-# 🗂️ Grafana (k3s)
+# 🗂️ Grafana (k3s) ✨
 
 > ✨ **What is Grafana?**
 >

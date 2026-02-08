@@ -1,4 +1,4 @@
-# 🗂️ Vaultwarden (k3s)
+# 🗂️ Vaultwarden (k3s) ✨
 
 > ✨ **What is Vaultwarden?**
 >

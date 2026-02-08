@@ -1,4 +1,4 @@
-# 🗂️ Wallos (k3s)
+# 🗂️ Wallos (k3s) ✨
 
 > ✨ **What is Wallos?**
 >

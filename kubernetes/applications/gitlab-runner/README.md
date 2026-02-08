@@ -1,4 +1,4 @@
-# 🗂️ GitLab Runner (k3s)
+# 🗂️ GitLab Runner (k3s) ✨
 
 > ✨ **What is GitLab Runner?**
 >

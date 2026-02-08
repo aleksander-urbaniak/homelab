@@ -1,4 +1,4 @@
-# 🗂️ Nginx Proxy Manager (Docker)
+# 🗂️ Nginx Proxy Manager (Docker) ✨
 
 > ✨ **What is Nginx Proxy Manager?**
 >

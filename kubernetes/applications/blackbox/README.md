@@ -1,4 +1,4 @@
-# 🗂️ Blackbox Exporter (k3s)
+# 🗂️ Blackbox Exporter (k3s) ✨
 
 > ✨ **What is Blackbox Exporter?**
 >

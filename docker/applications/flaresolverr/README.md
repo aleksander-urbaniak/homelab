@@ -1,4 +1,4 @@
-# 🗂️ FlareSolverr (Docker)
+# 🗂️ FlareSolverr (Docker) ✨
 
 > ✨ **What is FlareSolverr?**
 >

@@ -1,4 +1,4 @@
-# 🗂️ Pi-hole (Docker)
+# 🗂️ Pi-hole (Docker) ✨
 
 > ✨ **What is Pi-hole?**
 >

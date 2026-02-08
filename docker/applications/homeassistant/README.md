@@ -1,4 +1,4 @@
-# 🗂️ Home Assistant (Docker)
+# 🗂️ Home Assistant (Docker) ✨
 
 > ✨ **What is Home Assistant?**
 >

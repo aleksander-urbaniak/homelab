@@ -1,4 +1,4 @@
-# 🗂️ Portainer (k3s)
+# 🗂️ Portainer (k3s) ✨
 
 > ✨ **What is Portainer?**
 >

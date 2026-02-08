@@ -1,4 +1,4 @@
-# 🗂️ Node Exporter (k3s)
+# 🗂️ Node Exporter (k3s) ✨
 
 > ✨ **What is Node Exporter?**
 >

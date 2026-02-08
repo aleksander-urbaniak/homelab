@@ -1,4 +1,4 @@
-# 🗂️ Pastefy (k3s)
+# 🗂️ Pastefy (k3s) ✨
 
 > ✨ **What is Pastefy?**
 >

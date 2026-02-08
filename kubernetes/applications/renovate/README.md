@@ -1,4 +1,4 @@
-# 🗂️ Renovate (k3s)
+# 🗂️ Renovate (k3s) ✨
 
 > ✨ **What is Renovate?**
 >

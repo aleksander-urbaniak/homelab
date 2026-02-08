@@ -1,4 +1,4 @@
-# 🗂️ Nginx Proxy Manager (k3s)
+# 🗂️ Nginx Proxy Manager (k3s) ✨
 
 > ✨ **What is Nginx Proxy Manager?**
 >

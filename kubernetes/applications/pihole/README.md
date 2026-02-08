@@ -1,4 +1,4 @@
-# 🗂️ Pi-hole (k3s)
+# 🗂️ Pi-hole (k3s) ✨
 
 > ✨ **What is Pi-hole?**
 >

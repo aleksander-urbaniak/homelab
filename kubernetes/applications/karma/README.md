@@ -1,4 +1,4 @@
-# 🗂️ Karma (k3s)
+# 🗂️ Karma (k3s) ✨
 
 > ✨ **What is Karma?**
 >

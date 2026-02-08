@@ -1,4 +1,4 @@
-# 🗂️ authentik (k3s)
+# 🗂️ authentik (k3s) ✨
 
 > ✨ **What is authentik?**
 >

@@ -1,4 +1,4 @@
-# 🗂️ Speedtest Tracker (k3s)
+# 🗂️ Speedtest Tracker (k3s) ✨
 
 > ✨ **What is Speedtest Tracker?**
 >

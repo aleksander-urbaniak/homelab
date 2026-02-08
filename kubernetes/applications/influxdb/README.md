@@ -1,4 +1,4 @@
-# 🗂️ InfluxDB (k3s)
+# 🗂️ InfluxDB (k3s) ✨
 
 > ✨ **What is InfluxDB?**
 >

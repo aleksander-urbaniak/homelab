@@ -1,4 +1,4 @@
-# 🗂️ Vaultwarden (Docker)
+# 🗂️ Vaultwarden (Docker) ✨
 
 > ✨ **What is Vaultwarden?**
 >

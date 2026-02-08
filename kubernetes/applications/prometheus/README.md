@@ -1,4 +1,4 @@
-# 🗂️ Prometheus (k3s)
+# 🗂️ Prometheus (k3s) ✨
 
 > ✨ **What is Prometheus?**
 >

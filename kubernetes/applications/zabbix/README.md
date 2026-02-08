@@ -1,4 +1,4 @@
-# 🗂️ Zabbix (k3s)
+# 🗂️ Zabbix (k3s) ✨
 
 > ✨ **What is Zabbix?**
 >

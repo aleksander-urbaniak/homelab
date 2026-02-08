@@ -1,4 +1,4 @@
-# K3s + CoreDNS: Cluster DNS and Private LAN DNS Together
+# 📘 K3s + CoreDNS: Cluster DNS and Private LAN DNS Together ✨
 
 This guide fixes a K3s setup where:
 - Cluster DNS works (for example, `kubernetes.default.svc.k3s.example.com`).
