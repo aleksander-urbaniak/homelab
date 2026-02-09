@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flarewatcher
+  namespace: flarewatcher
+  labels:
+    app: flarewatcher
+spec:
+  type: ClusterIP
+  selector:
+    app: flarewatcher
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

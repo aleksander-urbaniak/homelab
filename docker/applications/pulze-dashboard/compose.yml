@@ -1,0 +1,12 @@
+services:
+  pulze-dashboard:
+    image: aleksanderurbaniak/pulze-dashboard:v1.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      APP_BASE_URL: ${APP_BASE_URL:-}
+    volumes:
+      - pulze-data:/app/data
+
+volumes:
+  pulze-data:

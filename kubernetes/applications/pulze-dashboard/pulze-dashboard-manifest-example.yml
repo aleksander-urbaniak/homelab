@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pulze-dashboard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pulze-dashboard-data-pvc
+  namespace: pulze-dashboard
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulze-dashboard
+  namespace: pulze-dashboard
+  labels:
+    app: pulze-dashboard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pulze-dashboard
+  template:
+    metadata:
+      labels:
+        app: pulze-dashboard
+    spec:
+      containers:
+        - name: pulze-dashboard
+          image: aleksanderurbaniak/pulze-dashboard:v1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: APP_BASE_URL
+              value: "https://pulze-dashboard.example.com"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pulze-dashboard-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pulze-dashboard
+  namespace: pulze-dashboard
+  labels:
+    app: pulze-dashboard
+spec:
+  type: ClusterIP
+  selector:
+    app: pulze-dashboard
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pulze-dashboard-ingress
+  namespace: pulze-dashboard
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/auth-type: "basic"
+    nginx.ingress.kubernetes.io/auth-secret: pulze-dashboard-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - pulze-dashboard.example.com
+      secretName: pulze-dashboard-tls
+  rules:
+    - host: pulze-dashboard.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pulze-dashboard
+                port:
+                  number: 3000
