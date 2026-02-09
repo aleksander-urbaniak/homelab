@@ -1,0 +1,17 @@
+services:
+  nexterm:
+    image: germannewsmaker/nexterm:1.2.0-BETA
+    container_name: nexterm
+    pull_policy: always
+    env_file:
+      - .env
+    environment:
+      ENCRYPTION_KEY: ${NEXTERM_ENCRYPTION_KEY}
+    ports:
+      - "${NEXTERM_PORT}:6989"
+    restart: unless-stopped
+    volumes:
+      - nexterm-data:/app/data
+
+volumes:
+  nexterm-data:

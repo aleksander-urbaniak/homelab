@@ -226,7 +226,7 @@ Services are divided between Kubernetes (HA/in-cluster) and Docker (standalone).
 | Guacamole | Clientless remote desktop gateway | K8s |
 | Nextcloud | File sync + collaboration | Docker |
 | Home Assistant | Home automation platform | Docker |
-| Nexterm | Web terminal / remote access UI | Docker |
+| Nexterm | Web terminal / remote access UI | K8s / Docker |
 | Postfix relay | SMTP relay for outbound mail | Docker |
 
 
