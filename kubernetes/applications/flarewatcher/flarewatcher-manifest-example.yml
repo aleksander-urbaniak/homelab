@@ -44,10 +44,26 @@ spec:
       labels:
         app: flarewatcher
     spec:
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: init-data-permissions
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - mkdir -p /app/data && chown -R 1001:1001 /app/data && chmod -R ug+rwX /app/data
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
       containers:
         - name: flarewatcher
-          image: aleksanderurbaniak/flarewatcher:v1.0.0
-          imagePullPolicy: IfNotPresent
+          image: aleksanderurbaniak/flarewatcher:v1.0.4
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 3000
@@ -59,6 +75,10 @@ spec:
                 secretKeyRef:
                   name: flarewatcher-env
                   key: SECRET_ENCRYPTION_KEY
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+            runAsNonRoot: true
           volumeMounts:
             - name: data
               mountPath: /app/data

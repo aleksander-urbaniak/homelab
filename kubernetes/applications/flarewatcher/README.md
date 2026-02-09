@@ -11,7 +11,7 @@ This folder contains a k3s-ready Kubernetes configuration for **Flarewatcher** (
 ## 🎯 Quick facts
 
 - Namespace: `flarewatcher`
-- Image: `aleksanderurbaniak/flarewatcher:v1.0.0`
+- Image: `aleksanderurbaniak/flarewatcher:v1.0.4`
 - Ports (from Services): `3000`
 - StorageClass: `longhorn`
 
