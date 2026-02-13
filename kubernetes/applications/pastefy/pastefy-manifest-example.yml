@@ -49,7 +49,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
         - name: mariadb
-          image: mariadb:12.1
+          image: mariadb:12.2
           imagePullPolicy: IfNotPresent
           env:
             - name: MYSQL_ROOT_PASSWORD
