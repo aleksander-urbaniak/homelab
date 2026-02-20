@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: pulse
-          image: rcourtman/pulse:5.1.11
+          image: rcourtman/pulse:5.1.12
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
