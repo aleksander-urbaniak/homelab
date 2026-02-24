@@ -505,7 +505,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
         - name: ldap
-          image: ghcr.io/goauthentik/ldap:2025.12.4
+          image: ghcr.io/goauthentik/ldap:2026.2.0
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
