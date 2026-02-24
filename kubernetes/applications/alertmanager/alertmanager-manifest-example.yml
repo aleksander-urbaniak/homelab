@@ -6,19 +6,6 @@ metadata:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: alertmanager-config-pvc
-  namespace: alertmanager
-spec:
-  storageClassName: longhorn
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 512Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: alertmanager-data-pvc
   namespace: alertmanager
 spec:
@@ -76,32 +63,9 @@ spec:
         runAsNonRoot: true
         runAsUser: 65534
         fsGroup: 65534
-      initContainers:
-        - name: init-config
-          image: busybox:1.37
-          command:
-            - sh
-            - -c
-            - |
-              if [ ! -f /host-config/alertmanager.yml ]; then
-                cp -r /tmp-config/. /host-config/
-                chown -R 65534:65534 /host-config
-              fi
-          resources:
-            requests:
-              cpu: 10m
-              memory: 16Mi
-            limits:
-              cpu: 50m
-              memory: 64Mi
-          volumeMounts:
-            - name: config-cm
-              mountPath: /tmp-config
-            - name: config-host
-              mountPath: /host-config
       containers:
         - name: alertmanager
-          image: prom/alertmanager:v0.31.1
+          image: prom/alertmanager:v0.30.1
           imagePullPolicy: IfNotPresent
           args:
             - --config.file=/etc/alertmanager/alertmanager.yml
@@ -117,17 +81,14 @@ spec:
               cpu: 500m
               memory: 512Mi
           volumeMounts:
-            - name: config-host
+            - name: config-volume
               mountPath: /etc/alertmanager
             - name: data
               mountPath: /data
       volumes:
-        - name: config-cm
+        - name: config-volume
           configMap:
             name: alertmanager-config
-        - name: config-host
-          persistentVolumeClaim:
-            claimName: alertmanager-config-pvc
         - name: data
           persistentVolumeClaim:
             claimName: alertmanager-data-pvc
