@@ -3,6 +3,29 @@
   "extends": ["config:recommended"],
   "labels": ["update"],
 
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update annotated dependency version variables in docs and example files",
+      "managerFilePatterns": ["/(^|/).+\\.(md|txt|env|sh|ya?ml)$/"],
+      "matchStrings": [
+        "(?:#|//|<!--)\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?(?:\\s+registryUrl=(?<registryUrl>\\S+))?\\s*(?:-->)?\\s+(?:export\\s+)?[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
+        "(?:#|//|<!--)\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?(?:\\s+registryUrl=(?<registryUrl>\\S+))?\\s*(?:-->)?\\s+[A-Za-z0-9_.-]*Version:\\s*[\"']?(?<currentValue>[^\\s\"']+)[\"']?"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Update annotated image tags in docs and example files",
+      "datasourceTemplate": "docker",
+      "managerFilePatterns": ["/(^|/).+\\.(md|txt|sh|ya?ml)$/"],
+      "matchStrings": [
+        "(?:#|//|<!--)\\s*renovate:\\s*image=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\s*(?:-->)?\\s+image:\\s*[\"']?[^:\"'\\s]+:(?<currentValue>[^\\s\"']+)[\"']?"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}"
+    }
+  ],
+
   "packageRules": [
     {
       "matchDatasources": ["docker"],

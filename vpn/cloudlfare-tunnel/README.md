@@ -5,7 +5,7 @@ This runbook documents how to use Cloudflare Zero Trust as remote access for pri
 ## Scope in this repository
 
 - Networking model reference: `networking/README.md`
-- K3s connector deployment: `kubernetes/applications/cloudflared/`
+- K3s connector deployment: `kubernetes/applications/manifests/cloudflared/`
 - Docker connector deployment: `docker/applications/cloudflared/`
 - WireGuard alternative: `vpn/wireguard/README.md`
 
@@ -62,11 +62,11 @@ If you use the onboarding card shown in your screenshots (`Connect a device to p
 ### Option B: Kubernetes connector (recommended for this repo)
 
 1. Create tunnel token in Cloudflare Zero Trust.
-2. Put token in `kubernetes/applications/cloudflared/cloudflared-secrets.yml`.
+2. Put token in `kubernetes/applications/manifests/cloudflared/cloudflared-secrets.yml`.
 3. Deploy:
 
 ```bash
-kubectl apply -f kubernetes/applications/cloudflared/cloudflared-manifest.yml
+kubectl apply -f kubernetes/applications/manifests/cloudflared/cloudflared-manifest.yml
 kubectl -n cloudflared get pods
 ```
 

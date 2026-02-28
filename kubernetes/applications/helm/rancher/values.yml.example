@@ -1,0 +1,4 @@
+# renovate: datasource=helm depName=rancher versioning=helm registryUrl=https://releases.rancher.com/server-charts/latest
+rancherChartVersion: 2.13.3
+bootstrapPassword: REPLACE_ME
+hostname: rancher.example.com

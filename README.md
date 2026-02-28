@@ -35,7 +35,7 @@
 This repository serves as the central brain for a homelab. It is designed to be forked and adapted, providing a solid foundation for:
 
 - ☁️ **Virtualization**: Proxmox configuration snippets and firewall rules
-- ☸️ **Orchestration**: a K3s cluster with apps deployed via plain manifests
+- ☸️ **Orchestration**: a K3s cluster with apps deployed via plain manifests and Helm
 - 🐳 **Containerization**: a Docker Compose catalog for standalone services
 - 🤖 **Automation**: Ansible playbooks, n8n workflows and GitLab CI/CD pipelines
 
@@ -51,8 +51,10 @@ This repository serves as the central brain for a homelab. It is designed to be 
 │   ├── config/
 │   └── scripts/
 ├── img/              # Diagrams and screenshots
-├── kubernetes/       # K3s docs and manifests
+├── kubernetes/       # K3s docs, manifests, and Helm values
 │   ├── applications/
+│   │   ├── helm/
+│   │   └── manifests/
 │   ├── k3s-dns-setup/
 │   └── k3s-setup/
 ├── linux/            # Linux scripts and docs
@@ -64,7 +66,7 @@ This repository serves as the central brain for a homelab. It is designed to be 
 └── windows/          # Windows notes/scripts
 ```
 
-> NOTE: Each application folder under `kubernetes/applications/` and `docker/applications/` includes its own `README.md` with deployment commands and specific notes.
+> NOTE: Each application folder under `kubernetes/applications/helm/`, `kubernetes/applications/manifests/`, and `docker/applications/` includes its own `README.md` with deployment commands and specific notes.
 
 ## 🖥️ Hardware
 
@@ -240,7 +242,7 @@ Services are divided between Kubernetes (HA/in-cluster) and Docker (standalone).
 
 ### ☸️ Kubernetes & Apps
 
-- [x] App manifests organized per namespace/app (`kubernetes/applications/*`)
+- [x] Kubernetes apps split between Helm values and per-app manifests (`kubernetes/applications/helm/*`, `kubernetes/applications/manifests/*`)
 - [x] Per-app docs with deploy commands and split-manifest notes
 - [x] Kubernetes-first services (SSO, monitoring, storage, automation, dashboards)
 
