@@ -80,7 +80,7 @@ spec:
               mountPath: /host-config
       containers:
         - name: karma
-          image: ghcr.io/prymitive/karma:v0.126
+          image: ghcr.io/prymitive/karma:v0.125
           imagePullPolicy: IfNotPresent
           env:
             - name: ALERTMANAGER_URI

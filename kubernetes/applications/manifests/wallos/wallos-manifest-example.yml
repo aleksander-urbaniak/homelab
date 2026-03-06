@@ -73,7 +73,7 @@ spec:
               memory: 64Mi
       containers:
         - name: wallos
-          image: bellamy/wallos:4.6.2
+          image: bellamy/wallos:4.6.1
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ
