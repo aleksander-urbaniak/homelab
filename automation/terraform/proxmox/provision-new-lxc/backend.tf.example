@@ -1,0 +1,10 @@
+terraform {
+  backend "s3" {
+    bucket       = "replace-me"
+    key          = "homelab/proxmox/provision-new-lxc/terraform.tfstate"
+    region       = "eu-central-1"
+    encrypt      = true
+    use_lockfile = true
+  }
+}
+

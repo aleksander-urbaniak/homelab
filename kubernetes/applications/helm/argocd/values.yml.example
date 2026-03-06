@@ -1,0 +1,23 @@
+# renovate: datasource=helm depName=argo-cd versioning=helm registryUrl=https://argoproj.github.io/argo-helm
+argoCdChartVersion: 9.4.7
+
+global:
+  domain: argocd.example.com
+
+configs:
+  secret:
+    # Argo CD expects a bcrypt hash, not plain text.
+    argocdServerAdminPassword: REPLACE_ME_BCRYPT_HASH
+    # Update this when changing the password hash.
+    argocdServerAdminPasswordMtime: "2026-03-06T00:00:00Z"
+  params:
+    server.insecure: "true"
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: argocd.example.com
+    path: /
+    pathType: Prefix
+    tls: true

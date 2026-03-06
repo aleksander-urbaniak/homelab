@@ -1,0 +1,55 @@
+# Provider authentication
+proxmox_endpoint  = "https://pve.example.internal:8006/"
+proxmox_api_token = "terraform@pve!iac=replace-with-token-secret"
+proxmox_insecure  = true
+
+# Workload placement
+node_name = "pve1"
+pool_id   = "production"
+
+# LXC identity
+hostname    = "dns01"
+description = "Production DNS resolver container"
+tags        = ["terraform", "production", "dns"]
+
+# CPU and memory
+cpu_cores           = 2
+memory_dedicated_mb = 2048
+memory_swap_mb      = 512
+
+# Root disk
+root_disk_datastore_id = "local-lvm"
+root_disk_size_gb      = 16
+
+# Template source
+template_node_name    = "pve1"
+template_datastore_id = "local"
+template_file_name    = "debian-12-standard_12.12-1_amd64.tar.zst"
+template_url          = "https://download.proxmox.com/images/system/debian-12-standard_12.12-1_amd64.tar.zst"
+# Set to false only if the Proxmox node cannot validate the remote TLS certificate chain.
+# template_verify_tls = false
+operating_system_type = "debian"
+
+# Network
+network_bridge    = "vmbr0"
+network_vlan_id   = 10
+network_firewall  = true
+ipv4_address      = "192.168.10.50/24"
+ipv4_gateway      = "192.168.10.1"
+dns_search_domain = "lab.internal"
+dns_servers       = ["192.168.10.10", "1.1.1.1"]
+
+# Access
+ssh_public_keys = [
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIReplaceMeWithYourPublicKey homelab"
+]
+
+# Optional bind/data mounts
+mount_points = [
+  {
+    path   = "/mnt/data"
+    volume = "local-lvm"
+    size   = "50G"
+    backup = true
+  }
+]
