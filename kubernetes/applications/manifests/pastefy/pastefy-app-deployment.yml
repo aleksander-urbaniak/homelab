@@ -33,7 +33,7 @@ spec:
               done
       containers:
         - name: pastefy-app
-          image: interaapps/pastefy:7.2.0
+          image: interaapps/pastefy:7.2.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
