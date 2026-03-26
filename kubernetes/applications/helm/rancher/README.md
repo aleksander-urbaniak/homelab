@@ -21,7 +21,7 @@ This README pins a chart version so installs stay reproducible while still allow
 
 ```bash
 # renovate: datasource=helm depName=rancher versioning=helm registryUrl=https://releases.rancher.com/server-charts/latest
-export RANCHER_CHART_VERSION=2.13.3
+export RANCHER_CHART_VERSION=2.14.0
 ```
 
 ## Configuration notes
