@@ -39,7 +39,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
       - name: homepage
-        image: ghcr.io/gethomepage/homepage:v1.12.0
+        image: ghcr.io/gethomepage/homepage:v1.12.1
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
