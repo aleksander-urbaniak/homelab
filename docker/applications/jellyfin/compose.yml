@@ -1,7 +1,7 @@
 services:
   jellyfin:
     container_name: jellyfin
-    image: 'jellyfin/jellyfin:10.11.7'
+    image: 'jellyfin/jellyfin:10.11.8'
     volumes:
       - /mnt/docker/jellyfin/config:/config
       - /mnt/docker/jellyfin/cache:/cache
