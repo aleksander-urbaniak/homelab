@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: pulze-dashboard
-          image: aleksanderurbaniak/pulze-dashboard:v1.0.3
+          image: aleksanderurbaniak/pulze-dashboard:v1.0.4
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
