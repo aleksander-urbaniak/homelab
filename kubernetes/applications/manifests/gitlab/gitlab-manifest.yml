@@ -105,7 +105,7 @@ spec:
               mountPath: /var/opt/gitlab/postgresql
       containers:
         - name: gitlab
-          image: gitlab/gitlab-ce:18.11.0-ce.0
+          image: gitlab/gitlab-ce:18.11.1-ce.0
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ
