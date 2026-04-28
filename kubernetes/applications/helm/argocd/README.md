@@ -20,7 +20,7 @@ This README pins a chart version so installs stay reproducible while still allow
 
 ```bash
 # renovate: datasource=helm depName=argo-cd versioning=helm registryUrl=https://argoproj.github.io/argo-helm
-export ARGOCD_CHART_VERSION=9.5.4
+export ARGOCD_CHART_VERSION=9.5.5
 ```
 
 ## Configuration notes
