@@ -1,0 +1,70 @@
+---
+# =====================================
+# 1) Config
+# =====================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-config
+  namespace: loki
+data:
+  loki.yaml: |
+    auth_enabled: false
+
+    server:
+      http_listen_port: 3100
+
+    common:
+      instance_addr: 127.0.0.1
+      path_prefix: /loki
+      replication_factor: 1
+      ring:
+        kvstore:
+          store: inmemory
+      storage:
+        filesystem:
+          chunks_directory: /loki/chunks
+          rules_directory: /loki/rules
+
+    schema_config:
+      configs:
+        - from: 2024-01-01
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+
+    storage_config:
+      filesystem:
+        directory: /loki/chunks
+
+    compactor:
+      working_directory: /loki/compactor
+      retention_enabled: true
+      delete_request_store: filesystem
+
+    limits_config:
+      retention_period: 168h
+      allow_structured_metadata: false
+      volume_enabled: true
+
+    query_range:
+      results_cache:
+        cache:
+          embedded_cache:
+            enabled: true
+            max_size_mb: 100
+
+    ruler:
+      alertmanager_url: http://prometheus-alertmanager.prometheus.svc.k3s.example.com
+      storage:
+        type: local
+        local:
+          directory: /loki/rules
+      ring:
+        kvstore:
+          store: inmemory
+      rule_path: /loki/rules-tmp
+      enable_api: true

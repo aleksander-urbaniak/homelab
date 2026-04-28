@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - nebula-sync-config-configmap.yml
+  - nebula-sync-deployment.yml
+  - nebula-sync-namespace.yml
+  - nebula-sync-secrets.yml
+  - nebula-sync-service.yml

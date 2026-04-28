@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - homepage-app-service.yml
+  - homepage-authentik-middleware.yml
+  - homepage-config-pvc-persistentvolumeclaim.yml
+  - homepage-deployment.yml
+  - homepage-env-secret.yml
+  - homepage-ingress.yml
+  - homepage-namespace.yml

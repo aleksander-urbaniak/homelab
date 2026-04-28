@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - pihole-exporter-certs-persistentvolumeclaim.yml
+  - pihole-exporter-deployment.yml
+  - pihole-exporter-namespace.yml
+  - pihole-exporter-secrets.yml
+  - pihole-exporter-service.yml

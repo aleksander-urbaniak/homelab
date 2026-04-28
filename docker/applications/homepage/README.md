@@ -1,4 +1,4 @@
-# 🗂️ Homepage (Docker) ✨
+# 📦 Homepage (Docker) ✨
 
 > ✨ **What is Homepage?**
 >

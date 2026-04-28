@@ -1,0 +1,100 @@
+
+# =====================================
+# Renovate CE Deployment (Server + Worker in one container)
+# =====================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: renovate
+  namespace: renovate
+  labels:
+    app: renovate
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: renovate
+  template:
+    metadata:
+      labels:
+        app: renovate
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+
+      # Use custom DNS servers for this Pod
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 198.51.100.10
+          - 198.51.100.11
+
+      # Run as root to avoid SQLite + volume permission issues
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+
+      containers:
+        - name: renovate
+          # Replace with desired version
+          image: ghcr.io/mend/renovate-ce:14.3.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            # From docker-compose `environment:` block
+            - name: LOG_LEVEL
+              value: "debug"
+            # - name: LOG_FORMAT
+            #   value: "json"
+            - name: MEND_RNV_REQUEST_LOGGER_ENABLED
+              value: "true"
+            - name: MEND_RNV_ADMIN_API_ENABLED
+              value: "true"
+            - name: MEND_RNV_REPORTING_ENABLED
+              value: "true"
+            - name: MEND_RNV_LOG_HISTORY_DIR
+              value: "/logs"
+            - name: MEND_RNV_SQLITE_FILE_PATH
+              value: "/db/renovate-db.sqlite"
+            # RENOVATE_REPOSITORY_CACHE is provided via renovate-gitlab-env (or similar)
+          envFrom:
+            - secretRef:
+                name: mend-renovate-env
+            - secretRef:
+                name: renovate-gitlab-env
+          volumeMounts:
+            - name: renovate-logs
+              mountPath: /logs
+            - name: renovate-db
+              mountPath: /db
+          readinessProbe:
+            httpGet:
+              # Adjust if Mend exposes a different health endpoint
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+      volumes:
+        - name: renovate-logs
+          persistentVolumeClaim:
+            claimName: renovate-logs-pvc
+        - name: renovate-db
+          persistentVolumeClaim:
+            claimName: renovate-db-pvc

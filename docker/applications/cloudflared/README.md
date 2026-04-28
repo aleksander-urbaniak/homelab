@@ -1,4 +1,4 @@
-# 🗂️ cloudflared (Docker) ✨
+# 📦 cloudflared (Docker) ✨
 
 > ✨ **What is cloudflared?**
 >

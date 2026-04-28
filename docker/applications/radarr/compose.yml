@@ -1,7 +1,7 @@
 services:
   radarr:
     container_name: radarr
-    image: linuxserver/radarr:6.0.4
+    image: linuxserver/radarr:6.1.1
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -12,3 +12,11 @@ services:
       - /mnt/docker/qbittorrent/downloads:/downloads
     ports:
       - "7878:7878"
+    networks:
+      - media
+    restart: unless-stopped
+
+networks:
+  media:
+    external: true
+    name: media

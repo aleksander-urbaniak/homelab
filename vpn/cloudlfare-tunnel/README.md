@@ -1,4 +1,4 @@
-# 📘 Cloudflare Tunnel + WARP Private Network Access ✨
+# 🌐 Cloudflare Tunnel + WARP Private Network Access
 
 This runbook documents how to use Cloudflare Zero Trust as remote access for private homelab subnets (VPN-like access through WARP), consistent with this repository's networking model.
 
@@ -18,11 +18,11 @@ Replace with your own values.
 ```bash
 TEAM_NAME=example-team
 TUNNEL_NAME=homelab-tunnel
-PRIVATE_CIDR=10.0.0.0/22
+PRIVATE_CIDR=192.0.2.0/24
 ADMIN_EMAIL=admin@example.com
 LOCAL_DNS_DOMAIN=lab.example.com
-LOCAL_DNS_SERVER=10.0.0.5
-TEST_HOST=10.0.0.1
+LOCAL_DNS_SERVER=192.0.2.53
+TEST_HOST=192.0.2.1
 ```
 
 ## 1) Create and run the tunnel connector
@@ -36,7 +36,7 @@ Use this path in Zero Trust:
 1. Go to `Networks -> Connectors -> Cloudflare Tunnels`.
 2. Click `Create a tunnel` and choose `Cloudflared`.
 3. Name the tunnel (for example `homelab-tunnel`) and install connector on your host.
-4. In tunnel setup, open the `CIDR` tab and add your private route (for example `10.0.0.0/22`).
+4. In tunnel setup, open the `CIDR` tab and add your private route (for example `192.0.2.0/24`).
 5. Save and confirm tunnel status is `Healthy`.
 
 ### Wizard flow for devices (from onboarding UI)
@@ -103,12 +103,12 @@ warp-routing:
 
 In `Zero Trust -> Networks -> Tunnels -> <your tunnel> -> Private networks`, add:
 
-- CIDR: `10.0.0.0/22` (or your subnet)
+- CIDR: `192.0.2.0/24` (or your subnet)
 
 Equivalent CLI:
 
 ```bash
-cloudflared tunnel route ip add 10.0.0.0/22 <TUNNEL_NAME>
+cloudflared tunnel route ip add 192.0.2.0/24 <TUNNEL_NAME>
 ```
 
 ## 3) Create Access policy for private network
@@ -141,7 +141,7 @@ Split tunnel requirement:
 Optional local DNS fallback:
 
 - Domain: `lab.example.com`
-- DNS server: `10.0.0.5`
+- DNS server: `192.0.2.53`
 
 ## 5) Enroll client and validate
 
@@ -151,7 +151,7 @@ Optional local DNS fallback:
 4. Validate:
 
 ```bash
-ping 10.0.0.1
+ping 192.0.2.1
 nslookup service.lab.example.com
 ```
 

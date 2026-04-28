@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - speedtest-tracker-app-service.yml
+  - speedtest-tracker-config-persistentvolumeclaim.yml
+  - speedtest-tracker-db-headless-service.yml
+  - speedtest-tracker-db-service.yml
+  - speedtest-tracker-db-statefulset.yml
+  - speedtest-tracker-deployment.yml
+  - speedtest-tracker-ingressroute.yml
+  - speedtest-tracker-namespace.yml
+  - speedtest-tracker-secrets.yml
+  - speedtest-tracker-transport-serverstransport.yml
+  - speedtest-tracker-web-persistentvolumeclaim.yml

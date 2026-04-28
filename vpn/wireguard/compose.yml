@@ -1,0 +1,19 @@
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:15.2.2
+    container_name: wg-easy
+    ports:
+      - "51820:51820/udp" # WireGuard VPN port
+      - "80:80/tcp"       # Web UI port
+    volumes:
+      - /mnt/docker/wg-easy/etc:/etc/wireguard
+      - /lib/modules:/lib/modules:ro
+    environment:
+      - PORT=80
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1

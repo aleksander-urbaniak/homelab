@@ -1,0 +1,80 @@
+---
+# 5. Deployment (Manager Runnera)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-runner
+  namespace: gitlab-runner
+  labels:
+    app: gitlab-runner
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gitlab-runner
+  template:
+    metadata:
+      labels:
+        app: gitlab-runner
+    spec:
+      serviceAccountName: gitlab-runner-sa
+
+      # Wymuszenie uruchomienia Managera na workerze
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+
+      # Example DNS configuration for the runner manager
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 198.51.100.10
+          - 198.51.100.11
+
+      containers:
+      - name: gitlab-runner
+        image: gitlab/gitlab-runner:v18.11.1
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash", "-c"]
+        # Kopiujemy config i uruchamiamy runnera
+        args:
+          - sed "s|__GITLAB_RUNNER_TOKEN__|${GITLAB_RUNNER_TOKEN}|g" /config-template/config.toml > /etc/gitlab-runner/config.toml && /usr/bin/gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
+
+        env:
+        - name: KUBERNETES_SERVICE_ACCOUNT_OVERWRITE
+          value: "gitlab-runner-sa"
+        - name: GITLAB_RUNNER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: gitlab-runner-secret
+              key: GITLAB_RUNNER_TOKEN
+
+        ports:
+        - containerPort: 8093
+          name: metrics
+
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config-template
+        - name: runner-data
+          mountPath: /home/gitlab-runner
+        - name: etc-gitlab-runner
+          mountPath: /etc/gitlab-runner
+
+        livenessProbe:
+          exec:
+            command: ["/usr/bin/pgrep", "gitlab-runner"]
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          periodSeconds: 10
+
+      volumes:
+      - name: config-volume
+        configMap:
+          name: gitlab-runner-config
+      - name: runner-data
+        persistentVolumeClaim:
+          claimName: gitlab-runner-pvc
+      - name: etc-gitlab-runner
+        emptyDir: {}

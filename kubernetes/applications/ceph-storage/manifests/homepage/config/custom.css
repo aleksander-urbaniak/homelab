@@ -1,0 +1,447 @@
+/* --- GLOBAL SCROLLBAR HIDING --- */
+::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+#homepage-waves-bg {
+    mix-blend-mode: normal;
+    filter: none;
+    transform: none;
+    opacity: 1;
+    will-change: auto;
+}
+
+/* --- MASTER ROUNDED CORNERS --- */
+.service-card,
+.bookmark-card,
+.group-header,
+div[id$="-card"],
+div[id$="-card"] > div,
+div[class*="rounded-lg"] {
+    border-radius: 25px !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+}
+
+.service-card,
+div[id$="-card"],
+div[id$="-card"] > div {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* --- CARD TINTING SETUP --- */
+#uptime-card, #homepage-card, #authentik-card, #gitlab-card, #nexterm-card,
+#portainer-card, #rancher-card, #semaphore-card, #traefik-card, #proxmoxcluster-card,
+#proxmox01-card, #proxmox02-card, #proxmox03-card, #pbs-card,
+#apprise-card, #alertmanager-card, #grafana-card, #influxdb-card, #karma-card,
+#prometheus-card, #speedtest-card, #wazuh-card, #zabbix-card, #flarewatcher-card,
+#pulze-card, #jackett-card, #jellyfin-card, #qbit-card, #radarr-card, #sonarr-card,
+#affine-card, #homeassistant-card, #n8n-card, #omv-card, #pastefy-card,
+#pihole1-card, #pihole2-card, #pihole3-card, #portfolio-card, #vaultwarden-card,
+#wireguard-card {
+    position: relative !important;
+    background-color: transparent !important;
+}
+
+#uptime-card::before, #homepage-card::before, #authentik-card::before, #gitlab-card::before, #nexterm-card::before,
+#portainer-card::before, #rancher-card::before, #semaphore-card::before, #traefik-card::before, #proxmoxcluster-card::before,
+#proxmox01-card::before, #proxmox02-card::before, #proxmox03-card::before, #pbs-card::before,
+#apprise-card::before, #alertmanager-card::before, #grafana-card::before, #influxdb-card::before, #karma-card::before,
+#prometheus-card::before, #speedtest-card::before, #wazuh-card::before, #zabbix-card::before, #flarewatcher-card::before,
+#pulze-card::before, #jackett-card::before, #jellyfin-card::before, #qbit-card::before, #radarr-card::before, #sonarr-card::before,
+#affine-card::before, #homeassistant-card::before, #n8n-card::before, #omv-card::before, #pastefy-card::before,
+#pihole1-card::before, #pihole2-card::before, #pihole3-card::before, #portfolio-card::before, #vaultwarden-card::before,
+#wireguard-card::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 6px;
+    z-index: 0;
+    border-radius: 23px !important;
+    opacity: 1;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* --- SERVICE COLOR ASSIGNMENTS --- */
+#uptime-card::before, #homepage-card::before, #authentik-card::before, #gitlab-card::before, #nexterm-card::before,
+#portainer-card::before, #rancher-card::before, #semaphore-card::before, #traefik-card::before, #proxmoxcluster-card::before,
+#proxmox01-card::before, #proxmox02-card::before, #proxmox03-card::before, #pbs-card::before,
+#apprise-card::before, #alertmanager-card::before, #grafana-card::before, #influxdb-card::before, #karma-card::before,
+#prometheus-card::before, #speedtest-card::before, #wazuh-card::before, #zabbix-card::before, #flarewatcher-card::before,
+#pulze-card::before, #jackett-card::before, #jellyfin-card::before, #qbit-card::before, #radarr-card::before, #sonarr-card::before,
+#affine-card::before, #homeassistant-card::before, #n8n-card::before, #omv-card::before, #pastefy-card::before,
+#pihole1-card::before, #pihole2-card::before, #pihole3-card::before, #portfolio-card::before, #vaultwarden-card::before,
+#wireguard-card::before                                                   { background-color: rgba(58, 58, 58, 0.2) !important; }
+
+/* --- STATUS & PING BADGE POSITIONING --- */
+.service-card > div {
+    position: relative;
+    z-index: 1;
+}
+
+span[class*="status-"],
+div[class*="status-"] {
+    position: absolute !important;
+    top: 10px !important;
+    right: 12px !important;
+    z-index: 10 !important;
+    border-radius: 8px !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    padding: 2px 6px !important;
+}
+
+.service-tags {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
+    top: 10px !important;
+    right: 12px !important;
+    position: absolute !important;
+    z-index: 20 !important;
+}
+
+.service-ping .ping-status {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    padding: 2px 6px !important;
+    height: auto !important;
+    width: auto !important;
+    background-image: none !important;
+}
+
+.service-ping .ping-status div {
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    opacity: 1 !important;
+    line-height: 1.2 !important;
+}
+
+.service-ping .ping-status div[class*="text-emerald"],
+.service-ping .ping-status div[class*="text-rose"],
+.service-ping .ping-status div[class*="text-red"] {
+    filter: brightness(1.4) !important;
+}
+
+/* --- TAB NAVIGATION --- */
+#tabs ul {
+    width: fit-content !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    border-radius: 50px !important;
+    padding: 4px !important;
+    background-color: rgba(58, 58, 58, 0.2);
+}
+
+#tabs ul li {
+    width: auto !important;
+    flex: 0 0 auto !important;
+}
+
+#tabs ul li button {
+    width: auto !important;
+    border-radius: 50px !important;
+    padding: 6px 20px !important;
+    min-height: unset !important;
+    color: #ffffff83 !important;
+    background-color: transparent !important;
+}
+
+#tabs ul li button[aria-selected="true"] {
+    color: #6aabbf !important;
+    background-color: rgba(78, 59, 122, 0.15) !important;
+    font-weight: bold !important;
+}
+
+@media (max-width: 768px) {
+    #tabs ul li button {
+        padding: 5px 10px !important;
+        font-size: 13px !important;
+    }
+
+    #tabs ul {
+        max-width: 100% !important;
+    }
+}
+
+/* --- BOOKMARK STYLING --- */
+li.bookmark a {
+    border-radius: 25px !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    margin-bottom: 8px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+li.bookmark .bookmark-icon {
+    border-radius: 0 !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+li.bookmark .bookmark-text {
+    border-radius: 0 !important;
+}
+
+.bookmark-name {
+    color: #f5f5f583 !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+}
+
+.bookmark-description {
+    color: #94a3b8 !important;
+    font-size: 0.7rem !important;
+}
+
+li.bookmark a:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+li.bookmark a:hover .bookmark-name {
+    color: #555555 !important;
+}
+
+/* --- SYSTEM MONITOR --- */
+.information-widget-resource div[style*="width"] {
+    background: linear-gradient(90deg, #4ade80 0%, #2dd4bf 40%, #3b82f6 75%, #b80fde 100%) !important;
+    opacity: 0.40 !important;
+    border-radius: 10px !important;
+}
+
+.information-widget-resource:nth-of-type(1) svg { color: #4ade80 !important; }
+.information-widget-resource:nth-of-type(2) svg { color: #22d3ee !important; }
+.information-widget-resource:nth-of-type(3) svg { color: #ef4444 !important; }
+.information-widget-resource:nth-of-type(4) svg { color: #3b82f6 !important; }
+
+/* --- GENERAL TYPOGRAPHY --- */
+.service-group-name, .bookmark-group-name {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.service-name, .service-description {
+    color: #f5f5f583 !important;
+}
+
+/* --- SEARCH WIDGET TUNING --- */
+.information-widget-form.information-widget-search {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 4px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.information-widget-form.information-widget-search > div {
+    height: 30px !important;
+    min-height: 30px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.widget-container:has(input[type="search"]),
+.widget-container:has(input[placeholder*="Search"]),
+.widget-container:has(input[placeholder*="search"]) {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 4px 10px !important;
+}
+
+.widget-container:has(input[type="search"]) form,
+.widget-container:has(input[placeholder*="Search"]) form,
+.widget-container:has(input[placeholder*="search"]) form {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.widget-container input[type="search"],
+.widget-container input[placeholder*="Search"],
+.widget-container input[placeholder*="search"] {
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 12px !important;
+    font-size: 0.9rem !important;
+    line-height: 1.1 !important;
+    color: #f5f5f5 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.information-widget-form.information-widget-search input {
+    height: 30px !important;
+    min-height: 30px !important;
+    border-radius: 10px !important;
+    padding: 0 38px 0 12px !important;
+    font-size: 0.88rem !important;
+}
+
+.widget-container:has(input[type="search"]) button,
+.widget-container:has(input[placeholder*="Search"]) button,
+.widget-container:has(input[placeholder*="search"]) button {
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 10px !important;
+    color: #f5f5f5 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.information-widget-form.information-widget-search button {
+    height: 29px !important;
+    min-height: 29px !important;
+    top: 50% !important;
+    bottom: auto !important;
+    right: 2px !important;
+    transform: translateY(-50%) !important;
+    padding: 0 10px !important;
+}
+
+.widget-container input[type="search"]::placeholder,
+.widget-container input[placeholder*="Search"]::placeholder,
+.widget-container input[placeholder*="search"]::placeholder {
+    color: rgba(245, 245, 245, 0.55) !important;
+}
+
+.widget-container:has(input[type="search"]) svg,
+.widget-container:has(input[placeholder*="Search"]) svg,
+.widget-container:has(input[placeholder*="search"]) svg {
+    color: rgba(245, 245, 245, 0.75) !important;
+}
+
+.widget-container:has(input[type="search"]):hover,
+.widget-container:has(input[placeholder*="Search"]):hover,
+.widget-container:has(input[placeholder*="search"]):hover {
+    background-color: rgba(58, 58, 58, 0.26) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Desktop and Tablet */
+@media (min-width: 768px) {
+    .widget-container,
+    .information-widget-logo,
+    [class*="information-widget-glances"] {
+        background-color: rgba(58, 58, 58, 0.2) !important;
+        border-radius: 50px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 16px !important;
+        margin-top: 10px !important;
+        box-shadow: none !important;
+    }
+
+    .widget-container:has(input[type="search"]),
+    .widget-container:has(input[placeholder*="Search"]),
+    .widget-container:has(input[placeholder*="search"]) {
+        height: 36px !important;
+        min-height: 36px !important;
+        padding: 3px 10px !important;
+    }
+
+    .information-widget-form.information-widget-search {
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 3px 12px !important;
+    }
+
+    .information-widget-form.information-widget-search > div {
+        height: 28px !important;
+        min-height: 28px !important;
+    }
+
+    .information-widget-form.information-widget-search input {
+        height: 28px !important;
+        min-height: 28px !important;
+        font-size: 0.86rem !important;
+    }
+
+    .information-widget-form.information-widget-search button {
+        height: 27px !important;
+        min-height: 27px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .widget-container,
+    .information-widget-logo,
+    [class*="information-widget-glances"] {
+        background-color: rgba(58, 58, 58, 0.2) !important;
+        border-radius: 25px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        height: auto !important;
+        min-height: 40px !important;
+        padding: 8px 12px !important;
+        margin: 5px 0 !important;
+        width: 100% !important;
+    }
+
+    .information-widget-inner,
+    [class*="information-widget-glances"] > div {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    .widget-container:has(input[type="search"]),
+    .widget-container:has(input[placeholder*="Search"]),
+    .widget-container:has(input[placeholder*="search"]) {
+        min-height: 36px !important;
+        padding: 4px 10px !important;
+    }
+
+    .information-widget-form.information-widget-search {
+        min-height: 38px !important;
+        padding: 4px 12px !important;
+    }
+
+    .information-widget-form.information-widget-search > div {
+        margin: 0 !important;
+    }
+}
+
+/* Global Alignment for Widgets */
+.information-widget-logo img {
+    margin: 0 !important;
+    max-height: 24px !important;
+}
+
+.information-widget-resource,
+.widget-inner-text,
+.resource-icon {
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+.information-widget-resource {
+    margin-right: 12px !important;
+}

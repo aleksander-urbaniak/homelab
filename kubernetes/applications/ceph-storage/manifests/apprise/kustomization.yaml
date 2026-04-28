@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - apprise-authentik-middleware.yml
+  - apprise-authentik-outpost-ingress.yml
+  - apprise-config-pvc-persistentvolumeclaim.yml
+  - apprise-deployment.yml
+  - apprise-ingress.yml
+  - apprise-namespace.yml
+  - apprise-service.yml

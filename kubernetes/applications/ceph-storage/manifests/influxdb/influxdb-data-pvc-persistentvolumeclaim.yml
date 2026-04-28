@@ -1,0 +1,23 @@
+
+# =====================================
+# 1. StorageClass for InfluxDB
+# (removed ??? use cluster's Ceph SC: "ceph")
+# =====================================
+
+---
+
+# =====================================
+# 2. PVC for InfluxDB data
+# =====================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influxdb-data-pvc
+  namespace: influxdb
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

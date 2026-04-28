@@ -1,4 +1,4 @@
-# 🛠️ Ansible ✨
+# 🛠️ Ansible
 
 ![Tool](https://img.shields.io/badge/Tool-Ansible-EE0000?style=flat-square&logo=ansible&logoColor=white) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow?style=flat-square)
 

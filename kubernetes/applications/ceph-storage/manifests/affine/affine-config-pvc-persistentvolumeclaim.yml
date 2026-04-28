@@ -1,0 +1,16 @@
+
+# =====================================
+# PVCs (Ceph)
+# =====================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: affine-config-pvc
+  namespace: affine
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 512Mi

@@ -1,0 +1,227 @@
+# Proxmox Ceph to K3s Integration Guide (RBD & CephFS)
+
+## Architecture Overview
+This document outlines the steps to connect an external Ceph cluster hosted on Proxmox to a K3s Kubernetes cluster, providing both Block Storage (RBD) and Shared Filesystem Storage (CephFS).
+
+* **Proxmox Ceph Nodes:** `192.0.2.11`, `192.0.2.12`, `192.0.2.13`
+* **K3s Master Nodes:** `198.51.100.40`, `198.51.100.41`, `198.51.100.42`
+* **K3s Worker Nodes:** `198.51.100.50`, `198.51.100.51`, `198.51.100.52`
+
+---
+
+## Phase 1: K3s Node Preparation
+For Kubernetes to successfully mount Ceph volumes, the underlying host operating systems must have the Ceph client tools installed.
+
+1. SSH into **all K3s nodes** (Masters and Workers).
+2. Run the following to install the required utilities:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ceph-common
+```
+
+---
+
+## Phase 2: Proxmox Ceph Preparation
+Perform these steps via SSH on one of the Proxmox nodes (e.g., `192.0.2.11`) to configure the pools and generate authentication keys.
+
+### 1. Setup RBD (Block Storage)
+```bash
+# Create and initialize the RBD pool
+ceph osd pool create example-rbd
+rbd pool init example-rbd
+
+# Create the K3s user and output the key
+ceph auth get-or-create client.example-rbd \
+  mon 'profile rbd' \
+  osd 'profile rbd pool=example-rbd' \
+  mgr 'profile rbd pool=example-rbd'
+```
+*(Save the generated key as your **RBD Key**).*
+
+### 2. Setup CephFS (Shared Filesystem)
+First, ensure Metadata Servers (MDS) are active and the filesystem `example-cephfs` is created via the Proxmox GUI.
+
+```bash
+# Create the K3s CephFS user and output the key
+ceph auth get-or-create client.example-cephfs \
+  mon 'allow r' \
+  mgr 'allow rw' \
+  mds 'allow rw' \
+  osd 'allow rw pool=example-cephfs_data, allow rw pool=example-cephfs_metadata'
+
+# Pre-create the CSI subvolume group to prevent K3s provisioning timeouts
+ceph fs subvolumegroup create example-cephfs csi
+```
+*(Save the generated key as your **CephFS Key**).*
+
+### 3. Retrieve Cluster ID
+```bash
+ceph fsid
+```
+*(Save this UUID as your **Cluster ID**).*
+
+---
+
+## Phase 3: Deploy Ceph CSI Drivers on K3s
+Run these commands on your K3s management machine using `helm`.
+
+### 1. Configure Helm Values
+Add the repository and create a `ceph-csi-values.yaml` file. Replace `<YOUR-CLUSTER-ID>` with the UUID from Phase 2.
+
+```bash
+helm repo add ceph-csi [https://ceph.github.io/csi-charts](https://ceph.github.io/csi-charts)
+helm repo update
+```
+
+**`ceph-csi-values.yaml`**:
+```yaml
+csiConfig:
+  - clusterID: "<YOUR-CLUSTER-ID>"
+    monitors:
+      - "192.0.2.11:3300"
+      - "192.0.2.12:3300"
+      - "192.0.2.13:3300"
+
+nodeplugin:
+  podSecurityPolicy:
+    enabled: false
+provisioner:
+  podSecurityPolicy:
+    enabled: false
+```
+
+### 2. Install the Drivers
+*Note: The CephFS installation includes specific `--set` flags to prevent ConfigMap collisions with the RBD driver.*
+
+```bash
+# Install RBD Driver
+helm install ceph-csi-rbd ceph-csi/ceph-csi-rbd \
+  --namespace ceph-csi \
+  --create-namespace \
+  -f ceph-csi-values.yaml
+
+# Install CephFS Driver (with conflict-resolution flags)
+helm install ceph-csi-cephfs ceph-csi/ceph-csi-cephfs \
+  --namespace ceph-csi \
+  -f ceph-csi-values.yaml \
+  --set cephConfConfigMapName=ceph-config-cephfs \
+  --set configMapName=ceph-csi-config-cephfs \
+  --set kmsConfigMapName=ceph-csi-encryption-kms-config-cephfs
+```
+
+---
+
+## Phase 4: Kubernetes Storage Configuration
+Create the authentication secrets and storage classes. Replace the placeholder `<YOUR-...>` tags with the keys and ID saved in Phase 2.
+
+**`k3s-ceph-resources.yaml`**:
+```yaml
+# --- SECRETS ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: example-rbd-csi-secret
+  namespace: ceph-csi
+type: kubernetes.io/rook
+stringData:
+  userID: example-rbd
+  userKey: <YOUR-RBD-KEY>
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: example-cephfs-fs-secret
+  namespace: ceph-csi
+stringData:
+  userID: example-cephfs
+  userKey: <YOUR-CEPHFS-KEY>
+  adminID: example-cephfs
+  adminKey: <YOUR-CEPHFS-KEY>
+---
+# --- STORAGE CLASSES ---
+# RBD Storage Class (Set as Default)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: example-rbd-rbd
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: rbd.csi.ceph.com
+parameters:
+  clusterID: <YOUR-CLUSTER-ID>
+  pool: example-rbd
+  imageFeatures: layering
+  csi.storage.k8s.io/provisioner-secret-name: example-rbd-csi-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: ceph-csi
+  csi.storage.k8s.io/controller-expand-secret-name: example-rbd-csi-secret
+  csi.storage.k8s.io/controller-expand-secret-namespace: ceph-csi
+  csi.storage.k8s.io/node-stage-secret-name: example-rbd-csi-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: ceph-csi
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+mountOptions:
+  - discard
+---
+# CephFS Storage Class
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: example-cephfs-cephfs
+provisioner: cephfs.csi.ceph.com
+parameters:
+  clusterID: <YOUR-CLUSTER-ID>
+  fsName: example-cephfs
+  pool: example-cephfs_data
+  csi.storage.k8s.io/provisioner-secret-name: example-cephfs-fs-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: ceph-csi
+  csi.storage.k8s.io/controller-expand-secret-name: example-cephfs-fs-secret
+  csi.storage.k8s.io/controller-expand-secret-namespace: ceph-csi
+  csi.storage.k8s.io/node-stage-secret-name: example-cephfs-fs-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: ceph-csi
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+```
+
+Apply the resources:
+```bash
+kubectl apply -f k3s-ceph-resources.yaml
+```
+
+---
+
+## Phase 5: Validation
+Test the configuration by claiming volumes from both storage classes.
+
+**`test-pvcs.yaml`**:
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc-rbd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: example-rbd-rbd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc-cephfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: example-cephfs-cephfs
+```
+
+Apply the claims and verify they reach the `Bound` status:
+```bash
+kubectl apply -f test-pvcs.yaml
+kubectl get pvc
+```

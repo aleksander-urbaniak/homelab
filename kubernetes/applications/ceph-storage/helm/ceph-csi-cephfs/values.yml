@@ -1,0 +1,15 @@
+cephConfConfigMapName: ceph-csi-cephfs-ceph-config
+configMapName: ceph-csi-cephfs-config
+csiConfig:
+  - clusterID: REPLACE_ME
+    monitors:
+      - 192.0.2.11:3300
+      - 192.0.2.12:3300
+      - 192.0.2.13:3300
+kmsConfigMapName: ceph-csi-cephfs-encryption-kms-config
+nodeplugin:
+  podSecurityPolicy:
+    enabled: false
+provisioner:
+  podSecurityPolicy:
+    enabled: false

@@ -1,0 +1,18 @@
+
+# =====================================
+# 5. ClusterIP Service dla MariaDB
+# =====================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pastefy-db
+  namespace: pastefy
+spec:
+  type: ClusterIP
+  selector:
+    app: pastefy-db
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306

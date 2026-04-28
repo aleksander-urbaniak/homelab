@@ -1,0 +1,80 @@
+
+
+
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: speedtest-tracker-db
+  namespace: speedtest-tracker
+  labels:
+    app: speedtest-tracker-db
+spec:
+  serviceName: speedtest-tracker-db-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speedtest-tracker-db
+  template:
+    metadata:
+      labels:
+        app: speedtest-tracker-db
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: postgres
+        image: postgres:18.3
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: speedtest-tracker-db-secret
+                key: POSTGRES_DB
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: speedtest-tracker-db-secret
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: speedtest-tracker-db-secret
+                key: POSTGRES_PASSWORD
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+        ports:
+          - name: postgres
+            containerPort: 5432
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/postgresql/data
+        readinessProbe:
+          exec:
+            command: ["sh","-c","pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command: ["sh","-c","pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: example-rbd-rbd
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 3Gi

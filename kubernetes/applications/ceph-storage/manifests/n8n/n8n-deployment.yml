@@ -1,0 +1,109 @@
+
+---
+
+# =====================================
+# 4. n8n Deployment
+# =====================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: n8n
+  labels:
+    app: n8n
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      securityContext:
+        fsGroup: 1000
+      dnsPolicy: ClusterFirst
+
+      initContainers:
+        - name: init-chown
+          image: busybox:1.37.0
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /home/node/.n8n
+          securityContext:
+            runAsUser: 0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: n8n-storage
+              mountPath: /home/node/.n8n
+
+      containers:
+        - name: n8n
+          image: n8nio/n8n:2.18.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - start
+          ports:
+            - containerPort: 5678
+          env:
+            - name: WEBHOOK_URL
+              value: "https://n8n.example.com/"
+
+            # ====================================================
+            # DODANO: Zmienne pomocnicze dla stabilno??ci
+            # ====================================================
+            - name: N8N_HOST
+              value: "n8n.example.com"
+            - name: N8N_PROTOCOL
+              value: "https"
+            - name: N8N_SKIP_WEBHOOK_TEST
+              value: "true"
+            # Naprawa warninga o uprawnieniach z log??w
+            - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+              value: "true"
+
+            - name: DB_TYPE
+              value: postgresdb
+
+            # TERAZ MO??EMY U??YWA?? NAZWY SERWISU (CoreDNS j?? rozwi????e)
+            - name: DB_POSTGRESDB_HOST
+              value: "n8n-postgres-db"
+
+            - name: DB_POSTGRESDB_DATABASE
+              value: n8n
+            - name: DB_POSTGRESDB_USER
+              value: n8n
+            - name: DB_POSTGRESDB_PASSWORD
+              value: n8n
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 2Gi
+          volumeMounts:
+            - name: n8n-storage
+              mountPath: /home/node/.n8n
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+
+      volumes:
+        - name: n8n-storage
+          persistentVolumeClaim:
+            claimName: n8n-data-rbd-pvc

@@ -34,10 +34,10 @@ operating_system_type = "debian"
 network_bridge    = "vmbr0"
 network_vlan_id   = 10
 network_firewall  = true
-ipv4_address      = "192.168.10.50/24"
-ipv4_gateway      = "192.168.10.1"
+ipv4_address      = "192.0.2.50/24"
+ipv4_gateway      = "192.0.2.1"
 dns_search_domain = "lab.internal"
-dns_servers       = ["192.168.10.10", "1.1.1.1"]
+dns_servers       = ["192.0.2.10", "1.1.1.1"]
 
 # Access
 ssh_public_keys = [

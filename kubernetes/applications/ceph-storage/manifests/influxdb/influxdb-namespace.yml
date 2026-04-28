@@ -1,0 +1,8 @@
+# =====================================
+# 0. Namespace for InfluxDB
+# =====================================
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: influxdb

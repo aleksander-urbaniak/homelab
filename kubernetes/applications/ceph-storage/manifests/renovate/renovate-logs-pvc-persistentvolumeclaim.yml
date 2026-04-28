@@ -1,0 +1,16 @@
+
+# =====================================
+# PVCs (Ceph) for logs + SQLite DB
+# =====================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: renovate-logs-pvc
+  namespace: renovate
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi

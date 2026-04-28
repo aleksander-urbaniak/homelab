@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - loki-app-service.yml
+  - loki-config-configmap.yml
+  - loki-data-pvc-persistentvolumeclaim.yml
+  - loki-ingress.yml
+  - loki-namespace.yml
+  - loki-statefulset.yml

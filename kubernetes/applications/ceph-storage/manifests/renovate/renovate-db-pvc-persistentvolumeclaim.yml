@@ -1,0 +1,13 @@
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: renovate-db-pvc
+  namespace: renovate
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi

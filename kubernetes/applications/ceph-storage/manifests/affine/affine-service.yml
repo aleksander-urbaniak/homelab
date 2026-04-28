@@ -1,0 +1,15 @@
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine
+  namespace: affine
+spec:
+  type: ClusterIP
+  selector:
+    app: affine
+  ports:
+    - name: http
+      port: 3010
+      targetPort: 3010

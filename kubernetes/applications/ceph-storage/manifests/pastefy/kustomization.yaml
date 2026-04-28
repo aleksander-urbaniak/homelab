@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - pastefy-app-deployment.yml
+  - pastefy-app-service.yml
+  - pastefy-db-headless-service.yml
+  - pastefy-db-service.yml
+  - pastefy-ingress.yml
+  - pastefy-mariadb-db-statefulset.yml
+  - pastefy-namespace.yml
+  - pastefy-secrets.yml

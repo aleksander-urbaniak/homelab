@@ -1,0 +1,18 @@
+  # "postgresql://vaultwarden:2C6rEx45Y3RnPsjmCQK2dGPjpKAkJ9xH@vaultwarden-db:5432/vaultwarden"
+
+# =====================================
+# 7. PVC for Vaultwarden data
+# =====================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vaultwarden-data-pvc
+  namespace: vaultwarden
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

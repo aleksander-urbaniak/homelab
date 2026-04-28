@@ -1,0 +1,26 @@
+crds:
+  enabled: true
+
+image:
+  repository: quay.io/jetstack/cert-manager-controller
+  tag: v1.20.2
+
+webhook:
+  image:
+    repository: quay.io/jetstack/cert-manager-webhook
+    tag: v1.20.2
+
+cainjector:
+  image:
+    repository: quay.io/jetstack/cert-manager-cainjector
+    tag: v1.20.2
+
+acmesolver:
+  image:
+    repository: quay.io/jetstack/cert-manager-acmesolver
+    tag: v1.20.2
+
+startupapicheck:
+  image:
+    repository: quay.io/jetstack/cert-manager-ctl
+    tag: v1.20.1

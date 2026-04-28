@@ -1,7 +1,7 @@
 services:
   jackett:
     container_name: jackett
-    image: linuxserver/jackett:0.24.1226
+    image: linuxserver/jackett:0.24.1616
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -13,3 +13,11 @@ services:
       - /mnt/docker/jackett/downloads:/downloads
     ports:
       - "9117:9117"
+    networks:
+      - media
+    restart: unless-stopped
+
+networks:
+  media:
+    external: true
+    name: media

@@ -1,0 +1,32 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/widgets
+
+- greeting:
+    text_size: xl
+    text: Hi, user!
+
+- resources:
+    cpu: true
+    memory: true
+    disk: /
+    cputemp: true
+    uptime: true
+
+- datetime:
+    locale: en
+    format:
+        dateStyle: long
+        timeStyle: long
+        hour12: false
+
+- openweathermap:
+    label: Nekla #optional
+    latitude: 52.3649
+    longitude: 17.4133
+    units: metric # or imperial
+    provider: openweathermap
+    apiKey: REPLACE_ME
+    cache: 5 # Time in minutes to cache API responses, to stay within limits
+    format: # optional, Intl.NumberFormat options
+      maximumFractionDigits: 5

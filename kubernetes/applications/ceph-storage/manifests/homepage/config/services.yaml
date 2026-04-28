@@ -1,0 +1,332 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/services
+- infrastructure:
+    - "Open Media Vault":
+        description: NAS management and storage services.
+        icon: openmediavault.png
+        href: https://nas.example.com
+        id: omv-card
+        widget:
+          type: openmediavault
+          url: https://192.0.2.14/
+          username: "{{HOMEPAGE_VAR_OMV_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_OMV_PASSWORD}}"
+          method: services.getStatus
+          rejectUnauthorized: false
+
+    - "Portainer":
+        description: Web UI for Docker environment management.
+        icon: portainer.png
+        href: https://portainer.example.com
+        id: portainer-card
+
+    - "Proxmox Backup Server":
+        description: Backup target for virtual machines and hosts.
+        icon: proxmox.png
+        href: https://backup.example.com
+        id: pbs-card
+        widget:
+          type: proxmoxbackupserver
+          url: https://198.51.100.20:8007
+          username: "{{HOMEPAGE_VAR_PBS_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_PBS_PASSWORD}}"
+
+    - "Proxmox Cluster":
+        description: Cluster entrypoint for the Proxmox environment.
+        icon: proxmox.png
+        href: https://proxmox-cluster.example.com/
+        id: proxmoxcluster-card
+
+    - "Proxmox node proxmox-node-01":
+        description: Proxmox virtualization node.
+        icon: proxmox.png
+        href: https://proxmox-node-01.example.com/
+        id: proxmox01-card
+        widget:
+          type: proxmox
+          # Query all nodes through one known-good API endpoint and select the target node below.
+          url: https://192.0.2.11:8006
+          username: "{{HOMEPAGE_VAR_PROXMOX_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_PROXMOX_PASSWORD}}"
+          node: proxmox-node-01
+
+    - "Proxmox node proxmox-node-02":
+        description: Proxmox virtualization node.
+        icon: proxmox.png
+        href: https://proxmox-node-02.example.com/
+        id: proxmox02-card
+        widget:
+          type: proxmox
+          url: https://192.0.2.11:8006
+          username: "{{HOMEPAGE_VAR_PROXMOX_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_PROXMOX_PASSWORD}}"
+          node: proxmox-node-02
+
+    - "Proxmox node proxmox-node-03":
+        description: Proxmox virtualization node.
+        icon: proxmox.png
+        href: https://proxmox-node-03.example.com/
+        id: proxmox03-card
+        widget:
+          type: proxmox
+          url: https://192.0.2.11:8006
+          username: "{{HOMEPAGE_VAR_PROXMOX_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_PROXMOX_PASSWORD}}"
+          node: proxmox-node-03
+
+    - "Rancher":
+        description: Kubernetes cluster management UI.
+        icon: rancher.png
+        href: https://rancher.example.com
+        id: rancher-card
+
+- networking:
+    - "Authentik":
+        description: Identity provider and SSO portal.
+        icon: authentik.png
+        href: https://authentik.example.com
+        id: authentik-card
+        widget:
+          version: 2
+          type: authentik
+          url: http://authentik-server-app.authentik.svc.k3s.example.com:80
+          key: "{{HOMEPAGE_VAR_AUTHENTIK_KEY}}"
+
+    - "Pi-hole-01":
+        description: DNS sinkhole and network ad blocker.
+        icon: https://pihole-01.example.com/admin/img/logo.svg
+        href: https://pihole-01.example.com
+        id: pihole1-card
+        widget:
+          type: pihole
+          url: https://198.51.100.10:443
+          version: 6
+          key: "{{HOMEPAGE_VAR_PIHOLE_01_KEY}}"
+
+    - "Pi-hole-02":
+        description: DNS sinkhole and network ad blocker.
+        icon: https://pihole-02.example.com/admin/img/logo.svg
+        href: https://pihole-02.example.com
+        id: pihole2-card
+        widget:
+          type: pihole
+          url: https://198.51.100.11:443
+          version: 6
+          key: "{{HOMEPAGE_VAR_PIHOLE_02_KEY}}"
+
+    - "Pi-hole-03":
+        description: DNS sinkhole and network ad blocker.
+        icon: https://pihole-03.example.com/admin/img/logo.svg
+        href: https://pihole-03.example.com
+        id: pihole3-card
+        widget:
+          type: pihole
+          url: https://192.0.2.14:4443
+          version: 6
+          key: "{{HOMEPAGE_VAR_PIHOLE_03_KEY}}"
+
+    - "Traefik Proxy":
+        description: Reverse proxy and ingress controller.
+        icon: traefik.png
+        href: https://traefik.example.com
+        id: traefik-card
+        widget:
+          type: traefik
+          url: https://traefik.example.com
+
+    - "WireGuard VPN":
+        description: VPN access portal.
+        icon: wireguard.png
+        href: https://vpn.example.com
+        id: wireguard-card
+        widget:
+          type: wgeasy
+          url: http://198.51.100.24
+          version: 2 # optional, default is 1
+          username: {{HOMEPAGE_VAR_WIREGUARD_USERNAME}} # required for v15 and above
+          password: {{HOMEPAGE_VAR_WIREGUARD_PASSWORD}}
+          threshold: 2 # optional
+
+- monitoring:
+    - "Alertmanager":
+        description: Alert routing and silencing for Prometheus.
+        icon: alertmanager.png
+        href: https://alertmanager.example.com
+        id: alertmanager-card
+
+    - "Apprise":
+        description: Notification gateway for multiple delivery channels.
+        href: https://apprise.example.com
+        id: apprise-card
+
+    - "Flarewatcher":
+        description: Cloudflare-focused monitoring and alerting dashboard.
+        href: https://flarewatcher.example.com
+        id: flarewatcher-card
+
+    - "Grafana":
+        description: Dashboards and visualization for metrics and logs.
+        icon: grafana.png
+        href: https://grafana.example.com
+        id: grafana-card
+
+    - "InfluxDB":
+        description: Time-series database for telemetry and metrics.
+        icon: influxdb.png
+        href: https://influxdb.example.com
+        id: influxdb-card
+
+    - "Prometheus":
+        description: Metrics collection and querying.
+        icon: prometheus.png
+        href: https://prometheus.example.com
+        id: prometheus-card
+        widget:
+          type: prometheus
+          url: http://prometheus-server.prometheus.svc.k3s.example.com
+          
+    - "Pulze Dashboard":
+        description: Internal dashboard for consolidated status views.
+        href: https://pulze.example.com
+        id: pulze-card
+
+    - "Speedtest Tracker":
+        description: Monitor and track internet speed test results.
+        icon: speedtest-tracker.png
+        href: https://speedtest-tracker.example.com
+        id: speedtest-card
+        widget:
+          type: speedtest
+          url: https://speedtest-tracker-app.speedtest-tracker.svc.k3s.example.com:443
+
+    - "Uptime-Kuma External":
+        description: External status page for public service monitoring.
+        icon: uptime-kuma.png
+        href: https://status.example.com
+        id: uptime-card
+
+    - "Wazuh":
+        description: Security monitoring and threat detection dashboard.
+        icon: wazuh.png
+        href: https://wazuh.example.com
+        id: wazuh-card
+
+    - "Zabbix":
+        description: Infrastructure and application monitoring platform.
+        icon: zabbix.png
+        href: https://zabbix.example.com
+        id: zabbix-card
+        widget:
+          type: zabbix
+          url: http://198.51.100.22/zabbix
+          key: "{{HOMEPAGE_VAR_ZABBIX_KEY}}"
+
+- media:
+    - "Jackett":
+        description: API proxy for torrent indexers.
+        icon: jackett.png
+        href: https://jackett.example.com
+        id: jackett-card
+
+    - "Jellyfin":
+        description: Media server for streaming and library management.
+        icon: jellyfin.png
+        href: https://jellyfin.example.com
+        id: jellyfin-card
+        widget:
+          type: jellyfin
+          url: http://198.51.100.21:8096
+          key: "{{HOMEPAGE_VAR_JELLYFIN_KEY}}"
+          enableBlocks: true
+          enableNowPlaying: true
+          showEpisodeNumber: true
+
+    - "QBitTorrent":
+        description: Torrent client for downloads.
+        icon: qbittorrent.png
+        href: https://qbittorrent.example.com
+        id: qbit-card
+        widget:
+          type: qbittorrent
+          url: http://198.51.100.21:8080
+          username: "{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
+          enableLeechProgress: true
+          enableLeechSize: true
+
+    - "Radarr":
+        description: Automated movie management and downloads.
+        icon: radarr.png
+        href: https://radarr.example.com
+        id: radarr-card
+        widget:
+          type: radarr
+          url: http://198.51.100.21:7878
+          key: "{{HOMEPAGE_VAR_RADARR_KEY}}"
+          enableQueue: true
+
+    - "Sonarr":
+        description: Automated TV show management and downloads.
+        icon: sonarr.png
+        href: https://sonarr.example.com
+        id: sonarr-card
+        widget:
+          type: sonarr
+          url: http://198.51.100.21:8989
+          key: "{{HOMEPAGE_VAR_SONARR_KEY}}"
+          enableQueue: true
+
+- automation:
+    - "Ansible Semaphore":
+        description: Ansible automation and job runner.
+        icon: ansible.png
+        href: https://semaphore.example.com
+        id: semaphore-card
+
+    - "GitLab":
+        description: Source control and CI platform.
+        icon: gitlab.png
+        href: https://gitlab.example.com
+        id: gitlab-card
+
+    - "N8N":
+        description: Workflow automation platform.
+        icon: n8n.png
+        href: https://n8n.example.com
+        id: n8n-card
+
+    - "Nexterm":
+        description: Browser-based terminal and remote access tool.
+        href: https://nexterm.example.com
+        id: nexterm-card
+
+- apps:
+    - "Affine":
+        description: Collaborative workspace and note-taking app.
+        icon: affine.png
+        href: https://affine.example.com
+        id: affine-card
+
+    - "Homeassistant":
+        description: Smart home automation dashboard.
+        icon: home-assistant.png
+        href: https://homeassistant.example.com
+        id: homeassistant-card
+
+    - "Pastefy":
+        description: Pastebin-style text sharing service.
+        icon: https://image.pngaaa.com/309/3414309-middle.png
+        href: https://pastefy.example.com
+        id: pastefy-card
+
+    - "Portfolio Website":
+        description: Personal website and portfolio.
+        href: https://portfolio.example.com
+        id: portfolio-card
+
+    - "Vaultwarden":
+        description: Password manager and secret vault.
+        icon: bitwarden.png
+        href: https://vaultwarden.example.com
+        id: vaultwarden-card

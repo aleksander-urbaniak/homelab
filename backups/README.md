@@ -1,4 +1,4 @@
-# 🖥️ Homelab Backup Strategy ✨
+# 💾 Homelab Backup Strategy
 
 > **Goal:** Keep backups **simple**, **predictable**, and **tested** — for two workload types:  
 > **Proxmox VMs** + **K3s (Longhorn) persistent volumes**

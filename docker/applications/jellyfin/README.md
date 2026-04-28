@@ -1,4 +1,4 @@
-# 🗂️ Jellyfin (Docker) ✨
+# 📦 Jellyfin (Docker) ✨
 
 > ✨ **What is Jellyfin?**
 >

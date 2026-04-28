@@ -1,0 +1,21 @@
+
+# =====================================
+# 9. Service for Vaultwarden
+# =====================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+  labels:
+    app: vaultwarden
+spec:
+  type: ClusterIP
+  selector:
+    app: vaultwarden
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

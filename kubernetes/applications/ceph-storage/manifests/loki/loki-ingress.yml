@@ -1,0 +1,27 @@
+---
+# =====================================
+# 5) Ingress
+# =====================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: loki-ingress
+  namespace: loki
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - grafana-loki.example.com
+  rules:
+    - host: grafana-loki.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: loki-app
+                port:
+                  number: 3100

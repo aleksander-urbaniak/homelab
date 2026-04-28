@@ -1,0 +1,22 @@
+
+# =====================================
+# 2. StorageClass (Ceph)
+# =====================================
+
+# =====================================
+# 3. Headless Service (StatefulSet DNS)
+# =====================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pastefy-db-headless
+  namespace: pastefy
+spec:
+  clusterIP: None
+  selector:
+    app: pastefy-db
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306

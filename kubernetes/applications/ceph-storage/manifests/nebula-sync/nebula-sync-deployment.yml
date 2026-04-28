@@ -1,0 +1,150 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nebula-sync
+  namespace: nebula-sync
+  labels:
+    app.kubernetes.io/name: nebula-sync
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nebula-sync
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nebula-sync
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: nebula-sync
+          image: ghcr.io/lovelaze/nebula-sync:v0.11.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PRIMARY
+              valueFrom:
+                secretKeyRef:
+                  name: nebula-sync-secret
+                  key: PRIMARY
+            - name: REPLICAS
+              valueFrom:
+                secretKeyRef:
+                  name: nebula-sync-secret
+                  key: REPLICAS
+            - name: FULL_SYNC
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: FULL_SYNC
+            - name: RUN_GRAVITY
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: RUN_GRAVITY
+            - name: CRON
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: CRON
+            - name: SYNC_CONFIG_DNS
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_DNS
+            - name: SYNC_CONFIG_DNS_EXCLUDE
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_DNS_EXCLUDE
+            - name: SYNC_CONFIG_DHCP
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_DHCP
+            - name: SYNC_CONFIG_NTP
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_NTP
+            - name: SYNC_CONFIG_RESOLVER
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_RESOLVER
+            - name: SYNC_CONFIG_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_DATABASE
+            - name: SYNC_CONFIG_MISC
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_MISC
+            - name: SYNC_CONFIG_DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_CONFIG_DEBUG
+            - name: SYNC_GRAVITY_DHCP_LEASES
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_DHCP_LEASES
+            - name: SYNC_GRAVITY_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_GROUP
+            - name: SYNC_GRAVITY_AD_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_AD_LIST
+            - name: SYNC_GRAVITY_AD_LIST_BY_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_AD_LIST_BY_GROUP
+            - name: SYNC_GRAVITY_DOMAIN_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_DOMAIN_LIST
+            - name: SYNC_GRAVITY_DOMAIN_LIST_BY_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_DOMAIN_LIST_BY_GROUP
+            - name: SYNC_GRAVITY_CLIENT
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_CLIENT
+            - name: SYNC_GRAVITY_CLIENT_BY_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: SYNC_GRAVITY_CLIENT_BY_GROUP
+            - name: WEBHOOK_CLIENT_SKIP_TLS_VERIFICATION
+              valueFrom:
+                configMapKeyRef:
+                  name: nebula-sync-config
+                  key: WEBHOOK_CLIENT_SKIP_TLS_VERIFICATION
+            - name: CLIENT_SKIP_TLS_VERIFICATION
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080   # Change if the application listens on a different port
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+

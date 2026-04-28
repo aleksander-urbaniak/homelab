@@ -1,0 +1,21 @@
+
+# =====================================
+# 3. Headless Service for Vaultwarden DB
+# =====================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden-db-headless
+  namespace: vaultwarden
+  labels:
+    app: vaultwarden-db
+spec:
+  clusterIP: None
+  selector:
+    app: vaultwarden-db
+  ports:
+    - name: postgres
+      protocol: TCP
+      port: 5432
+      targetPort: 5432

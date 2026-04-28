@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole-exporter
+  namespace: pihole-exporter
+  labels:
+    app.kubernetes.io/name: pihole-exporter
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pihole-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pihole-exporter
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+
+      containers:
+        - name: pihole-exporter
+          image: ekofr/pihole-exporter:v1.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 9617
+          env:
+            - name: PIHOLE_PROTOCOL
+              value: "https"
+            - name: PIHOLE_HOSTNAME
+              value: "pihole-01.example.com,pihole-02.example.com,pihole-03.example.com"
+            - name: PIHOLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-exporter-secret
+                  key: PIHOLE_PASSWORD
+            - name: PIHOLE_PORT
+              value: "443"
+            - name: PORT
+              value: "9617"
+          volumeMounts:
+            - name: certs
+              mountPath: /etc/ssl/certs
+          command: ["./pihole-exporter"]
+          args: ["-skip_tls_verification", "true"]
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: certs
+          persistentVolumeClaim:
+            claimName: pihole-exporter-certs

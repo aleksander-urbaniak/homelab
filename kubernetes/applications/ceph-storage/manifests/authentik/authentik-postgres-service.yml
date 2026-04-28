@@ -1,0 +1,17 @@
+
+# =====================================
+# 3. Service for Authentik DB
+# =====================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentik-postgres-db
+  namespace: authentik
+spec:
+  selector:
+    app: authentik-postgres-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

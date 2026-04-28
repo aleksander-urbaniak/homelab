@@ -1,0 +1,46 @@
+---
+# 4. ConfigMap (G????wna konfiguracja Runnera)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-runner-config
+  namespace: gitlab-runner
+data:
+  config.toml: |
+    concurrent = 4
+    check_interval = 3
+    log_level = "info"
+    listen_address = ":8093"
+    request_concurrency = 2
+
+    [[runners]]
+      name = "k3s-cluster-runner"
+      url = "https://gitlab.example.com"
+      token = "REPLACE_ME"
+      executor = "kubernetes"
+
+      # Fix dla SSL je??li u??ywasz Self-Signed certyfikat??w na GitLabie
+      # ssl_verify = false
+
+      [runners.kubernetes]
+        namespace = "gitlab-runner"
+        service_account = "gitlab-runner-sa"
+
+        # Obraz pomocniczy do klonowania repozytorium
+        helper_image = "gitlab/gitlab-runner-helper:x86_64-v18.11.0"
+        pull_policy = "if-not-present"
+
+        dns_policy = "none"
+
+        # >>> CHANGE 2: Force Job Pods to use your local DNS <<<
+        [runners.kubernetes.dns_config]
+          nameservers = ["198.51.100.10", "198.51.100.11"]
+
+        # Zasoby dla kontenera pomocniczego
+        helper_cpu_limit = "500m"
+        helper_memory_limit = "512Mi"
+        cpu_limit = "1"
+        memory_limit = "1Gi"
+
+        [runners.kubernetes.node_selector]
+          "node-role.kubernetes.io/worker" = ""

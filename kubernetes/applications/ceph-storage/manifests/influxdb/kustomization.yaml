@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - influxdb-app-service.yml
+  - influxdb-data-pvc-persistentvolumeclaim.yml
+  - influxdb-deployment.yml
+  - influxdb-ingress.yml
+  - influxdb-namespace.yml

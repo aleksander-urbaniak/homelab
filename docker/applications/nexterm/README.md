@@ -1,4 +1,4 @@
-# Nexterm (Docker)
+# 📦 Nexterm (Docker) ✨
 
 Nexterm is a self-hosted web terminal and remote access UI.
 

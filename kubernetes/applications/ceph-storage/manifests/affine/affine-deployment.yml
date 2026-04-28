@@ -1,0 +1,76 @@
+
+# =====================================
+# Affine App - Deployment + Service
+# =====================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine
+  namespace: affine
+  labels:
+    app: affine
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: affine
+  template:
+    metadata:
+      labels:
+        app: affine
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: affine
+          image: ghcr.io/toeverything/affine:0.26.6
+          ports:
+            - name: http
+              containerPort: 3010
+          env:
+            - name: REDIS_SERVER_HOST
+              value: affine-redis
+            - name: REDIS_SERVER_PORT
+              value: "6379"
+            - name: REDIS_SERVER_PASSWORD
+              valueFrom: { secretKeyRef: { name: affine-secrets, key: REDIS_PASSWORD } }
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: affine-secrets, key: DATABASE_URL } }
+            - name: AFFINE_INDEXER_ENABLED
+              valueFrom: { secretKeyRef: { name: affine-secrets, key: AFFINE_INDEXER_ENABLED } }
+            - name: AFFINE_SERVER_EXTERNAL_URL
+              valueFrom: { secretKeyRef: { name: affine-secrets, key: AFFINE_SERVER_EXTERNAL_URL } }
+          volumeMounts:
+            - name: affine-storage
+              mountPath: /root/.affine/storage
+            - name: affine-config
+              mountPath: /root/.affine/config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3010
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3010
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+      volumes:
+        - name: affine-storage
+          persistentVolumeClaim:
+            claimName: affine-storage-pvc
+        - name: affine-config
+          persistentVolumeClaim:
+            claimName: affine-config-pvc

@@ -1,0 +1,18 @@
+
+---
+
+# =====================================
+# 2. PVC for n8n data (RWX)
+# =====================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-data-rbd-pvc
+  namespace: n8n
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

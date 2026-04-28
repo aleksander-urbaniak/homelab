@@ -1,0 +1,55 @@
+replicaCount: 1
+
+image:
+  repository: portainer/portainer-ce
+  tag: 2.40.0
+  pullPolicy: IfNotPresent
+
+nodeSelector:
+  node-role.kubernetes.io/worker: ""
+
+service:
+  type: ClusterIP
+  httpPort: 9000
+  httpsPort: 9443
+  edgePort: 8000
+  annotations:
+    # Portainer serves HTTPS with a self-signed cert on 9443, so Traefik
+    # needs an explicit ServersTransport to skip backend cert verification.
+    traefik.ingress.kubernetes.io/service.serverstransport: portainer-portainer-backend-transport@kubernetescrd
+
+tls:
+  force: true
+
+trusted_origins:
+  enabled: true
+  domains: portainer.example.com
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+  hosts:
+    - host: portainer.example.com
+      paths:
+        - path: /
+  tls:
+    - hosts:
+        - portainer.example.com
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+persistence:
+  enabled: true
+  storageClass: example-rbd-rbd
+  size: 1Gi
+
+localMgmt: true

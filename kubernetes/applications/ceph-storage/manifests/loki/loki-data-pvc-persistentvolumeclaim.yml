@@ -1,0 +1,16 @@
+---
+# =====================================
+# 2) PVC
+# =====================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: loki-data-pvc
+  namespace: loki
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi

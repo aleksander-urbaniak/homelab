@@ -1,0 +1,51 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/settings
+
+title: example.com | dashboard
+
+background: /images/bg.jpg
+
+headerStyle: boxedWidgets
+
+quicklaunch:
+  searchDescriptions: true
+
+
+showStats: false
+
+providers:
+  openweathermap: REPLACE_ME
+  weatherapi: REPLACE_ME
+
+hideErrors: false
+
+layout:
+  dashboard:
+    header: true 
+    style: column
+    columns: 6
+  infrastructure:
+    header: true
+    style: column
+    columns: 6
+  networking:
+    header: true
+    style: column
+    columns: 6
+  monitoring:
+    header: true
+    style: column
+    columns: 6
+  media:
+    header: true
+    style: column
+    columns: 6
+  automation:
+    header: true
+    style: column
+    columns: 6
+  apps:
+    header: true
+    style: column
+    columns: 6

@@ -1,4 +1,4 @@
-# 🗂️ Pulze Dashboard (Docker) ✨
+# 📦 Pulze Dashboard (Docker) ✨
 
 > ✨ **What is Pulze Dashboard?**
 >

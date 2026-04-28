@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - n8n-app-service.yml
+  - n8n-data-pvc-persistentvolumeclaim.yml
+  - n8n-deployment.yml
+  - n8n-ingress.yml
+  - n8n-namespace.yml
+  - n8n-postgres-db-service.yml
+  - postgres-statefulset-statefulset.yml

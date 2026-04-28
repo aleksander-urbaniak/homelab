@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ak-ldap-outpost
+  namespace: authentik
+  labels:
+    app: ak-ldap-outpost
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ak-ldap-outpost
+  template:
+    metadata:
+      labels:
+        app: ak-ldap-outpost
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: ldap
+          image: ghcr.io/goauthentik/ldap:2026.2.2
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: ak-ldap-outpost-secret
+          ports:
+            - name: ldap-internal
+              containerPort: 3389
+              protocol: TCP
+            - name: ldaps-internal
+              containerPort: 6636
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 3389
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

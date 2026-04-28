@@ -1,4 +1,4 @@
-# Proxmox Terraform Stacks
+# 🛠️ Proxmox Terraform Stacks
 
 This directory contains two standalone Terraform root modules for provisioning workloads on Proxmox VE with the `bpg/proxmox` provider:
 

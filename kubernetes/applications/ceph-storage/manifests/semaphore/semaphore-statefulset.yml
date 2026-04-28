@@ -1,0 +1,127 @@
+
+# =====================================
+# 4. Semaphore App StatefulSet
+# =====================================
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: semaphore
+  namespace: semaphore
+  labels:
+    app: semaphore
+spec:
+  serviceName: semaphore
+  replicas: 1
+  selector:
+    matchLabels:
+      app: semaphore
+  template:
+    metadata:
+      labels:
+        app: semaphore
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      securityContext:
+        fsGroup: 0
+      containers:
+      - name: semaphore
+        image: semaphoreui/semaphore:v2.17.38
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+        ports:
+        - name: http
+          containerPort: 3000
+        env:
+        - name: SEMAPHORE_DB_DIALECT
+          value: "mysql"
+        - name: SEMAPHORE_DB_HOST
+          value: "semaphore-db"
+        - name: SEMAPHORE_DB_PORT
+          value: "3306"
+        - name: SEMAPHORE_DB_NAME
+          value: "semaphore"
+        - name: SEMAPHORE_DB_USER
+          value: "semaphore"
+        - name: SEMAPHORE_DB_PASS
+          value: "OSm#7m#jN!ELKsAqZ5FhelcprRMMtwlz"
+        - name: SEMAPHORE_ADMIN
+          value: "exampleuser"
+        - name: SEMAPHORE_ADMIN_PASSWORD
+          value: "P@ssw0rd1233"
+        - name: SEMAPHORE_ADMIN_NAME
+          value: "Aleksander Urbaniak"
+        - name: SEMAPHORE_ADMIN_EMAIL
+          value: "exampleuser@example.com"
+        - name: SEMAPHORE_PORT
+          value: "3000"
+        - name: SEMAPHORE_INTERFACE
+          value: "0.0.0.0"
+        - name: SEMAPHORE_ACCESS_KEY_ENCRYPTION
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-secret
+              key: SEMAPHORE_ACCESS_KEY_ENCRYPTION
+        startupProbe:
+          httpGet:
+            path: "/"
+            port: 3000
+          periodSeconds: 10
+          failureThreshold: 30
+        readinessProbe:
+          httpGet:
+            path: "/"
+            port: 3000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: "/"
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/semaphore
+        - name: config
+          mountPath: /etc/semaphore
+        - name: tmp
+          mountPath: /tmp/semaphore
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 300m
+            memory: 512Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: example-rbd-rbd
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 3Gi
+  - metadata:
+      name: config
+    spec:
+      storageClassName: example-rbd-rbd
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: tmp
+    spec:
+      storageClassName: example-rbd-rbd
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi

@@ -1,0 +1,8 @@
+# =====================================
+# 0. Namespace for Homepage
+# =====================================
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homepage

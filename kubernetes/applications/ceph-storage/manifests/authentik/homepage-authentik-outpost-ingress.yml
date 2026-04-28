@@ -1,0 +1,25 @@
+# Homepage host outpost route to Authentik proxy outpost
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage-authentik-outpost-ingress
+  namespace: authentik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - homepage.example.com
+  rules:
+    - host: homepage.example.com
+      http:
+        paths:
+          - path: /outpost.goauthentik.io/
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-server-app
+                port:
+                  number: 80

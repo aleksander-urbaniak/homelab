@@ -1,4 +1,4 @@
-# 🗂️ qBittorrent (Docker) ✨
+# 📦 qBittorrent (Docker) ✨
 
 > ✨ **What is qBittorrent?**
 >

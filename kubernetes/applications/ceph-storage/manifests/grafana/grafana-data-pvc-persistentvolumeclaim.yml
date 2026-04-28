@@ -1,0 +1,16 @@
+---
+# =====================================
+# 1) PVC
+# =====================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data-pvc
+  namespace: grafana
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

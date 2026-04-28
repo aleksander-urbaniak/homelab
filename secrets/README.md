@@ -1,4 +1,4 @@
-# 🔐 Secrets Management ✨
+# 🔐 Secrets Management
 
 This repo does not store real secrets. Use a password manager and keep encrypted
 values out of Git.

@@ -1,0 +1,8 @@
+# release|namespace|repo_name|repo_url|chart_ref|values_file
+cert-manager|cert-manager|jetstack|https://charts.jetstack.io|jetstack/cert-manager|applications/helm/cert-manager/values.yml
+traefik|traefik|traefik|https://helm.traefik.io/traefik|traefik/traefik|applications/helm/traefik/values.yml
+portainer|portainer|portainer|https://portainer.github.io/k8s/|portainer/portainer|applications/helm/portainer/values.yml
+prometheus|prometheus|prometheus-community|https://prometheus-community.github.io/helm-charts|prometheus-community/prometheus|applications/helm/prometheus/values.yml
+rancher|cattle-system|rancher-stable|https://releases.rancher.com/server-charts/stable|rancher-stable/rancher|applications/helm/rancher/values.yml
+ceph-csi-rbd|ceph-csi|ceph-csi|https://ceph.github.io/csi-charts|ceph-csi/ceph-csi-rbd|applications/helm/ceph-csi-rbd/values.yml
+ceph-csi-cephfs|ceph-csi|ceph-csi|https://ceph.github.io/csi-charts|ceph-csi/ceph-csi-cephfs|applications/helm/ceph-csi-cephfs/values.yml

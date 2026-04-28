@@ -1,4 +1,4 @@
-# 🗂️ Radarr (Docker) ✨
+# 📦 Radarr (Docker) ✨
 
 > ✨ **What is Radarr?**
 >

@@ -1,0 +1,12 @@
+csiConfig:
+  - clusterID: REPLACE_ME
+    monitors:
+      - 192.0.2.11:3300
+      - 192.0.2.12:3300
+      - 192.0.2.13:3300
+nodeplugin:
+  podSecurityPolicy:
+    enabled: false
+provisioner:
+  podSecurityPolicy:
+    enabled: false

@@ -1,15 +1,30 @@
 services:
   pihole:
     container_name: pihole
-    image: pihole/pihole:2026.02.0
+    image: pihole/pihole:2026.04.0
     restart: unless-stopped
     hostname: pihole
-    volumes:
-      - /mnt/docker/pihole/etc-pihole:/etc/pihole
-      - /mnt/docker/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "${PIHOLE_WEB_PORT}:80/tcp"
-    cap_add:
-      - NET_ADMIN
+      - "8080:80/tcp"
+      - "4443:443/tcp"
+    environment:
+      TZ: "${TZ}"
+      FTLCONF_dns_upstreams: "unbound#53"
+      FTLCONF_dns_listeningMode: "ALL"
+    volumes:
+      - "/docker/pihole:/etc/pihole"
+    networks:
+      - pihole_network
+
+  unbound:
+    container_name: unbound
+    image: klutchell/unbound:1.24.2
+    restart: unless-stopped
+    networks:
+      - pihole_network
+
+networks:
+  pihole_network:
+    driver: bridge

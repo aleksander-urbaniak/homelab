@@ -1,0 +1,128 @@
+---
+# =====================================
+# 2) Deployment (Grafana + Authentik OIDC + local login)
+# =====================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: grafana
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      securityContext:
+        fsGroup: 472
+
+      initContainers:
+        - name: init-chown
+          image: busybox:1.37.0
+          command: ["sh", "-c", "chown -R 472:472 /var/lib/grafana"]
+          securityContext:
+            runAsUser: 0
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+            limits:
+              cpu: "50m"
+              memory: "64Mi"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/grafana
+
+      containers:
+        - name: grafana
+          image: grafana/grafana:13.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 472
+            runAsGroup: 472
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/grafana
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+
+          env:
+            - name: GF_SERVER_ROOT_URL
+              value: "https://grafana.example.com"
+
+            - name: GF_AUTH_DISABLE_LOGIN_FORM
+              value: "false"
+            - name: GF_AUTH_BASIC_ENABLED
+              value: "true"
+
+            - name: GF_AUTH_OAUTH_AUTO_LOGIN
+              value: "false"
+            - name: GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN
+              value: "false"
+
+            - name: GF_AUTH_GENERIC_OAUTH_ENABLED
+              value: "true"
+            - name: GF_AUTH_GENERIC_OAUTH_NAME
+              value: "authentik"
+            - name: GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP
+              value: "true"
+            - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+              value: "2sXS88iTwH8wyR8IlF60uKUZn2gA433TwwkBpIkz"
+            - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+              value: "LNugmn6PTQK7mfnKwbHySPQK1Om3ggWMnzlNdqEgwwFdzT8aYhP1bFIr8E6A2geXs7jpvV0zqWBUyzint1FoxGX3IaYiy80W3U5Wlaf7cRmdarndDfg49gfTGfYYWX9w"
+            - name: GF_AUTH_GENERIC_OAUTH_SCOPES
+              value: "openid profile email"
+
+            - name: GF_AUTH_GENERIC_OAUTH_USE_ID_TOKEN
+              value: "true"
+            - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
+              value: "https://authentik.example.com/application/o/authorize/"
+            - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
+              value: "https://authentik.example.com/application/o/token/"
+            - name: GF_AUTH_GENERIC_OAUTH_API_URL
+              value: "https://authentik.example.com/application/o/userinfo/"
+
+            - name: GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH
+              value: "email || preferred_username || sub"
+            - name: GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH
+              value: "preferred_username"
+            - name: GF_AUTH_GENERIC_OAUTH_NAME_ATTRIBUTE_PATH
+              value: "name"
+
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: grafana-data-pvc

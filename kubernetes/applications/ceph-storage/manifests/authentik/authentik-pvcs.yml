@@ -1,0 +1,43 @@
+
+# =====================================
+# 6. PVCs for Authentik Server & Worker (RWX via Ceph)
+# =====================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authentik-media-pvc
+  namespace: authentik
+spec:
+  storageClassName: example-cephfs-cephfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authentik-templates-pvc
+  namespace: authentik
+spec:
+  storageClassName: example-cephfs-cephfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authentik-certs-pvc
+  namespace: authentik
+spec:
+  storageClassName: example-cephfs-cephfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

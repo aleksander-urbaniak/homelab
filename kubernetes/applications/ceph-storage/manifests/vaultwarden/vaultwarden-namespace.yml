@@ -1,0 +1,8 @@
+# =====================================
+# 0. Namespace for Vaultwarden
+# =====================================
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vaultwarden

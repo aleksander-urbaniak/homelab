@@ -1,4 +1,4 @@
-# 🗂️ Uptime Kuma (Docker) ✨
+# 📦 Uptime Kuma (Docker) ✨
 
 > ✨ **What is Uptime Kuma?**
 >

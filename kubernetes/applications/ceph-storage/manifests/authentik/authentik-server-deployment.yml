@@ -1,0 +1,155 @@
+
+# =====================================
+# 7. Authentik Server Deployment
+# =====================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-server-app
+  namespace: authentik
+  labels:
+    app: authentik-server-app
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: authentik-server-app
+  template:
+    metadata:
+      labels:
+        app: authentik-server-app
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+        kubernetes.io/hostname: k3s-worker-01
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.37.0
+          command: ["sh","-c","chmod -R 777 /media /templates /certs"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: media
+              mountPath: /media
+            - name: templates
+              mountPath: /templates
+            - name: certs
+              mountPath: /certs
+        - name: wait-for-postgres
+          image: postgres:18.3
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h authentik-postgres-db -U authentik; do
+                echo "Waiting for Postgres???"; sleep 5;
+              done
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        - name: wait-for-redis
+          image: redis:8.6.2-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until redis-cli -h authentik-redis-app ping | grep PONG; do
+                echo "Waiting for Redis???"; sleep 5;
+              done
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      containers:
+        - name: authentik-server-app
+          image: ghcr.io/goauthentik/server:2026.2.2
+          imagePullPolicy: IfNotPresent
+          args: ["server"]
+          env:
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: secret_key
+            - name: AUTHENTIK_REDIS__HOST
+              value: "authentik-redis-app"
+            - name: AUTHENTIK_REDIS__PORT
+              value: "6379"
+            - name: AUTHENTIK_WEB__WORKERS
+              value: "1"
+            - name: AUTHENTIK_POSTGRESQL__HOST
+              value: "authentik-postgres-db"
+            - name: AUTHENTIK_POSTGRESQL__PORT
+              value: "5432"
+            - name: AUTHENTIK_POSTGRESQL__USER
+              value: "authentik"
+            - name: AUTHENTIK_POSTGRESQL__NAME
+              value: "authentik"
+            - name: AUTHENTIK_POSTGRESQL__PASSWORD
+              value: "F0JlW8dbDJWNOnfKJCppaBLDkMS9ByOpp6oxcoQfDnnpesCB"
+            - name: AUTHENTIK_LISTEN__HTTP
+              value: "0.0.0.0:80"
+            - name: AUTHENTIK_LISTEN__HTTPS
+              value: "0.0.0.0:443"
+          startupProbe:
+            httpGet:
+              path: /-/health/live/
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /-/health/ready/
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /-/health/live/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 2Gi
+          volumeMounts:
+            - name: media
+              mountPath: /media
+            - name: templates
+              mountPath: /templates
+            - name: certs
+              mountPath: /certs
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: authentik-media-pvc
+        - name: templates
+          persistentVolumeClaim:
+            claimName: authentik-templates-pvc
+        - name: certs
+          persistentVolumeClaim:
+            claimName: authentik-certs-pvc

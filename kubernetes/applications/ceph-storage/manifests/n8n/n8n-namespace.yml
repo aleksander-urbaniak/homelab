@@ -1,0 +1,7 @@
+# =====================================
+# 0. Namespace
+# =====================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: n8n

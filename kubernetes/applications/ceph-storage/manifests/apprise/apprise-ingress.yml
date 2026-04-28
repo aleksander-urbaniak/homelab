@@ -1,0 +1,26 @@
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apprise-ingress
+  namespace: apprise
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: apprise-apprise-authentik@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - apprise.example.com
+  rules:
+    - host: apprise.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: apprise
+                port:
+                  number: 8000

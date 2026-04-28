@@ -1,0 +1,16 @@
+
+# =====================================
+# 1. ConfigMap for DB Init
+# =====================================
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: semaphore-db-init
+  namespace: semaphore
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS `semaphore`;
+    CREATE USER IF NOT EXISTS 'semaphore'@'%' IDENTIFIED BY 'OSm#7m#jN!ELKsAqZ5FhelcprRMMtwlz';
+    GRANT ALL PRIVILEGES ON `semaphore`.* TO 'semaphore'@'%';
+    FLUSH PRIVILEGES;

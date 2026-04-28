@@ -1,4 +1,4 @@
-# 🗂️ Portainer (Docker) ✨
+# 📦 Portainer (Docker) ✨
 
 > ✨ **What is Portainer?**
 >

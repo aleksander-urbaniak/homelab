@@ -1,0 +1,20 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: speedtest-tracker
+  namespace: speedtest-tracker
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`speedtest-tracker.example.com`)
+      services:
+        - name: speedtest-tracker-app
+          port: 443
+          scheme: https
+          serversTransport: speedtest-tracker-transport
+  tls: {}

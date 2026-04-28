@@ -1,0 +1,84 @@
+
+# =====================================
+# PostgreSQL (pgvector) - StatefulSet + Service
+#  - Uses subdir PGDATA to avoid lost+found issue
+# =====================================
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: affine-postgres
+  namespace: affine
+  labels:
+    app: affine-postgres
+spec:
+  serviceName: affine-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affine-postgres
+  template:
+    metadata:
+      labels:
+        app: affine-postgres
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: "OnRootMismatch"
+      initContainers:
+        - name: init-pgdata
+          image: busybox:1.37.0
+          command: ["sh","-c","mkdir -p /var/lib/postgresql/data/pgdata && chown -R 999:999 /var/lib/postgresql/data"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:0.8.2-pg16
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: affine-secrets, key: DB_USERNAME } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: affine-secrets, key: DB_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: affine-secrets, key: DB_DATABASE } }
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          readinessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -h 127.0.0.1 -p 5432"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -h 127.0.0.1 -p 5432"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: example-rbd-rbd
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi

@@ -1,4 +1,4 @@
-# provision-new-lxc
+# 🛠️ provision-new-lxc
 
 Provision a new Proxmox LXC container from an existing template file ID or by downloading a template directly through the Proxmox API.
 

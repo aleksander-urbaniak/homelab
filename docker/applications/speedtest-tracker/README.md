@@ -1,4 +1,4 @@
-# 🗂️ Speedtest Tracker (Docker) ✨
+# 📦 Speedtest Tracker (Docker) ✨
 
 > ✨ **What is Speedtest Tracker?**
 >

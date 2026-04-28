@@ -1,0 +1,21 @@
+
+# =====================================
+# 3. Headless Service for DB
+# =====================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: semaphore-db
+  namespace: semaphore
+  labels:
+    app: semaphore-db
+spec:
+  clusterIP: None
+  selector:
+    app: semaphore-db
+  ports:
+  - name: mysql
+    protocol: TCP
+    port: 3306
+    targetPort: 3306

@@ -1,0 +1,22 @@
+
+# =====================================
+# 2. StorageClass for Homepage NFS
+# (removed ??? using cluster's Ceph SC: "ceph")
+# =====================================
+
+# =====================================
+# 3. PVC for Homepage Config
+# =====================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homepage-config-pvc
+  namespace: homepage
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

@@ -1,0 +1,21 @@
+
+# =====================================
+# 5. ClusterIP Service for Vaultwarden DB
+# =====================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden-db
+  namespace: vaultwarden
+  labels:
+    app: vaultwarden-db
+spec:
+  type: ClusterIP
+  selector:
+    app: vaultwarden-db
+  ports:
+    - name: postgres
+      protocol: TCP
+      port: 5432
+      targetPort: 5432

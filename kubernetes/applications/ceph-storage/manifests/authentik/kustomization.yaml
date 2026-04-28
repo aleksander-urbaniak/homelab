@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ak-ldap-outpost-deployment.yml
+  - ak-ldap-outpost-service.yml
+  - authentik-ingress.yml
+  - authentik-ldap-ingressroutetcp.yml
+  - authentik-ldaps-ingressroutetcp.yml
+  - authentik-namespace.yml
+  - authentik-postgres-service.yml
+  - authentik-postgres-statefulset.yml
+  - authentik-pvcs.yml
+  - authentik-redis-service.yml
+  - authentik-redis-statefulset.yml
+  - authentik-secrets.yml
+  - authentik-server-deployment.yml
+  - authentik-server-service.yml
+  - authentik-worker-deployment.yml
+  - homepage-authentik-outpost-ingress.yml

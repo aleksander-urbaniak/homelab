@@ -1,0 +1,10 @@
+hostname: rancher.example.com
+bootstrapPassword: REPLACE_ME
+rancherImage: rancher/rancher
+rancherImageTag: v2.14.0
+replicas: 1
+
+ingress:
+  extraAnnotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure

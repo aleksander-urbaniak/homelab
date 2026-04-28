@@ -1,0 +1,14 @@
+---
+# 3. PVC (Cache / Storage)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitlab-runner-pvc
+  namespace: gitlab-runner
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

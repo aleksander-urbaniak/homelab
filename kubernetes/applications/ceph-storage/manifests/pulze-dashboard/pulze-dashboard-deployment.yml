@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulze-dashboard
+  namespace: pulze-dashboard
+  labels:
+    app: pulze-dashboard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pulze-dashboard
+  template:
+    metadata:
+      labels:
+        app: pulze-dashboard
+    spec:
+      containers:
+        - name: pulze-dashboard
+          image: aleksanderurbaniak/pulze-dashboard:v1.0.7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: APP_BASE_URL
+              value: "https://pulze.example.com"
+            - name: SAML_ALLOW_UNSIGNED
+              value: "true"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pulze-dashboard-data-pvc

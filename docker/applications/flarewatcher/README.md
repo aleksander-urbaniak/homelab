@@ -1,4 +1,4 @@
-# 🗂️ Flarewatcher (Docker) ✨
+# 📦 Flarewatcher (Docker) ✨
 
 > ✨ **What is Flarewatcher?**
 >

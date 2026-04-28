@@ -1,0 +1,90 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "kubernetes-rules.yml"
+  - "prometheus-self-monitoring-rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager.alertmanager.svc.k3s.example.com:9093']
+
+scrape_configs:
+  - job_name: 'alertmanager'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'alertmanager.alertmanager.svc.k3s.example.com:9093'
+
+  # 1) self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 2) kube-apiserver
+  - job_name: 'kubernetes-apiservers'
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: ['kube-system']
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_component]
+        regex: apiserver
+        action: keep
+
+  # 3) kubelet + cAdvisor
+  - job_name: 'kubernetes-nodes'
+    kubernetes_sd_configs:
+      - role: node
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+
+  - job_name: 'kubernetes-cadvisor'
+    kubernetes_sd_configs:
+      - role: node
+    metrics_path: /metrics/cadvisor
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  # 4) kube-state-metrics
+  - job_name: 'kube-state-metrics'
+    static_configs:
+      - targets:
+          - 'kube-state-metrics.kube-state-metrics.svc.k3s.example.com:8080'
+
+  # 5) scrape annotation for Pods
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        regex: "true"
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        regex: "([^:]+)(?::\\d+)?;(\\d+)"
+        replacement: "$1:$2"
+        target_label: __address__
+        action: replace
+
+  # 8) pihole
+  - job_name: 'pihole'
+    static_configs:
+      - targets:
+          - 'pihole-exporter.pihole-exporter.svc.k3s.example.com:9617'

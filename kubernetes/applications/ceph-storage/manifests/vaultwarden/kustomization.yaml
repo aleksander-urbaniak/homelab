@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - vaultwarden-db-headless-service.yml
+  - vaultwarden-db-service.yml
+  - vaultwarden-db-statefulset.yml
+  - vaultwarden-deployment.yml
+  - vaultwarden-ingress.yml
+  - vaultwarden-namespace.yml
+  - vaultwarden-pvc.yml
+  - vaultwarden-secrets.yml
+  - vaultwarden-service.yml

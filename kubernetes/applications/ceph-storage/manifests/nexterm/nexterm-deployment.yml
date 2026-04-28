@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexterm
+  namespace: nexterm
+  labels:
+    app: nexterm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nexterm
+  template:
+    metadata:
+      labels:
+        app: nexterm
+    spec:
+      containers:
+        - name: nexterm
+          image: germannewsmaker/nexterm:1.2.0-BETA
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 6989
+          env:
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nexterm-env
+                  key: NEXTERM_ENCRYPTION_KEY
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          readinessProbe:
+            tcpSocket:
+              port: 6989
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            tcpSocket:
+              port: 6989
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nexterm-data-pvc

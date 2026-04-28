@@ -1,0 +1,60 @@
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-statefulset
+  namespace: n8n
+  labels:
+    app:        postgres
+    component: statefulset
+spec:
+  serviceName: n8n-postgres-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app:        postgres
+      component: statefulset
+  template:
+    metadata:
+      labels:
+        app:        postgres
+        component: statefulset
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: postgres
+          image: postgres:18.3
+          env:
+            - name: POSTGRES_USER
+              value: "n8n"
+            - name: POSTGRES_DB
+              value: "n8n"
+            - name: POSTGRES_PASSWORD
+              value: "n8n"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - name: postgres
+              containerPort: 5432
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1
+              memory: 1Gi
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        storageClassName: example-rbd-rbd
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi

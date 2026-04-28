@@ -1,4 +1,4 @@
-# 🗂️ Zabbix (Docker) ✨
+# 📦 Zabbix (Docker) ✨
 
 > ✨ **What is Zabbix?**
 >

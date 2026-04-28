@@ -1,0 +1,8 @@
+# =====================================
+# 0. Namespace for Semaphore
+# =====================================
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: semaphore

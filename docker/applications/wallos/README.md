@@ -1,4 +1,4 @@
-# 🗂️ Wallos (Docker) ✨
+# 📦 Wallos (Docker) ✨
 
 > ✨ **What is Wallos?**
 >

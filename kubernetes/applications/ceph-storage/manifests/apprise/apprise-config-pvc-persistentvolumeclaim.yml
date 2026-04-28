@@ -1,0 +1,17 @@
+
+# =====================================
+# 1. PVC for Apprise Config (Ceph)
+# =====================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: apprise-config-pvc
+  namespace: apprise
+spec:
+  storageClassName: example-rbd-rbd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

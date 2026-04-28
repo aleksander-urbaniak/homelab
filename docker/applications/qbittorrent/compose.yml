@@ -12,3 +12,11 @@ services:
       - /mnt/docker/qbittorrent/downloads:/downloads
     ports:
       - "8080:8080"
+    networks:
+      - media
+    restart: unless-stopped
+
+networks:
+  media:
+    external: true
+    name: media

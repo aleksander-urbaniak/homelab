@@ -1,0 +1,147 @@
+certificatesResolvers:
+  cloudflare:
+    acme:
+      dnsChallenge:
+        provider: cloudflare
+      email: user@example.com
+      storage: /data/acme.json
+
+deployment:
+  initContainers:
+    - name: volume-permissions
+      image: busybox:1.37
+      command:
+        - sh
+        - -c
+        - touch /data/acme.json && chmod 600 /data/acme.json
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  replicas: 1
+
+envFrom:
+  - secretRef:
+      name: cloudflare-dns-api-token
+
+fullnameOverride: traefik
+
+image:
+  pullPolicy: IfNotPresent
+  repository: traefik
+  tag: v3.6.13
+
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+  name: traefik
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    entryPoints:
+      - websecure
+    matchRule: Host(`traefik.example.com`)
+    tls:
+      certResolver: cloudflare
+      domains:
+        - main: example.com
+          sans:
+            - "*.example.com"
+
+logs:
+  access:
+    enabled: true
+  general:
+    level: INFO
+
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    enabled: true
+
+persistence:
+  accessMode: ReadWriteOnce
+  enabled: true
+  path: /data
+  size: 1Gi
+  storageClass: example-rbd-rbd
+
+podSecurityContext:
+  fsGroup: 65532
+  fsGroupChangePolicy: OnRootMismatch
+  runAsGroup: 65532
+  runAsNonRoot: true
+  runAsUser: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+ports:
+  ldap:
+    expose:
+      default: true
+    exposedPort: 389
+    port: 3389
+    protocol: TCP
+  ldaps:
+    expose:
+      default: true
+    exposedPort: 636
+    port: 6636
+    protocol: TCP
+  metrics:
+    expose:
+      default: true
+    exposedPort: 9000
+    port: 9000
+    protocol: TCP
+  web:
+    http:
+      redirections:
+        entryPoint:
+          permanent: true
+          scheme: https
+          to: websecure
+  websecure:
+    http:
+      tls:
+        certResolver: cloudflare
+        domains:
+          - main: example.com
+            sans:
+              - "*.example.com"
+        enabled: true
+
+providers:
+  kubernetesCRD:
+    ingressClass: traefik
+  kubernetesIngress:
+    ingressClass: traefik
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+service:
+  spec:
+    loadBalancerIP: 198.51.100.61
+    type: LoadBalancer
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: traefik-default-cert
+    defaultGeneratedCert:
+      domain:
+        main: example.com
+        sans:
+          - "*.example.com"
+      resolver: cloudflare
+
+updateStrategy:
+  type: Recreate

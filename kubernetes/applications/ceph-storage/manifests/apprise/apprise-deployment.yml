@@ -1,0 +1,54 @@
+
+# =====================================
+# 2. Apprise Deployment
+# =====================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apprise
+  namespace: apprise
+  labels:
+    app: apprise
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: apprise
+  template:
+    metadata:
+      labels:
+        app: apprise
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: apprise
+        image: caronc/apprise:v1.3.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8000
+        env:
+        - name: APPRISE_STATEFUL_MODE
+          value: simple
+        - name: APPRISE_WORKER_COUNT
+          value: "1"
+        - name: APPRISE_ADMIN
+          value: "y"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 512Mi
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: apprise-config-pvc

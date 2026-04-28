@@ -1,73 +1,132 @@
-# 🐧 Linux ✨
+# 💻 Linux Homelab
 
-![Platform](https://img.shields.io/badge/Platform-Linux-FCC624?style=flat-square&logo=linux&logoColor=black) ![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow?style=flat-square)
+This folder collects Linux-focused homelab notes, install guides, helper scripts, and configuration snippets used across Debian-family and RHEL-family systems.
 
-Linux-focused runbooks and helper scripts used for day-2 ops (new VM prep, disk operations, monitoring/logging agents, and Authentik LDAP integration).
+The public copy is redacted. Domains, usernames, IP addresses, generated tokens, and passwords are represented with examples or placeholders.
 
----
+## Scope
 
-## 📌 At-a-Glance
+| Area | Contents |
+| --- | --- |
+| Storage | disk mounting and online disk expansion guides |
+| Identity | Authentik LDAP + SSSD integration for Debian/Ubuntu and RHEL/Oracle Linux |
+| Monitoring | Node Exporter, Promtail, Proxmox `pve-exporter`, and Uptime Kuma helper scripts |
+| System | RHEL SSH daemon configuration examples |
 
-| Area | What's here | Where |
-|---|---|---|
-| Runbooks | Step-by-step docs (manual procedures) | `docs/` |
-| Scripts | Helpers you can run on hosts | `scripts/` |
-| Automation | Many steps mirrored in Ansible | `../ansible/` |
+## Repository Structure
 
----
+| Path | Description |
+| --- | --- |
+| [docs/storage](docs/storage) | operational docs for disk setup and resizing |
+| [identity/ldap/debian](identity/ldap/debian) | Debian/Ubuntu LDAP + SSSD integration files |
+| [identity/ldap/rhel](identity/ldap/rhel) | RHEL/Oracle/Rocky/Alma LDAP + SSSD integration files |
+| [monitoring/prometheus/node-exporter](monitoring/prometheus/node-exporter) | Node Exporter docs and install scripts |
+| [monitoring/proxmox/pve-exporter](monitoring/proxmox/pve-exporter) | Proxmox exporter docs and helper scripts |
+| [monitoring/loki/promtail](monitoring/loki/promtail) | Promtail install helper |
+| [system/ssh/rhel](system/ssh/rhel) | SSH config examples and notes for RHEL |
+| [scripts/monitoring](scripts/monitoring) | monitoring-related helper scripts |
 
-## 📚 Table of Contents
-- [📁 Layout](#-layout)
-- [📖 Docs (Runbooks)](#-docs-runbooks)
-- [🧰 Scripts](#-scripts)
-- [⚠️ Safety Notes](#-safety-notes)
-
----
-
-## 📁 Layout
+## Layout
 
 ```text
 linux/
-  docs/                     # Runbooks and how-tos
-  scripts/                  # Shell scripts for common tasks
+|-- docs/
+|   `-- storage/
+|-- identity/
+|   `-- ldap/
+|       |-- debian/
+|       `-- rhel/
+|-- monitoring/
+|   |-- loki/
+|   |   `-- promtail/
+|   |-- prometheus/
+|   |   `-- node-exporter/
+|   `-- proxmox/
+|       `-- pve-exporter/
+|-- scripts/
+|   `-- monitoring/
+|-- system/
+|   `-- ssh/
+|       `-- rhel/
+`-- README.md
 ```
 
----
+## Storage Docs
 
-## 📖 Docs (Runbooks)
+| File | Description |
+| --- | --- |
+| [add-disk-mount.md](docs/storage/add-disk-mount.md) | guide for preparing a new disk and mounting it persistently |
+| [expand-disk-online.md](docs/storage/expand-disk-online.md) | step-by-step guide for online disk and filesystem expansion |
 
-- `docs/new-vm-preparation.md` - manual baseline steps for a fresh VM (mirrors `../ansible/playbooks/ultimate-linux-setup.yml`)
-- `docs/how-to-add-new-disk.md` - partition + format + persistent mount (XFS/ext4)
-- `docs/how-to-expand-existing-disk.md` - online partition + filesystem expansion (ext4/XFS)
-- `docs/generate-ssh-keys.md` - generate SSH keys for host access
-- `docs/node_exporter_install.md` - Node Exporter install notes
-- `docs/authentik-ldap-integration.md` - Authentik LDAP + SSSD integration
+## Identity And LDAP
 
----
+LDAP-related configuration is grouped by operating system family under [identity/ldap](identity/ldap).
 
-## 🧰 Scripts
+### Debian-Based
 
-- `scripts/check_system_info.sh` - generate a system info report file
-- `scripts/check_update.sh` - detect distro, list updates, optionally apply updates
-- `scripts/install-promtail.sh` - install/configure Promtail + systemd service
-- `scripts/node_exporter_install.sh` - Node Exporter install script
-- `scripts/authentik-ldap-intergration.sh` - SSSD setup against Authentik LDAP (supports `--help`)
-- `scripts/replace-local-user.sh` - local user migration script (review and adjust variables before running)
+| File | Description |
+| --- | --- |
+| [README.md](identity/ldap/debian/README.md) | Debian/Ubuntu Authentik LDAP + SSSD usage notes |
+| [authentik-ldap-integration.sh](identity/ldap/debian/authentik-ldap-integration.sh) | integration script for Debian-based systems |
+| [remove-user.sh](identity/ldap/debian/remove-user.sh) | local user migration/cleanup helper; requires private `NEW_PASS` at runtime |
 
-Examples:
+### RHEL-Based
 
-```bash
-# From repo root
-bash linux/scripts/check_system_info.sh
+| File | Description |
+| --- | --- |
+| [README.md](identity/ldap/rhel/README.md) | RHEL/Oracle Linux Authentik LDAP + SSSD usage notes |
+| [authentik-ldap-integration.sh](identity/ldap/rhel/authentik-ldap-integration.sh) | integration script for RHEL-based systems |
 
-# Promtail install (requires sudo)
-sudo bash linux/scripts/install-promtail.sh
-```
+## Monitoring
 
----
+Monitoring resources are grouped by stack and target under [monitoring](monitoring).
 
-## ⚠️ Safety Notes
+### Prometheus
 
-- Always read scripts before running them; some are intentionally "ops sharp tools".
-- `scripts/replace-local-user.sh` is destructive by design (user deletion/migration) - verify the config section first.
-- Prefer Ansible (`../ansible/`) for repeatable changes; use these runbooks/scripts when you need a manual/one-off procedure.
+| File | Description |
+| --- | --- |
+| [README.md](monitoring/prometheus/node-exporter/README.md) | Node Exporter installation guide |
+| [install-debian.sh](monitoring/prometheus/node-exporter/install-debian.sh) | Node Exporter install script for Debian-based systems |
+| [install-rhel.sh](monitoring/prometheus/node-exporter/install-rhel.sh) | Node Exporter install script for RHEL-based systems |
+
+### Proxmox
+
+| File | Description |
+| --- | --- |
+| [README.md](monitoring/proxmox/pve-exporter/README.md) | Proxmox `pve-exporter` setup guide |
+| [create-user.sh](monitoring/proxmox/pve-exporter/create-user.sh) | helper for creating the exporter user/token |
+| [deploy.sh](monitoring/proxmox/pve-exporter/deploy.sh) | deployment helper for `pve-exporter` |
+
+### Loki
+
+| File | Description |
+| --- | --- |
+| [install.sh](monitoring/loki/promtail/install.sh) | Promtail installation helper |
+
+### Uptime Kuma
+
+| File | Description |
+| --- | --- |
+| [uptime-kuma-push-monitor-tui.sh](scripts/monitoring/uptime-kuma-push-monitor-tui.sh) | interactive helper for creating an Uptime Kuma push monitor and local checker |
+
+## System
+
+| File | Description |
+| --- | --- |
+| [change-sshd-config.txt](system/ssh/rhel/change-sshd-config.txt) | SSH daemon configuration notes |
+| [generate-ssh-keys.txt](system/ssh/rhel/generate-ssh-keys.txt) | SSH key generation notes |
+| [sshd_config](system/ssh/rhel/sshd_config) | example SSH daemon config |
+
+## Redaction Notes
+
+Do not commit:
+
+- real LDAP bind secrets
+- real user passwords or generated migration passwords
+- private domains, private IPs, or internal hostnames
+- API tokens for Proxmox, Uptime Kuma, Loki, or other monitoring services
+- private SSH keys generated from examples in this folder
+
+## Purpose
+
+The goal of this folder is to keep Linux operational knowledge for the homelab in one place: install notes, configuration examples, and reusable scripts that can be applied quickly when building or maintaining servers.

@@ -1,7 +1,7 @@
 services:
   sonarr:
     container_name: sonarr
-    image: linuxserver/sonarr:4.0.16
+    image: linuxserver/sonarr:4.0.17
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -12,3 +12,11 @@ services:
       - /mnt/docker/qbittorrent/downloads/:/downloads
     ports:
       - "8989:8989"
+    networks:
+      - media
+    restart: unless-stopped
+
+networks:
+  media:
+    external: true
+    name: media

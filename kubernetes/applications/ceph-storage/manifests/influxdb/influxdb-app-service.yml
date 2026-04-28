@@ -1,0 +1,22 @@
+
+---
+
+# =====================================
+# 4. Service for InfluxDB (renamed)
+# =====================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb-app
+  namespace: influxdb
+  labels:
+    app: influxdb
+spec:
+  type: ClusterIP
+  selector:
+    app: influxdb
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8086
+      targetPort: 8086

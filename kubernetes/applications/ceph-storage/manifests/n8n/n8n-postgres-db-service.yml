@@ -1,0 +1,21 @@
+
+---
+
+# =====================================
+# 3. Postgres Service & StatefulSet
+# =====================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-postgres-db
+  namespace: n8n
+spec:
+  # Typ ClusterIP zapewnia sta??y dost??p wewn??trz klastra
+  type: ClusterIP
+  selector:
+    app:        postgres
+    component: statefulset
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

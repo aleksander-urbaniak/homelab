@@ -1,0 +1,8 @@
+# =====================================
+# 0. Namespace for Apprise
+# =====================================
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apprise
