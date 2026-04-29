@@ -84,7 +84,7 @@ alertmanager:
   enabled: true
   image:
     repository: quay.io/prometheus/alertmanager
-    tag: v0.32.0
+    tag: v0.32.1
   baseURL: https://alertmanager.example.com
   nodeSelector:
     node-role.kubernetes.io/worker: ""
