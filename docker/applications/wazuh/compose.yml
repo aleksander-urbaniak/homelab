@@ -74,7 +74,7 @@ services:
       - /mnt/docker/wazuh/config/wazuh_cluster/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf:ro
 
   wazuh.dashboard:
-    image: wazuh/wazuh-dashboard:4.14.4
+    image: wazuh/wazuh-dashboard:4.14.5
     container_name: wazuh.dashboard
     hostname: wazuh.dashboard
     restart: always
