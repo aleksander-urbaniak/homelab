@@ -28,7 +28,7 @@ fullnameOverride: traefik
 image:
   pullPolicy: IfNotPresent
   repository: traefik
-  tag: v3.6.14
+  tag: v3.6.15
 
 ingressClass:
   enabled: true
