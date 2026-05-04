@@ -20,7 +20,7 @@ services:
 
   unbound:
     container_name: unbound
-    image: klutchell/unbound:1.24.2
+    image: klutchell/unbound:1.25.0
     restart: unless-stopped
     networks:
       - pihole_network
