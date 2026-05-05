@@ -36,7 +36,7 @@ spec:
                 sleep 2
               done
         - name: wait-for-redis
-          image: redis:8.6.2
+          image: redis:8.6.3
           env:
             - name: REDIS_PASSWORD
               valueFrom: { secretKeyRef: { name: affine-secrets, key: REDIS_PASSWORD } }
