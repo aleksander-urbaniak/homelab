@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: portainer/portainer-ce
-  tag: 2.41.0
+  tag: 2.41.1
   pullPolicy: IfNotPresent
 
 nodeSelector:
