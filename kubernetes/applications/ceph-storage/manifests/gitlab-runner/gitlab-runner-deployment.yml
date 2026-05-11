@@ -34,7 +34,7 @@ spec:
 
       containers:
       - name: gitlab-runner
-        image: gitlab/gitlab-runner:v18.11.2
+        image: gitlab/gitlab-runner:v18.11.3
         imagePullPolicy: IfNotPresent
         command: ["/bin/bash", "-c"]
         # Kopiujemy config i uruchamiamy runnera
