@@ -37,7 +37,7 @@ spec:
               done
       containers:
         - name: speedtest-tracker
-          image: lscr.io/linuxserver/speedtest-tracker:1.14.0
+          image: lscr.io/linuxserver/speedtest-tracker:1.14.1
           imagePullPolicy: IfNotPresent
           env:
             - name: PUID
