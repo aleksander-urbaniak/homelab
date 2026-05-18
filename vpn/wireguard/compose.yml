@@ -1,6 +1,6 @@
 services:
   wg-easy:
-    image: ghcr.io/wg-easy/wg-easy:15.2.2
+    image: ghcr.io/wg-easy/wg-easy:15.3.0
     container_name: wg-easy
     ports:
       - "51820:51820/udp" # WireGuard VPN port
