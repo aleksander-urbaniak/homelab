@@ -27,7 +27,7 @@ spec:
         kubernetes.io/hostname: k3s-worker-01
       initContainers:
         - name: fix-permissions
-          image: busybox:1.37.0
+          image: busybox:1.38.0
           command: ["sh","-c","chmod -R 777 /media /templates /certs"]
           resources:
             requests:

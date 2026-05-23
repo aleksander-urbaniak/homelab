@@ -28,7 +28,7 @@ spec:
 
       initContainers:
         - name: init-chown
-          image: busybox:1.37.0
+          image: busybox:1.38.0
           command: ["sh", "-c", "chown -R 472:472 /var/lib/grafana"]
           securityContext:
             runAsUser: 0
