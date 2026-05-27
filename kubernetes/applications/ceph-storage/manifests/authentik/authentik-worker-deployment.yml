@@ -60,7 +60,7 @@ spec:
               cpu: 100m
               memory: 128Mi
         - name: wait-for-redis
-          image: redis:8.6.3-alpine
+          image: redis:8.8.0-alpine
           command:
             - sh
             - -c
