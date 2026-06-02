@@ -1,6 +1,6 @@
 services:
   pastefy-db:
-    image: mariadb:12.2
+    image: mariadb:12.3
     volumes:
       - ./db:/var/lib/mysql
     environment:
