@@ -62,6 +62,14 @@ Alertmanager is enabled from the Prometheus Helm values and uses persistent stor
 
 The public documentation does not include notification webhooks. Real receivers should stay in private configuration or external secret management.
 
+Custom HTML Alertmanager email templates are documented in:
+
+[custom-html-alertmanager-email-alerts.md](custom-html-alertmanager-email-alerts.md)
+
+Preview of the styled Alertmanager notification:
+
+![Prometheus Alertmanager HTML alert preview](assets/image.png)
+
 ## Grafana
 
 Grafana runs as a Kubernetes Deployment with:

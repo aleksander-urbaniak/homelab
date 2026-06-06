@@ -43,6 +43,16 @@ Published service ports include:
 - Use Zabbix templates for host resources, services, websites, and network devices.
 - Prefer Zabbix for broad availability and infrastructure monitoring, while Prometheus focuses on K3s metrics.
 
+## Custom HTML Alerts
+
+Custom HTML email alert templates are documented in:
+
+[custom-html-email-alerts.md](custom-html-email-alerts.md)
+
+Preview of the styled problem notification:
+
+![Zabbix HTML alert preview](assets/image.png)
+
 ## Redaction
 
 The public docs do not include real Zabbix database passwords, monitored hostnames, SNMP communities, URLs, or internal addresses.

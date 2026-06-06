@@ -22,6 +22,7 @@ The lab is built around Proxmox, K3s, Docker, Linux automation, layered monitori
 - [Networking and VPN](#-networking-and-vpn)
 - [Linux and Proxmox Operations](#-linux-and-proxmox-operations)
 - [Redaction Model](#-redaction-model)
+- [Mirror Workflow](#-mirror-workflow)
 - [Security](#-security)
 - [License](#-license)
 
@@ -183,6 +184,24 @@ This repository is intentionally public-safe. It keeps the structure and operati
 | Passwords, tokens, API keys | `REPLACE_ME` |
 | Private hostnames | Generic names such as `pve-node-01` |
 | Full private policies | Summaries and examples instead of complete production rules |
+
+## Mirror Workflow
+
+The private source folder for this public mirror is:
+
+```powershell
+C:\Users\aurbaniak\Desktop\homelab
+```
+
+Use [scripts/Sync-RedactedMirror.ps1](scripts/Sync-RedactedMirror.ps1) to preview, stage, or apply a redacted copy from that source path.
+
+```powershell
+.\scripts\Sync-RedactedMirror.ps1
+.\scripts\Sync-RedactedMirror.ps1 -Mode Stage
+.\scripts\Sync-RedactedMirror.ps1 -Mode Apply
+```
+
+The script writes `.mirror-report.json` and stages output in `.mirror-staging/` before applying. Always review the report and `git diff` before committing or pushing this public repository.
 
 ## 🔐 Security
 

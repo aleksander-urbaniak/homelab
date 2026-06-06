@@ -45,6 +45,16 @@ Published ports include:
 - Keep Wazuh manager, dashboard, and indexer configuration files outside public docs when they include environment-specific values.
 - Use the postfix relay only with private relay credentials and allowed sender/domain settings.
 
+## Custom HTML Alerts
+
+Custom HTML email alerts using the Wazuh integrator are documented in:
+
+[custom-html-email-alerts.md](custom-html-email-alerts.md)
+
+Preview of the styled Wazuh notification:
+
+![Wazuh HTML alert preview](assets/image.png)
+
 ## Redaction
 
 The public docs do not include Wazuh indexer passwords, API passwords, dashboard credentials, relay credentials, generated certificates, private keys, agent keys, real hostnames, or private IPs.

@@ -20,6 +20,8 @@
 Thumbs.db
 .idea/
 .vscode/
+.mirror-staging/
+.mirror-report.json
 
 # Terraform
 .terraform/
