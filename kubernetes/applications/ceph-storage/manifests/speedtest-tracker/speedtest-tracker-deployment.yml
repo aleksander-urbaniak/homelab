@@ -26,7 +26,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       initContainers:
         - name: wait-for-db
-          image: busybox:1.37.0
+          image: busybox:1.38.0
           command:
             - sh
             - -c
@@ -37,7 +37,7 @@ spec:
               done
       containers:
         - name: speedtest-tracker
-          image: lscr.io/linuxserver/speedtest-tracker:1.14.0
+          image: lscr.io/linuxserver/speedtest-tracker:1.14.3
           imagePullPolicy: IfNotPresent
           env:
             - name: PUID

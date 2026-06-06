@@ -27,7 +27,7 @@ spec:
       # InitContainer czekaj??cy na gotow?? baz??
       initContainers:
         - name: wait-for-db
-          image: busybox:1.37.0
+          image: busybox:1.38.0
           imagePullPolicy: IfNotPresent
           command:
             - sh
@@ -39,7 +39,7 @@ spec:
               done
       containers:
         - name: pastefy-app
-          image: interaapps/pastefy:7.2.1
+          image: interaapps/pastefy:7.2.6
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

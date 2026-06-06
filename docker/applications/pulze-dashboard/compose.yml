@@ -1,6 +1,6 @@
 services:
   pulze-dashboard:
-    image: aleksanderurbaniak/pulze-dashboard:v1.0.7
+    image: aleksanderurbaniak/pulze-dashboard:v1.0.10
     ports:
       - "3000:3000"
     environment:

@@ -9,7 +9,7 @@ certificatesResolvers:
 deployment:
   initContainers:
     - name: volume-permissions
-      image: busybox:1.37
+      image: busybox:1.38
       command:
         - sh
         - -c
@@ -28,7 +28,7 @@ fullnameOverride: traefik
 image:
   pullPolicy: IfNotPresent
   repository: traefik
-  tag: v3.6.13
+  tag: v3.7.4
 
 ingressClass:
   enabled: true

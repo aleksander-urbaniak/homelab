@@ -29,7 +29,7 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
         - name: init-pgdata
-          image: busybox:1.37.0
+          image: busybox:1.38.0
           command: ["sh","-c","mkdir -p /var/lib/postgresql/data/pgdata && chown -R 999:999 /var/lib/postgresql/data"]
           volumeMounts:
             - name: data

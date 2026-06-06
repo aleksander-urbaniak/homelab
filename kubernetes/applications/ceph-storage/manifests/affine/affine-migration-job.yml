@@ -20,7 +20,7 @@ spec:
       restartPolicy: OnFailure
       initContainers:
         - name: wait-for-postgres
-          image: postgres:18.3
+          image: postgres:18.4
           env:
             - name: PGPASSWORD
               valueFrom: { secretKeyRef: { name: affine-secrets, key: DB_PASSWORD } }
@@ -36,7 +36,7 @@ spec:
                 sleep 2
               done
         - name: wait-for-redis
-          image: redis:8.6.2
+          image: redis:8.8.0
           env:
             - name: REDIS_PASSWORD
               valueFrom: { secretKeyRef: { name: affine-secrets, key: REDIS_PASSWORD } }
@@ -49,7 +49,7 @@ spec:
               done
       containers:
         - name: migration
-          image: ghcr.io/toeverything/affine:0.26.6
+          image: ghcr.io/toeverything/affine:0.26.7
           command: ["sh","-c","node ./scripts/self-host-predeploy.js"]
           env:
             - name: REDIS_SERVER_HOST

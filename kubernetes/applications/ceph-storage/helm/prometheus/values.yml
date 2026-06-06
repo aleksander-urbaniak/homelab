@@ -11,7 +11,7 @@ server:
     enabled: true
   image:
     repository: quay.io/prometheus/prometheus
-    tag: v3.11.2
+    tag: v3.12.0
   replicaCount: 1
   nodeSelector:
     node-role.kubernetes.io/worker: ""
@@ -84,7 +84,7 @@ alertmanager:
   enabled: true
   image:
     repository: quay.io/prometheus/alertmanager
-    tag: v0.32.0
+    tag: v0.32.2
   baseURL: https://alertmanager.example.com
   nodeSelector:
     node-role.kubernetes.io/worker: ""
