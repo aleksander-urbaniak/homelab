@@ -18,7 +18,7 @@ cainjector:
 acmesolver:
   image:
     repository: quay.io/jetstack/cert-manager-acmesolver
-    tag: v1.20.2
+    tag: v1.20.3
 
 startupapicheck:
   image:
