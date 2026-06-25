@@ -13,7 +13,7 @@ webhook:
 cainjector:
   image:
     repository: quay.io/jetstack/cert-manager-cainjector
-    tag: v1.20.2
+    tag: v1.20.3
 
 acmesolver:
   image:
