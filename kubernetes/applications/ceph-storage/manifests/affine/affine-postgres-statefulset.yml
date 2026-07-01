@@ -36,7 +36,7 @@ spec:
               mountPath: /var/lib/postgresql/data
       containers:
         - name: postgres
-          image: pgvector/pgvector:0.8.3-pg16
+          image: pgvector/pgvector:0.8.4-pg16
           ports:
             - name: postgres
               containerPort: 5432
