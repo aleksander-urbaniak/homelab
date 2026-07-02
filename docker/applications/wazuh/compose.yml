@@ -26,7 +26,7 @@ services:
       - /mnt/docker/wazuh/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
 
   wazuh.manager:
-    image: wazuh/wazuh-manager:4.14.5
+    image: wazuh/wazuh-manager:4.14.6
     container_name: wazuh.manager
     hostname: wazuh.manager
     restart: always
