@@ -1,6 +1,6 @@
 services:
   wazuh.indexer:
-    image: wazuh/wazuh-indexer:4.14.5
+    image: wazuh/wazuh-indexer:4.14.6
     container_name: wazuh.indexer
     hostname: wazuh.indexer
     restart: always
