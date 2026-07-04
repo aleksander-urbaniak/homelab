@@ -1,7 +1,7 @@
 services:
   jackett:
     container_name: jackett
-    image: linuxserver/jackett:0.24.2166
+    image: linuxserver/jackett:0.24.2173
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
