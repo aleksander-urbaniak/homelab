@@ -1,7 +1,7 @@
 services:
   radarr:
     container_name: radarr
-    image: linuxserver/radarr:6.2.1
+    image: linuxserver/radarr:6.3.0
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
