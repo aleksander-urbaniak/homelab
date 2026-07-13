@@ -1,6 +1,6 @@
 services:
   flarewatcher:
-    image: aleksanderurbaniak/flarewatcher:v1.0.23
+    image: aleksanderurbaniak/flarewatcher:v1.1.1
     pull_policy: always
     ports:
       - "3000:3000"
