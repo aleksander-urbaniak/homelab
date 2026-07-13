@@ -36,7 +36,7 @@ spec:
               mountPath: /app/data
       containers:
         - name: flarewatcher
-          image: aleksanderurbaniak/flarewatcher:v1.0.23
+          image: aleksanderurbaniak/flarewatcher:v1.1.1
           imagePullPolicy: Always
           ports:
             - name: http
