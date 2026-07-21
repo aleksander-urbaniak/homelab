@@ -49,7 +49,7 @@ spec:
               done
       containers:
         - name: migration
-          image: ghcr.io/toeverything/affine:0.27.1
+          image: ghcr.io/toeverything/affine:0.27.2
           command: ["sh","-c","node ./scripts/self-host-predeploy.js"]
           env:
             - name: REDIS_SERVER_HOST
