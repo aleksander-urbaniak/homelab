@@ -1,7 +1,7 @@
 hostname: rancher.example.com
 bootstrapPassword: REPLACE_ME
 rancherImage: rancher/rancher
-rancherImageTag: v2.14.3
+rancherImageTag: v2.15.0
 replicas: 1
 
 ingress:
