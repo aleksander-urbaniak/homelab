@@ -25,7 +25,7 @@ spec:
         node-role.kubernetes.io/worker: ""
       containers:
         - name: redis
-          image: redis:8.8.1-alpine
+          image: redis:8.10.0-alpine
           imagePullPolicy: IfNotPresent
           command: ["redis-server","--save","60","1","--appendonly","no"]
           ports:
