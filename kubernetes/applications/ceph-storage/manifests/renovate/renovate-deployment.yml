@@ -40,7 +40,7 @@ spec:
       containers:
         - name: renovate
           # Replace with desired version
-          image: ghcr.io/mend/renovate-ce:15.1.0
+          image: ghcr.io/mend/renovate-ce:15.2.0
           ports:
             - name: http
               containerPort: 8080
