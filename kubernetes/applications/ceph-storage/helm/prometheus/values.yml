@@ -11,7 +11,7 @@ server:
     enabled: true
   image:
     repository: quay.io/prometheus/prometheus
-    tag: v3.13.2
+    tag: v3.14.0
   replicaCount: 1
   nodeSelector:
     node-role.kubernetes.io/worker: ""
