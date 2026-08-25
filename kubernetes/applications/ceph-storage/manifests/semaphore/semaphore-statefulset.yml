@@ -27,7 +27,7 @@ spec:
         fsGroup: 0
       containers:
       - name: semaphore
-        image: semaphoreui/semaphore:v2.19.8
+        image: semaphoreui/semaphore:v2.19.9
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 0
