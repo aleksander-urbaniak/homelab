@@ -13,7 +13,7 @@ services:
 
   nextcloud-app:
     container_name: nextcloud-app
-    image: nextcloud:34
+    image: nextcloud:35
     restart: unless-stopped
     depends_on:
       - nextcloud-postgres
