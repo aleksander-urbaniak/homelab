@@ -1,6 +1,6 @@
 services:
   nginx-proxy-manager:
-    image: 'jc21/nginx-proxy-manager:2.15.1'
+    image: 'jc21/nginx-proxy-manager:2.16.0'
     restart: unless-stopped
     ports:
       - '80:80'
