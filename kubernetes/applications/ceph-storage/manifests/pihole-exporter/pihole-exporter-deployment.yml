@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: pihole-exporter
-          image: ekofr/pihole-exporter:v1.2.0
+          image: ekofr/pihole-exporter:v1.3.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics
