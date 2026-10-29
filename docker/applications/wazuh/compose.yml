@@ -101,7 +101,7 @@ services:
       - /mnt/docker/wazuh/wazuh-dashboard-custom:/usr/share/wazuh-dashboard/plugins/wazuh/public/assets/custom
 
   postfix:
-    image: boky/postfix:5.1.0
+    image: boky/postfix:5.2.0
     container_name: postfix-gmail-relay
     restart: always
     network_mode: host
