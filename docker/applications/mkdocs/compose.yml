@@ -1,6 +1,6 @@
 services:
   mkdocs:
-    image: squidfunk/mkdocs-material:9.8.0
+    image: squidfunk/mkdocs-material:9.8.1
     ports:
       - "8000:8000"
     volumes:
