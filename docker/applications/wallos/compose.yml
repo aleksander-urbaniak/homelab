@@ -1,6 +1,6 @@
 services:
   wallos:
-    image: bellamy/wallos:5.10.4
+    image: bellamy/wallos:5.11.1
     environment:
       TZ: ${WALLOS_TZ}
     ports:
