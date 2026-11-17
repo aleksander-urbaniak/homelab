@@ -1,6 +1,6 @@
 services:
   uptime-kuma:
-    image: 'louislam/uptime-kuma:2.5.11'
+    image: 'louislam/uptime-kuma:2.5.12'
     ports:
       - "3001:3001"
     volumes:
