@@ -20,7 +20,7 @@ spec:
       restartPolicy: OnFailure
       initContainers:
         - name: wait-for-postgres
-          image: postgres:18.7
+          image: postgres:19.0
           env:
             - name: PGPASSWORD
               valueFrom: { secretKeyRef: { name: affine-secrets, key: DB_PASSWORD } }
